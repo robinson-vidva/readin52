@@ -23,7 +23,8 @@ $isHttps = (
 );
 
 // Session configuration - must be set before session_start()
-ini_set('session.use_strict_mode', 1);
+// Note: strict_mode disabled for Cloudways compatibility (causes session data loss)
+ini_set('session.use_strict_mode', 0);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Lax');
@@ -38,6 +39,11 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
+
+// Start session early to ensure consistent behavior
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Application settings
 define('APP_NAME', 'ReadIn52');
