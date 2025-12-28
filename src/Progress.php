@@ -7,6 +7,229 @@ class Progress
     private const CATEGORIES = ['poetry', 'history', 'prophecy', 'gospels'];
     private const TOTAL_READINGS = 208; // 52 weeks × 4 categories
 
+    // ==========================================
+    // CHAPTER-LEVEL PROGRESS METHODS
+    // ==========================================
+
+    /**
+     * Get chapter progress for a specific week and category
+     */
+    public static function getChapterProgress(int $userId, int $weekNumber, string $category): array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT book, chapter, completed, completed_at
+            FROM chapter_progress
+            WHERE user_id = ? AND week_number = ? AND category = ?
+            ORDER BY book, chapter
+        ");
+        $stmt->execute([$userId, $weekNumber, $category]);
+
+        $progress = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $key = $row['book'] . '_' . $row['chapter'];
+            $progress[$key] = [
+                'book' => $row['book'],
+                'chapter' => (int) $row['chapter'],
+                'completed' => (bool) $row['completed'],
+                'completed_at' => $row['completed_at']
+            ];
+        }
+        return $progress;
+    }
+
+    /**
+     * Get all chapter progress for a week
+     */
+    public static function getWeekChapterProgress(int $userId, int $weekNumber): array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT category, book, chapter, completed, completed_at
+            FROM chapter_progress
+            WHERE user_id = ? AND week_number = ?
+            ORDER BY category, book, chapter
+        ");
+        $stmt->execute([$userId, $weekNumber]);
+
+        $progress = [];
+        foreach (self::CATEGORIES as $cat) {
+            $progress[$cat] = [];
+        }
+
+        foreach ($stmt->fetchAll() as $row) {
+            $key = $row['book'] . '_' . $row['chapter'];
+            $progress[$row['category']][$key] = [
+                'book' => $row['book'],
+                'chapter' => (int) $row['chapter'],
+                'completed' => (bool) $row['completed'],
+                'completed_at' => $row['completed_at']
+            ];
+        }
+        return $progress;
+    }
+
+    /**
+     * Toggle chapter completion status
+     */
+    public static function toggleChapter(int $userId, int $weekNumber, string $category, string $book, int $chapter): array
+    {
+        if ($weekNumber < 1 || $weekNumber > 52) {
+            return ['success' => false, 'error' => 'Invalid week'];
+        }
+        if (!in_array($category, self::CATEGORIES)) {
+            return ['success' => false, 'error' => 'Invalid category'];
+        }
+
+        $pdo = Database::getInstance();
+
+        // Check current status
+        $stmt = $pdo->prepare("
+            SELECT completed FROM chapter_progress
+            WHERE user_id = ? AND week_number = ? AND category = ? AND book = ? AND chapter = ?
+        ");
+        $stmt->execute([$userId, $weekNumber, $category, $book, $chapter]);
+        $current = $stmt->fetch();
+
+        $newStatus = !($current && $current['completed']);
+
+        if ($newStatus) {
+            $stmt = $pdo->prepare("
+                INSERT INTO chapter_progress (user_id, week_number, category, book, chapter, completed, completed_at)
+                VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+                ON DUPLICATE KEY UPDATE completed = 1, completed_at = CURRENT_TIMESTAMP
+            ");
+        } else {
+            $stmt = $pdo->prepare("
+                INSERT INTO chapter_progress (user_id, week_number, category, book, chapter, completed, completed_at)
+                VALUES (?, ?, ?, ?, ?, 0, NULL)
+                ON DUPLICATE KEY UPDATE completed = 0, completed_at = NULL
+            ");
+        }
+
+        $stmt->execute([$userId, $weekNumber, $category, $book, $chapter]);
+
+        // Check if all chapters in category are complete
+        $categoryComplete = self::isCategoryComplete($userId, $weekNumber, $category);
+
+        return [
+            'success' => true,
+            'completed' => $newStatus,
+            'categoryComplete' => $categoryComplete
+        ];
+    }
+
+    /**
+     * Check if all chapters in a category are complete
+     */
+    public static function isCategoryComplete(int $userId, int $weekNumber, string $category): bool
+    {
+        // Get the week's readings to know how many chapters there should be
+        $week = ReadingPlan::getWeek($weekNumber);
+        if (!$week || !isset($week['readings'][$category])) {
+            return false;
+        }
+
+        $totalChapters = 0;
+        foreach ($week['readings'][$category]['passages'] as $passage) {
+            $totalChapters += count($passage['chapters']);
+        }
+
+        // Count completed chapters
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as count
+            FROM chapter_progress
+            WHERE user_id = ? AND week_number = ? AND category = ? AND completed = 1
+        ");
+        $stmt->execute([$userId, $weekNumber, $category]);
+        $completedChapters = (int) $stmt->fetch()['count'];
+
+        return $completedChapters >= $totalChapters;
+    }
+
+    /**
+     * Get chapter-based statistics
+     */
+    public static function getChapterStats(int $userId): array
+    {
+        // Calculate total chapters in plan
+        $totalChapters = self::getTotalChaptersInPlan();
+
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as count
+            FROM chapter_progress
+            WHERE user_id = ? AND completed = 1
+        ");
+        $stmt->execute([$userId]);
+        $completedChapters = (int) $stmt->fetch()['count'];
+
+        return [
+            'total_chapters' => $totalChapters,
+            'completed_chapters' => $completedChapters,
+            'percentage' => $totalChapters > 0 ? round(($completedChapters / $totalChapters) * 100, 1) : 0
+        ];
+    }
+
+    /**
+     * Calculate total chapters in the reading plan
+     */
+    public static function getTotalChaptersInPlan(): int
+    {
+        static $total = null;
+        if ($total !== null) {
+            return $total;
+        }
+
+        $total = 0;
+        $weeks = ReadingPlan::getWeeks();
+        foreach ($weeks as $week) {
+            foreach ($week['readings'] as $reading) {
+                foreach ($reading['passages'] as $passage) {
+                    $total += count($passage['chapters']);
+                }
+            }
+        }
+        return $total;
+    }
+
+    /**
+     * Get chapters completed per week (for weekly progress)
+     */
+    public static function getWeekChapterCounts(int $userId, int $weekNumber): array
+    {
+        $week = ReadingPlan::getWeek($weekNumber);
+        if (!$week) {
+            return ['total' => 0, 'completed' => 0];
+        }
+
+        $totalChapters = 0;
+        foreach ($week['readings'] as $reading) {
+            foreach ($reading['passages'] as $passage) {
+                $totalChapters += count($passage['chapters']);
+            }
+        }
+
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as count
+            FROM chapter_progress
+            WHERE user_id = ? AND week_number = ? AND completed = 1
+        ");
+        $stmt->execute([$userId, $weekNumber]);
+        $completedChapters = (int) $stmt->fetch()['count'];
+
+        return [
+            'total' => $totalChapters,
+            'completed' => $completedChapters
+        ];
+    }
+
+    // ==========================================
+    // ORIGINAL CATEGORY-LEVEL METHODS (kept for compatibility)
+    // ==========================================
+
     /**
      * Get progress for a specific week
      */

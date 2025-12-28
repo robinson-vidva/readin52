@@ -128,6 +128,54 @@ class Database
                 INDEX idx_login_attempts (email, attempted_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
+
+        // Chapter-level progress table (granular tracking)
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS chapter_progress (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                week_number TINYINT NOT NULL,
+                category ENUM('poetry', 'history', 'prophecy', 'gospels') NOT NULL,
+                book VARCHAR(5) NOT NULL,
+                chapter SMALLINT NOT NULL,
+                completed TINYINT(1) DEFAULT 0,
+                completed_at TIMESTAMP NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_chapter_progress (user_id, week_number, category, book, chapter),
+                INDEX idx_chapter_user (user_id),
+                INDEX idx_chapter_week (week_number)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+    }
+
+    /**
+     * Run migrations for existing databases
+     */
+    public static function migrate(): void
+    {
+        $pdo = self::getInstance();
+
+        // Check if chapter_progress table exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'chapter_progress'");
+        if ($stmt->fetch() === false) {
+            // Create chapter_progress table
+            $pdo->exec("
+                CREATE TABLE chapter_progress (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    week_number TINYINT NOT NULL,
+                    category ENUM('poetry', 'history', 'prophecy', 'gospels') NOT NULL,
+                    book VARCHAR(5) NOT NULL,
+                    chapter SMALLINT NOT NULL,
+                    completed TINYINT(1) DEFAULT 0,
+                    completed_at TIMESTAMP NULL,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    UNIQUE KEY unique_chapter_progress (user_id, week_number, category, book, chapter),
+                    INDEX idx_chapter_user (user_id),
+                    INDEX idx_chapter_week (week_number)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        }
     }
 
     /**

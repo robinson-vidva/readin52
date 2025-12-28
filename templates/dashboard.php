@@ -1,10 +1,13 @@
 <?php
 $user = Auth::getUser();
 $stats = Progress::getStats($user['id']);
+$chapterStats = Progress::getChapterStats($user['id']);
 $currentWeek = get('week', $stats['current_week']);
 $currentWeek = max(1, min(52, intval($currentWeek)));
 $weekData = ReadingPlan::getWeekWithDetails($currentWeek);
 $weekProgress = Progress::getWeekProgress($user['id'], $currentWeek);
+$chapterProgress = Progress::getWeekChapterProgress($user['id'], $currentWeek);
+$weekChapterCounts = Progress::getWeekChapterCounts($user['id'], $currentWeek);
 $categories = ReadingPlan::getCategories();
 $weeklyCompletion = Progress::getWeeklyCompletionCounts($user['id']);
 
@@ -26,7 +29,7 @@ ob_start();
             </div>
 
             <div class="progress-overview">
-                <div class="progress-circle" data-progress="<?php echo $stats['percentage']; ?>">
+                <div class="progress-circle" data-progress="<?php echo $chapterStats['percentage']; ?>">
                     <svg viewBox="0 0 36 36">
                         <path class="circle-bg"
                             d="M18 2.0845
@@ -34,19 +37,19 @@ ob_start();
                                a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
                         <path class="circle-progress"
-                            stroke-dasharray="<?php echo $stats['percentage']; ?>, 100"
+                            stroke-dasharray="<?php echo $chapterStats['percentage']; ?>, 100"
                             d="M18 2.0845
                                a 15.9155 15.9155 0 0 1 0 31.831
                                a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
                     </svg>
                     <div class="progress-text">
-                        <span class="progress-value"><?php echo $stats['percentage']; ?>%</span>
+                        <span class="progress-value"><?php echo $chapterStats['percentage']; ?>%</span>
                     </div>
                 </div>
                 <div class="progress-details">
-                    <span class="completed"><?php echo $stats['total_completed']; ?>/<?php echo $stats['total_readings']; ?></span>
-                    <span class="label">Readings Complete</span>
+                    <span class="completed"><?php echo $chapterStats['completed_chapters']; ?>/<?php echo $chapterStats['total_chapters']; ?></span>
+                    <span class="label">Chapters Complete</span>
                 </div>
             </div>
         </div>
@@ -76,9 +79,9 @@ ob_start();
         <!-- Weekly Progress -->
         <div class="weekly-progress">
             <div class="weekly-bar">
-                <div class="weekly-fill" style="width: <?php echo ($completedThisWeek / 4) * 100; ?>%"></div>
+                <div class="weekly-fill" id="weeklyFill" style="width: <?php echo $weekChapterCounts['total'] > 0 ? ($weekChapterCounts['completed'] / $weekChapterCounts['total']) * 100 : 0; ?>%"></div>
             </div>
-            <span class="weekly-text"><?php echo $completedThisWeek; ?>/4 readings this week</span>
+            <span class="weekly-text" id="weeklyText"><?php echo $weekChapterCounts['completed']; ?>/<?php echo $weekChapterCounts['total']; ?> chapters this week</span>
         </div>
 
         <!-- Reading Cards -->
@@ -86,37 +89,53 @@ ob_start();
             <?php foreach ($weekData['readings'] as $categoryId => $reading): ?>
                 <?php
                 $category = $reading['category'];
-                $isCompleted = $weekProgress[$categoryId]['completed'];
+                $categoryChapterProgress = $chapterProgress[$categoryId] ?? [];
+                $isCategoryComplete = Progress::isCategoryComplete($user['id'], $currentWeek, $categoryId);
+
+                // Count completed chapters in this category
+                $catTotalChapters = 0;
+                $catCompletedChapters = 0;
+                foreach ($reading['passages'] as $passage) {
+                    foreach ($passage['chapters'] as $ch) {
+                        $catTotalChapters++;
+                        $key = $passage['book'] . '_' . $ch;
+                        if (isset($categoryChapterProgress[$key]) && $categoryChapterProgress[$key]['completed']) {
+                            $catCompletedChapters++;
+                        }
+                    }
+                }
                 ?>
-                <div class="reading-card <?php echo $isCompleted ? 'completed' : ''; ?>"
-                     style="--category-color: <?php echo e($category['color']); ?>">
+                <div class="reading-card <?php echo $isCategoryComplete ? 'completed' : ''; ?>"
+                     style="--category-color: <?php echo e($category['color']); ?>"
+                     data-category="<?php echo e($categoryId); ?>">
 
                     <div class="card-header">
                         <span class="category-badge" style="background-color: <?php echo e($category['color']); ?>">
                             <?php echo e($category['name']); ?>
                         </span>
-                        <button class="check-btn <?php echo $isCompleted ? 'checked' : ''; ?>"
-                                onclick="toggleProgress(<?php echo $currentWeek; ?>, '<?php echo e($categoryId); ?>', this)"
-                                aria-label="<?php echo $isCompleted ? 'Mark incomplete' : 'Mark complete'; ?>">
-                            <?php echo $isCompleted ? '&#10003;' : ''; ?>
-                        </button>
+                        <span class="category-progress"><?php echo $catCompletedChapters; ?>/<?php echo $catTotalChapters; ?></span>
                     </div>
 
                     <div class="card-body">
                         <h3 class="reading-reference"><?php echo e($reading['reference']); ?></h3>
 
-                        <div class="passages-list">
+                        <div class="chapter-checklist">
                             <?php foreach ($reading['passages'] as $passage): ?>
                                 <?php
                                 $bookName = ReadingPlan::getBookName($passage['book']);
-                                $firstChapter = $passage['chapters'][0];
-                                $lastChapter = end($passage['chapters']);
                                 ?>
-                                <span class="passage-item">
-                                    <?php echo e($bookName); ?>
-                                    <?php echo $firstChapter; ?>
-                                    <?php echo $firstChapter !== $lastChapter ? '-' . $lastChapter : ''; ?>
-                                </span>
+                                <?php foreach ($passage['chapters'] as $ch): ?>
+                                    <?php
+                                    $key = $passage['book'] . '_' . $ch;
+                                    $isChapterComplete = isset($categoryChapterProgress[$key]) && $categoryChapterProgress[$key]['completed'];
+                                    ?>
+                                    <label class="chapter-check <?php echo $isChapterComplete ? 'checked' : ''; ?>">
+                                        <input type="checkbox"
+                                               <?php echo $isChapterComplete ? 'checked' : ''; ?>
+                                               onchange="toggleChapter(<?php echo $currentWeek; ?>, '<?php echo e($categoryId); ?>', '<?php echo e($passage['book']); ?>', <?php echo $ch; ?>, this)">
+                                        <span class="chapter-label"><?php echo e($bookName); ?> <?php echo $ch; ?></span>
+                                    </label>
+                                <?php endforeach; ?>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -129,7 +148,7 @@ ob_start();
                         </button>
                     </div>
 
-                    <?php if ($isCompleted): ?>
+                    <?php if ($isCategoryComplete): ?>
                         <div class="completed-overlay">
                             <span class="completed-check">&#10003;</span>
                         </div>
@@ -147,12 +166,12 @@ ob_start();
             </div>
             <div class="stat-card">
                 <span class="stat-icon">&#x1F4D6;</span>
-                <span class="stat-value"><?php echo $stats['total_completed']; ?></span>
-                <span class="stat-label">Readings Done</span>
+                <span class="stat-value"><?php echo $chapterStats['completed_chapters']; ?></span>
+                <span class="stat-label">Chapters Done</span>
             </div>
             <div class="stat-card">
                 <span class="stat-icon">&#x1F3AF;</span>
-                <span class="stat-value"><?php echo $stats['total_readings'] - $stats['total_completed']; ?></span>
+                <span class="stat-value"><?php echo $chapterStats['total_chapters'] - $chapterStats['completed_chapters']; ?></span>
                 <span class="stat-label">Remaining</span>
             </div>
         </div>
@@ -173,6 +192,12 @@ ob_start();
                 </button>
             </div>
             <div class="reader-controls">
+                <button class="view-mode-btn active" id="chapterViewBtn" onclick="setViewMode('chapter')" title="Chapter View">
+                    &#x1F4D6;
+                </button>
+                <button class="view-mode-btn" id="verseViewBtn" onclick="setViewMode('verse')" title="Verse by Verse">
+                    &#x1F4DD;
+                </button>
                 <select id="translationSelect" onchange="changeTranslation(this.value)">
                     <?php foreach (ReadingPlan::getTranslations() as $trans): ?>
                         <option value="<?php echo e($trans['id']); ?>"
@@ -188,6 +213,12 @@ ob_start();
             <div class="loading-spinner"></div>
         </div>
         <div class="reader-footer">
+            <!-- Verse navigation (hidden in chapter mode) -->
+            <div class="verse-nav" id="verseNav" style="display: none;">
+                <button class="verse-nav-btn" onclick="navigateVerse(-1)" title="Previous Verse">&larr; Prev</button>
+                <span class="verse-indicator" id="verseIndicator">Verse 1 of 30</span>
+                <button class="verse-nav-btn" onclick="navigateVerse(1)" title="Next Verse">Next &rarr;</button>
+            </div>
             <div class="reader-progress">
                 <span id="readerProgress"></span>
             </div>

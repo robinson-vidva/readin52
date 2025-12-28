@@ -18,6 +18,9 @@ if (!Database::isInstalled()) {
     die('Application not installed. Please run install.php');
 }
 
+// Run database migrations (for updates)
+Database::migrate();
+
 // Start session
 Auth::startSession();
 
@@ -197,7 +200,39 @@ try {
             Auth::requireAuth();
             header('Content-Type: application/json');
             $stats = Progress::getStats(Auth::getUserId());
-            echo json_encode(['success' => true, 'stats' => $stats]);
+            $chapterStats = Progress::getChapterStats(Auth::getUserId());
+            echo json_encode(['success' => true, 'stats' => $stats, 'chapterStats' => $chapterStats]);
+            exit;
+
+        case 'api/chapter-progress':
+            Auth::requireAuth();
+            header('Content-Type: application/json');
+
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                $week = intval($input['week'] ?? 0);
+                $category = $input['category'] ?? '';
+                $book = $input['book'] ?? '';
+                $chapter = intval($input['chapter'] ?? 0);
+
+                $result = Progress::toggleChapter(Auth::getUserId(), $week, $category, $book, $chapter);
+
+                // Also get updated week chapter counts
+                if ($result['success']) {
+                    $result['weekCounts'] = Progress::getWeekChapterCounts(Auth::getUserId(), $week);
+                }
+
+                echo json_encode($result);
+            } elseif ($method === 'GET') {
+                $week = intval($_GET['week'] ?? 0);
+                if ($week > 0) {
+                    $progress = Progress::getWeekChapterProgress(Auth::getUserId(), $week);
+                    $counts = Progress::getWeekChapterCounts(Auth::getUserId(), $week);
+                    echo json_encode(['success' => true, 'progress' => $progress, 'counts' => $counts]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Week required']);
+                }
+            }
             exit;
 
         // ============ Admin Routes ============
