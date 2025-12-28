@@ -17,8 +17,16 @@ ini_set('log_errors', 1);
 
 // Session configuration
 ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? 1 : 0);
 ini_set('session.use_strict_mode', 1);
+ini_set('session.cookie_samesite', 'Lax');
+
+// Detect HTTPS (Cloudways uses proxy, check X-Forwarded-Proto)
+$isHttps = (
+    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+    (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https')
+);
+ini_set('session.cookie_secure', $isHttps ? 1 : 0);
 
 // Application settings
 define('APP_NAME', 'ReadIn52');
