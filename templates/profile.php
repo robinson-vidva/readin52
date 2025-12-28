@@ -10,8 +10,8 @@ ob_start();
 <div class="profile-page">
     <div class="container">
         <!-- Profile Header with Avatar -->
-        <div class="profile-header">
-            <div class="avatar-large" style="background-color: <?php echo e($avatarColor); ?>">
+        <div class="profile-header" style="display: flex; align-items: center; gap: 1.5rem; padding: 2rem; background: var(--card-bg, #fff); border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <div class="avatar-large" style="background-color: <?php echo e($avatarColor); ?>; width: 80px; height: 80px; min-width: 80px; min-height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.75rem; text-transform: uppercase; flex-shrink: 0;">
                 <?php echo e($initials); ?>
             </div>
             <div class="profile-header-info">
@@ -25,28 +25,28 @@ ob_start();
         </div>
 
         <!-- Reading Stats Overview -->
-        <div class="stats-banner">
-            <div class="stat-item">
-                <span class="stat-value"><?php echo $stats['total_completed']; ?></span>
-                <span class="stat-label">Readings</span>
+        <div class="stats-banner" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; color: white;">
+            <div class="stat-item" style="text-align: center;">
+                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['total_completed']; ?></span>
+                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Readings</span>
             </div>
-            <div class="stat-item">
-                <span class="stat-value"><?php echo $stats['percentage']; ?>%</span>
-                <span class="stat-label">Complete</span>
+            <div class="stat-item" style="text-align: center;">
+                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['percentage']; ?>%</span>
+                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Complete</span>
             </div>
-            <div class="stat-item">
-                <span class="stat-value"><?php echo $stats['streak']; ?></span>
-                <span class="stat-label">Week Streak</span>
+            <div class="stat-item" style="text-align: center;">
+                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['streak']; ?></span>
+                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Week Streak</span>
             </div>
-            <div class="stat-item">
-                <span class="stat-value"><?php echo $stats['current_week']; ?></span>
-                <span class="stat-label">Current Week</span>
+            <div class="stat-item" style="text-align: center;">
+                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['current_week']; ?></span>
+                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Current Week</span>
             </div>
         </div>
 
-        <div class="profile-content">
+        <div class="profile-content" style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem;">
             <!-- Left Column -->
-            <div class="profile-main">
+            <div class="profile-main" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <!-- Account Information -->
                 <div class="profile-card">
                     <div class="card-header">

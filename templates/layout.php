@@ -46,6 +46,21 @@ if (Auth::isLoggedIn()) {
     <!-- Styles -->
     <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo APP_VERSION; ?>">
 
+    <!-- Responsive overrides for inline styles -->
+    <style>
+        @media (max-width: 768px) {
+            .stats-banner { grid-template-columns: repeat(2, 1fr) !important; }
+            .profile-content { grid-template-columns: 1fr !important; }
+            .settings-content { grid-template-columns: 1fr !important; }
+            .danger-zone-cards { grid-template-columns: 1fr !important; }
+            .profile-header { flex-direction: column !important; text-align: center !important; }
+        }
+        @media (max-width: 480px) {
+            .stats-banner { grid-template-columns: repeat(2, 1fr) !important; padding: 1rem !important; }
+            .stat-value { font-size: 1.5rem !important; }
+        }
+    </style>
+
     <?php if (isset($extraStyles)): ?>
         <?php echo $extraStyles; ?>
     <?php endif; ?>
@@ -70,15 +85,15 @@ if (Auth::isLoggedIn()) {
                 <?php if (Auth::isAdmin()): ?>
                     <a href="/?route=admin" class="nav-link <?php echo strpos(currentRoute(), 'admin') === 0 ? 'active' : ''; ?>">Admin</a>
                 <?php endif; ?>
-                <div class="nav-user-menu">
-                    <a href="/?route=profile" class="nav-avatar-link <?php echo activeClass('profile') || activeClass('settings') ? 'active' : ''; ?>">
-                        <span class="avatar-small" style="background-color: <?php echo e($navAvatarColor); ?>"><?php echo e($navInitials); ?></span>
+                <div class="nav-user-menu" style="position: relative; display: inline-block;">
+                    <a href="/?route=profile" class="nav-avatar-link <?php echo activeClass('profile') || activeClass('settings') ? 'active' : ''; ?>" style="display: flex; padding: 4px; border-radius: 50%; cursor: pointer;">
+                        <span class="avatar-small" style="background-color: <?php echo e($navAvatarColor); ?>; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.75rem; text-transform: uppercase;"><?php echo e($navInitials); ?></span>
                     </a>
-                    <div class="nav-user-dropdown">
-                        <a href="/?route=profile" class="dropdown-item">Profile</a>
-                        <a href="/?route=settings" class="dropdown-item">Settings</a>
-                        <div class="dropdown-divider"></div>
-                        <a href="/?route=logout" class="dropdown-item">Logout</a>
+                    <div class="nav-user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; min-width: 160px; background: var(--card-bg, #fff); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 0.5rem 0; z-index: 1000; margin-top: 4px;">
+                        <a href="/?route=profile" class="dropdown-item" style="display: block; padding: 0.75rem 1rem; color: var(--text-color, #333); text-decoration: none;">Profile</a>
+                        <a href="/?route=settings" class="dropdown-item" style="display: block; padding: 0.75rem 1rem; color: var(--text-color, #333); text-decoration: none;">Settings</a>
+                        <div class="dropdown-divider" style="height: 1px; background: var(--border-color, #e0e0e0); margin: 0.5rem 0;"></div>
+                        <a href="/?route=logout" class="dropdown-item" style="display: block; padding: 0.75rem 1rem; color: var(--text-color, #333); text-decoration: none;">Logout</a>
                     </div>
                 </div>
             </div>
@@ -130,6 +145,20 @@ if (Auth::isLoggedIn()) {
                 .then(reg => console.log('Service Worker registered'))
                 .catch(err => console.log('Service Worker registration failed:', err));
         }
+
+        // User dropdown toggle
+        (function() {
+            var userMenu = document.querySelector('.nav-user-menu');
+            var dropdown = document.querySelector('.nav-user-dropdown');
+            if (userMenu && dropdown) {
+                userMenu.addEventListener('mouseenter', function() {
+                    dropdown.style.display = 'block';
+                });
+                userMenu.addEventListener('mouseleave', function() {
+                    dropdown.style.display = 'none';
+                });
+            }
+        })();
     </script>
 </body>
 </html>

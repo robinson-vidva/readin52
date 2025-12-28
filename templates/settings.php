@@ -15,9 +15,9 @@ ob_start();
             <p>Customize your reading experience</p>
         </div>
 
-        <div class="settings-content">
+        <div class="settings-content" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
             <!-- Main Settings Column -->
-            <div class="settings-main">
+            <div class="settings-main" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <!-- Appearance -->
                 <div class="profile-card">
                     <div class="card-header">
@@ -78,29 +78,29 @@ ob_start();
 
             <!-- Sidebar with Account Info -->
             <div class="settings-sidebar">
-                <div class="profile-card">
-                    <div class="card-body">
-                        <div class="settings-account-preview">
-                            <div class="avatar-medium" style="background-color: <?php echo e($avatarColor); ?>">
+                <div class="profile-card" style="background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <div class="card-body" style="padding: 1.5rem;">
+                        <div class="settings-account-preview" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1rem;">
+                            <div class="avatar-medium" style="background-color: <?php echo e($avatarColor); ?>; width: 64px; height: 64px; min-width: 64px; min-height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.5rem; text-transform: uppercase; margin-bottom: 1rem;">
                                 <?php echo e($initials); ?>
                             </div>
-                            <div class="account-preview-info">
-                                <strong><?php echo e($user['name']); ?></strong>
-                                <span><?php echo e($user['email']); ?></span>
+                            <div class="account-preview-info" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                <strong style="font-size: 1rem;"><?php echo e($user['name']); ?></strong>
+                                <span style="color: var(--text-muted, #666); font-size: 0.875rem;"><?php echo e($user['email']); ?></span>
                             </div>
                         </div>
-                        <a href="/?route=profile" class="btn btn-outline btn-block">Edit Profile</a>
+                        <a href="/?route=profile" class="btn btn-outline btn-block" style="display: block; width: 100%; text-align: center; padding: 0.75rem 1rem; border: 2px solid var(--primary, #5D4037); color: var(--primary, #5D4037); border-radius: 8px; text-decoration: none; font-weight: 600;">Edit Profile</a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Danger Zone Section -->
-        <div class="danger-zone-section">
-            <h2 class="section-title danger-title">Danger Zone</h2>
-            <p class="section-description">These actions are permanent and cannot be undone.</p>
+        <div class="danger-zone-section" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #e0e0e0);">
+            <h2 class="section-title danger-title" style="color: #C62828; font-size: 1.25rem; margin-bottom: 0.5rem;">Danger Zone</h2>
+            <p class="section-description" style="color: var(--text-muted, #666); margin-bottom: 1.5rem;">These actions are permanent and cannot be undone.</p>
 
-            <div class="danger-zone-cards">
+            <div class="danger-zone-cards" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                 <!-- Reset Progress -->
                 <div class="profile-card danger-zone">
                     <div class="card-header">
