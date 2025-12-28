@@ -511,7 +511,7 @@ class Progress
                 WHERE completed = 1
                 GROUP BY user_id
                 HAVING COUNT(*) = 208
-            )
+            ) AS completed_users
         ");
         $completedPlan = (int) $stmt->fetch()['count'];
 
