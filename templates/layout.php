@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo APP_VERSION; ?>">
 
     <?php if (isset($extraStyles)): ?>
         <?php echo $extraStyles; ?>
@@ -81,8 +81,8 @@
     <?php endif; ?>
 
     <!-- Scripts -->
-    <script src="/assets/js/bible-api.js"></script>
-    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/bible-api.js?v=<?php echo APP_VERSION; ?>"></script>
+    <script src="/assets/js/app.js?v=<?php echo APP_VERSION; ?>"></script>
 
     <?php if (isset($extraScripts)): ?>
         <?php echo $extraScripts; ?>
