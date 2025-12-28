@@ -261,3 +261,42 @@ function getPreferredTranslation(): string
     $user = Auth::getUser();
     return $user['preferred_translation'] ?? DEFAULT_TRANSLATION;
 }
+
+/**
+ * Get user initials from name
+ */
+function getUserInitials(string $name): string
+{
+    $name = trim($name);
+    if (empty($name)) {
+        return '?';
+    }
+
+    $parts = preg_split('/\s+/', $name);
+    if (count($parts) >= 2) {
+        return strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
+    }
+    return strtoupper(substr($name, 0, 2));
+}
+
+/**
+ * Get avatar color based on name (consistent color per user)
+ */
+function getAvatarColor(string $name): string
+{
+    $colors = [
+        '#5D4037', // Brown
+        '#1565C0', // Blue
+        '#2E7D32', // Green
+        '#C62828', // Red
+        '#6A1B9A', // Purple
+        '#EF6C00', // Orange
+        '#00838F', // Teal
+        '#AD1457', // Pink
+        '#37474F', // Blue Grey
+        '#558B2F', // Light Green
+    ];
+
+    $hash = crc32(strtolower(trim($name)));
+    return $colors[abs($hash) % count($colors)];
+}

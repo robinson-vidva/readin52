@@ -2,6 +2,8 @@
 $user = Auth::getUser();
 $translations = ReadingPlan::getTranslations();
 $currentTheme = $user['theme'] ?? 'auto';
+$initials = getUserInitials($user['name']);
+$avatarColor = getAvatarColor($user['name']);
 
 ob_start();
 ?>
@@ -13,115 +15,132 @@ ob_start();
             <p>Customize your reading experience</p>
         </div>
 
-        <div class="settings-grid">
-            <!-- Appearance -->
-            <div class="profile-card">
-                <div class="card-header">
-                    <h2>Appearance</h2>
-                </div>
-                <div class="card-body">
-                    <?php if (isset($success)): ?>
-                        <div class="alert alert-success"><?php echo e($success); ?></div>
-                    <?php endif; ?>
+        <div class="settings-content">
+            <!-- Main Settings Column -->
+            <div class="settings-main">
+                <!-- Appearance -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h2>Appearance</h2>
+                    </div>
+                    <div class="card-body">
+                        <?php if (isset($success)): ?>
+                            <div class="alert alert-success"><?php echo e($success); ?></div>
+                        <?php endif; ?>
 
-                    <?php if (isset($error)): ?>
-                        <div class="alert alert-error"><?php echo e($error); ?></div>
-                    <?php endif; ?>
+                        <?php if (isset($error)): ?>
+                            <div class="alert alert-error"><?php echo e($error); ?></div>
+                        <?php endif; ?>
 
-                    <form method="POST" action="/?route=settings" class="profile-form">
-                        <?php echo csrfField(); ?>
+                        <form method="POST" action="/?route=settings" class="profile-form">
+                            <?php echo csrfField(); ?>
 
-                        <div class="form-group">
-                            <label>Theme</label>
-                            <div class="theme-selector">
-                                <label class="theme-option <?php echo $currentTheme === 'light' ? 'active' : ''; ?>">
-                                    <input type="radio" name="theme" value="light" <?php echo $currentTheme === 'light' ? 'checked' : ''; ?>>
-                                    <span class="theme-icon">&#9728;</span>
-                                    <span class="theme-label">Light</span>
-                                </label>
-                                <label class="theme-option <?php echo $currentTheme === 'dark' ? 'active' : ''; ?>">
-                                    <input type="radio" name="theme" value="dark" <?php echo $currentTheme === 'dark' ? 'checked' : ''; ?>>
-                                    <span class="theme-icon">&#9790;</span>
-                                    <span class="theme-label">Dark</span>
-                                </label>
-                                <label class="theme-option <?php echo $currentTheme === 'auto' ? 'active' : ''; ?>">
-                                    <input type="radio" name="theme" value="auto" <?php echo $currentTheme === 'auto' ? 'checked' : ''; ?>>
-                                    <span class="theme-icon">&#9881;</span>
-                                    <span class="theme-label">Auto</span>
-                                </label>
+                            <div class="form-group">
+                                <label>Theme</label>
+                                <div class="theme-selector">
+                                    <label class="theme-option <?php echo $currentTheme === 'light' ? 'active' : ''; ?>">
+                                        <input type="radio" name="theme" value="light" <?php echo $currentTheme === 'light' ? 'checked' : ''; ?>>
+                                        <span class="theme-icon">&#9728;</span>
+                                        <span class="theme-label">Light</span>
+                                    </label>
+                                    <label class="theme-option <?php echo $currentTheme === 'dark' ? 'active' : ''; ?>">
+                                        <input type="radio" name="theme" value="dark" <?php echo $currentTheme === 'dark' ? 'checked' : ''; ?>>
+                                        <span class="theme-icon">&#9790;</span>
+                                        <span class="theme-label">Dark</span>
+                                    </label>
+                                    <label class="theme-option <?php echo $currentTheme === 'auto' ? 'active' : ''; ?>">
+                                        <input type="radio" name="theme" value="auto" <?php echo $currentTheme === 'auto' ? 'checked' : ''; ?>>
+                                        <span class="theme-icon">&#9881;</span>
+                                        <span class="theme-label">Auto</span>
+                                    </label>
+                                </div>
+                                <small class="form-hint">Auto follows your device's system preference</small>
                             </div>
-                            <small class="form-hint">Auto follows your device's system preference</small>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="preferred_translation">Bible Translation</label>
-                            <select id="preferred_translation" name="preferred_translation">
-                                <?php foreach ($translations as $trans): ?>
-                                    <option value="<?php echo e($trans['id']); ?>"
-                                            <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
-                                        <?php echo e($trans['name']); ?> (<?php echo e($trans['language']); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <small class="form-hint">Select your preferred Bible translation for reading</small>
-                        </div>
+                            <div class="form-group">
+                                <label for="preferred_translation">Bible Translation</label>
+                                <select id="preferred_translation" name="preferred_translation">
+                                    <?php foreach ($translations as $trans): ?>
+                                        <option value="<?php echo e($trans['id']); ?>"
+                                                <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
+                                            <?php echo e($trans['name']); ?> (<?php echo e($trans['language']); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="form-hint">Select your preferred Bible translation for reading</small>
+                            </div>
 
-                        <button type="submit" class="btn btn-primary">Save Settings</button>
-                    </form>
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
-            <!-- Reset Progress -->
-            <div class="profile-card danger-zone">
-                <div class="card-header">
-                    <h2>Reset Progress</h2>
-                </div>
-                <div class="card-body">
-                    <?php if (isset($resetSuccess)): ?>
-                        <div class="alert alert-success"><?php echo e($resetSuccess); ?></div>
-                    <?php endif; ?>
-
-                    <?php if (isset($resetError)): ?>
-                        <div class="alert alert-error"><?php echo e($resetError); ?></div>
-                    <?php endif; ?>
-
-                    <p class="danger-text">This will permanently delete all your reading progress. You'll start fresh from Week 1.</p>
-
-                    <form method="POST" action="/?route=settings/reset-progress" class="profile-form" id="resetProgressForm">
-                        <?php echo csrfField(); ?>
-
-                        <div class="form-group">
-                            <label for="reset_password">Enter your password to confirm</label>
-                            <input type="password" id="reset_password" name="password" required>
+            <!-- Sidebar with Account Info -->
+            <div class="settings-sidebar">
+                <div class="profile-card">
+                    <div class="card-body">
+                        <div class="settings-account-preview">
+                            <div class="avatar-medium" style="background-color: <?php echo e($avatarColor); ?>">
+                                <?php echo e($initials); ?>
+                            </div>
+                            <div class="account-preview-info">
+                                <strong><?php echo e($user['name']); ?></strong>
+                                <span><?php echo e($user['email']); ?></span>
+                            </div>
                         </div>
-
-                        <button type="submit" class="btn btn-danger">Reset All Progress</button>
-                    </form>
+                        <a href="/?route=profile" class="btn btn-outline btn-block">Edit Profile</a>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Delete Account -->
-            <div class="profile-card danger-zone">
-                <div class="card-header">
-                    <h2>Delete Account</h2>
+        <!-- Danger Zone Section -->
+        <div class="danger-zone-section">
+            <h2 class="section-title danger-title">Danger Zone</h2>
+            <p class="section-description">These actions are permanent and cannot be undone.</p>
+
+            <div class="danger-zone-cards">
+                <!-- Reset Progress -->
+                <div class="profile-card danger-zone">
+                    <div class="card-header">
+                        <h2>Reset Progress</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="danger-text">This will permanently delete all your reading progress. You'll start fresh from Week 1.</p>
+
+                        <form method="POST" action="/?route=settings/reset-progress" class="profile-form" id="resetProgressForm">
+                            <?php echo csrfField(); ?>
+
+                            <div class="form-group">
+                                <label for="reset_password">Enter your password to confirm</label>
+                                <input type="password" id="reset_password" name="password" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-danger">Reset All Progress</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <?php if (isset($deleteError)): ?>
-                        <div class="alert alert-error"><?php echo e($deleteError); ?></div>
-                    <?php endif; ?>
 
-                    <p class="danger-text">This will permanently delete your account and all associated data. This action cannot be undone.</p>
+                <!-- Delete Account -->
+                <div class="profile-card danger-zone">
+                    <div class="card-header">
+                        <h2>Delete Account</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="danger-text">This will permanently delete your account and all associated data. This action cannot be undone.</p>
 
-                    <form method="POST" action="/?route=settings/delete-account" class="profile-form" id="deleteAccountForm">
-                        <?php echo csrfField(); ?>
+                        <form method="POST" action="/?route=settings/delete-account" class="profile-form" id="deleteAccountForm">
+                            <?php echo csrfField(); ?>
 
-                        <div class="form-group">
-                            <label for="delete_password">Enter your password to confirm</label>
-                            <input type="password" id="delete_password" name="password" required>
-                        </div>
+                            <div class="form-group">
+                                <label for="delete_password">Enter your password to confirm</label>
+                                <input type="password" id="delete_password" name="password" required>
+                            </div>
 
-                        <button type="submit" class="btn btn-danger">Delete My Account</button>
-                    </form>
+                            <button type="submit" class="btn btn-danger">Delete My Account</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,9 +1,13 @@
 <?php
-// Get user theme preference
+// Get user theme preference and avatar info
 $userTheme = 'auto';
+$navInitials = '';
+$navAvatarColor = '#5D4037';
 if (Auth::isLoggedIn()) {
     $currentUser = Auth::getUser();
     $userTheme = $currentUser['theme'] ?? 'auto';
+    $navInitials = getUserInitials($currentUser['name']);
+    $navAvatarColor = getAvatarColor($currentUser['name']);
 }
 ?>
 <!DOCTYPE html>
@@ -63,12 +67,20 @@ if (Auth::isLoggedIn()) {
 
             <div class="navbar-menu" id="navbarMenu">
                 <a href="/?route=dashboard" class="nav-link <?php echo activeClass('dashboard'); ?>">Dashboard</a>
-                <a href="/?route=profile" class="nav-link <?php echo activeClass('profile'); ?>">Profile</a>
-                <a href="/?route=settings" class="nav-link <?php echo activeClass('settings'); ?>">Settings</a>
                 <?php if (Auth::isAdmin()): ?>
                     <a href="/?route=admin" class="nav-link <?php echo strpos(currentRoute(), 'admin') === 0 ? 'active' : ''; ?>">Admin</a>
                 <?php endif; ?>
-                <a href="/?route=logout" class="nav-link">Logout</a>
+                <div class="nav-user-menu">
+                    <a href="/?route=profile" class="nav-avatar-link <?php echo activeClass('profile') || activeClass('settings') ? 'active' : ''; ?>">
+                        <span class="avatar-small" style="background-color: <?php echo e($navAvatarColor); ?>"><?php echo e($navInitials); ?></span>
+                    </a>
+                    <div class="nav-user-dropdown">
+                        <a href="/?route=profile" class="dropdown-item">Profile</a>
+                        <a href="/?route=settings" class="dropdown-item">Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/?route=logout" class="dropdown-item">Logout</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
