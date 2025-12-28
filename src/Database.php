@@ -146,6 +146,40 @@ class Database
                 INDEX idx_chapter_week (week_number)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
+
+        // Reading categories table
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS reading_categories (
+                id VARCHAR(20) PRIMARY KEY,
+                name VARCHAR(50) NOT NULL,
+                color VARCHAR(7) NOT NULL,
+                sort_order TINYINT NOT NULL DEFAULT 0
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        // Reading plan table
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS reading_plan (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                week_number TINYINT NOT NULL,
+                category_id VARCHAR(20) NOT NULL,
+                reference VARCHAR(100) NOT NULL,
+                passages JSON NOT NULL,
+                UNIQUE KEY unique_week_category (week_number, category_id),
+                INDEX idx_week (week_number),
+                INDEX idx_category (category_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        // Available translations table
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS bible_translations (
+                id VARCHAR(20) PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                language VARCHAR(50) NOT NULL,
+                direction ENUM('ltr', 'rtl') DEFAULT 'ltr'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
     }
 
     /**
@@ -181,6 +215,121 @@ class Database
         $columns = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
         if (!in_array('theme', $columns)) {
             $pdo->exec("ALTER TABLE users ADD COLUMN theme ENUM('light', 'dark', 'auto') DEFAULT 'auto' AFTER preferred_translation");
+        }
+
+        // Create reading_categories table if not exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'reading_categories'");
+        if ($stmt->fetch() === false) {
+            $pdo->exec("
+                CREATE TABLE reading_categories (
+                    id VARCHAR(20) PRIMARY KEY,
+                    name VARCHAR(50) NOT NULL,
+                    color VARCHAR(7) NOT NULL,
+                    sort_order TINYINT NOT NULL DEFAULT 0
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        }
+
+        // Create reading_plan table if not exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'reading_plan'");
+        if ($stmt->fetch() === false) {
+            $pdo->exec("
+                CREATE TABLE reading_plan (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    week_number TINYINT NOT NULL,
+                    category_id VARCHAR(20) NOT NULL,
+                    reference VARCHAR(100) NOT NULL,
+                    passages JSON NOT NULL,
+                    UNIQUE KEY unique_week_category (week_number, category_id),
+                    INDEX idx_week (week_number),
+                    INDEX idx_category (category_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        }
+
+        // Create bible_translations table if not exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'bible_translations'");
+        if ($stmt->fetch() === false) {
+            $pdo->exec("
+                CREATE TABLE bible_translations (
+                    id VARCHAR(20) PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    language VARCHAR(50) NOT NULL,
+                    direction ENUM('ltr', 'rtl') DEFAULT 'ltr'
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        }
+
+        // Import reading plan from JSON if tables are empty
+        self::importReadingPlanFromJson();
+    }
+
+    /**
+     * Import reading plan from JSON file into database
+     */
+    public static function importReadingPlanFromJson(): void
+    {
+        $pdo = self::getInstance();
+
+        // Check if reading_plan already has data
+        $stmt = $pdo->query("SELECT COUNT(*) as count FROM reading_plan");
+        $count = (int) $stmt->fetch()['count'];
+        if ($count > 0) {
+            return; // Already imported
+        }
+
+        // Load JSON file
+        $jsonPath = CONFIG_PATH . '/reading-plan.json';
+        if (!file_exists($jsonPath)) {
+            return;
+        }
+
+        $data = json_decode(file_get_contents($jsonPath), true);
+        if (!$data) {
+            return;
+        }
+
+        // Import translations
+        if (isset($data['availableTranslations'])) {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO bible_translations (id, name, language, direction) VALUES (?, ?, ?, ?)");
+            foreach ($data['availableTranslations'] as $trans) {
+                $stmt->execute([
+                    $trans['id'],
+                    $trans['name'],
+                    $trans['language'],
+                    $trans['direction'] ?? 'ltr'
+                ]);
+            }
+        }
+
+        // Import categories
+        if (isset($data['categories'])) {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO reading_categories (id, name, color, sort_order) VALUES (?, ?, ?, ?)");
+            $sortOrder = 0;
+            foreach ($data['categories'] as $cat) {
+                $stmt->execute([
+                    $cat['id'],
+                    $cat['name'],
+                    $cat['color'],
+                    $sortOrder++
+                ]);
+            }
+        }
+
+        // Import weeks/readings
+        if (isset($data['weeks'])) {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO reading_plan (week_number, category_id, reference, passages) VALUES (?, ?, ?, ?)");
+            foreach ($data['weeks'] as $week) {
+                $weekNum = $week['week'];
+                foreach ($week['readings'] as $categoryId => $reading) {
+                    $stmt->execute([
+                        $weekNum,
+                        $categoryId,
+                        $reading['reference'],
+                        json_encode($reading['passages'])
+                    ]);
+                }
+            }
         }
     }
 

@@ -375,22 +375,28 @@ try {
                     $readings = post('readings', []);
 
                     if ($week >= 1 && $week <= 52) {
-                        $plan = ReadingPlan::load();
+                        $allSuccess = true;
+                        $errorMsg = '';
 
                         foreach ($readings as $catId => $reading) {
                             $passages = json_decode($reading['passages'] ?? '[]', true);
-                            if (json_last_error() === JSON_ERROR_NONE) {
-                                $plan['weeks'][$week - 1]['readings'][$catId] = [
-                                    'reference' => $reading['reference'] ?? '',
-                                    'passages' => $passages
-                                ];
+                            if (json_last_error() !== JSON_ERROR_NONE) {
+                                $allSuccess = false;
+                                $errorMsg = "Invalid JSON format for $catId passages.";
+                                break;
+                            }
+
+                            if (!ReadingPlan::updateReading($week, $catId, $reading['reference'] ?? '', $passages)) {
+                                $allSuccess = false;
+                                $errorMsg = "Failed to update $catId reading.";
+                                break;
                             }
                         }
 
-                        if (ReadingPlan::save($plan)) {
+                        if ($allSuccess) {
                             $data['success'] = "Week $week updated successfully.";
                         } else {
-                            $data['error'] = 'Failed to save changes.';
+                            $data['error'] = $errorMsg ?: 'Failed to save changes.';
                         }
                     }
                 }
