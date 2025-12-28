@@ -52,10 +52,13 @@ ob_start();
                     <h3>User Registration</h3>
 
                     <div class="form-group">
-                        <label class="toggle-label">
+                        <label class="toggle-label" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
                             <input type="checkbox" name="registration_enabled" value="1"
-                                   <?php echo $registrationEnabled === '1' ? 'checked' : ''; ?>>
-                            <span class="toggle-switch"></span>
+                                   <?php echo $registrationEnabled === '1' ? 'checked' : ''; ?>
+                                   style="display: none;">
+                            <span class="toggle-switch" style="position: relative; width: 48px; min-width: 48px; height: 24px; background-color: <?php echo $registrationEnabled === '1' ? '#43A047' : '#ccc'; ?>; border-radius: 12px; transition: background-color 0.2s;">
+                                <span style="content: ''; position: absolute; top: 2px; left: <?php echo $registrationEnabled === '1' ? '26px' : '2px'; ?>; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: left 0.2s;"></span>
+                            </span>
                             <span class="toggle-text">Enable User Registration</span>
                         </label>
                         <small class="form-hint">When disabled, only admins can create new accounts</small>
@@ -136,6 +139,26 @@ ob_start();
         </div>
     </div>
 </div>
+
+<script>
+// Toggle switch interaction
+document.querySelector('.toggle-label')?.addEventListener('click', function(e) {
+    var checkbox = this.querySelector('input[type="checkbox"]');
+    var toggleSwitch = this.querySelector('.toggle-switch');
+    var knob = toggleSwitch.querySelector('span');
+
+    // Toggle state will be handled by the checkbox
+    setTimeout(function() {
+        if (checkbox.checked) {
+            toggleSwitch.style.backgroundColor = '#43A047';
+            knob.style.left = '26px';
+        } else {
+            toggleSwitch.style.backgroundColor = '#ccc';
+            knob.style.left = '2px';
+        }
+    }, 10);
+});
+</script>
 
 <?php
 $content = ob_get_clean();
