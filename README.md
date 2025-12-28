@@ -18,26 +18,39 @@ ReadIn52 is a progressive web app that helps you read through the entire Bible i
 
 - PHP 8.0+
 - MySQL 5.7+ or MariaDB 10.3+
-- mod_rewrite enabled
 
 ## Cloudways Deployment (GitHub)
 
-This app is structured for direct deployment to Cloudways Custom PHP via GitHub:
+This app is structured for direct deployment to Cloudways Custom PHP via GitHub.
+The config system ensures your database credentials are NOT overwritten on deploy.
+
+### First-Time Setup
 
 1. Create a Custom PHP application on Cloudways
 2. Connect your GitHub repository
 3. Deploy to `public_html/` (repo contents go directly to public_html)
-4. **Configure database credentials:**
+4. **Configure database credentials (one-time setup):**
    - Go to Cloudways > Application > Access Details > Database
    - Copy DB Name, Username, and Password
-   - Edit `config/config.php` and update:
+   - Via SSH or File Manager, create `config/config.local.php`:
      ```php
+     <?php
+     define('DB_HOST', 'localhost');
      define('DB_NAME', 'your_database_name');
      define('DB_USER', 'your_database_user');
      define('DB_PASS', 'your_database_password');
+     define('DB_PORT', '3306');
+     define('DB_CHARSET', 'utf8mb4');
      ```
+   - Or copy `config/config.local.example.php` to `config/config.local.php` and edit it
 5. Visit `https://yourdomain.com/install.php`
 6. **Delete `install.php` after installation**
+
+### Why config.local.php?
+
+- `config.local.php` is gitignored - it won't be overwritten when you deploy
+- Your database credentials stay safe across all future deployments
+- The main `config.php` loads your local config automatically
 
 ## Default Accounts
 
@@ -72,7 +85,9 @@ public_html/              # Document root (Cloudways)
 │   └── images/
 ├── config/               # Protected - no web access
 │   ├── .htaccess
-│   ├── config.php
+│   ├── config.php            # Main config (loads local config)
+│   ├── config.local.php      # YOUR credentials (gitignored)
+│   ├── config.local.example.php  # Template for local config
 │   └── reading-plan.json
 ├── data/                 # Protected - no web access
 │   ├── .htaccess

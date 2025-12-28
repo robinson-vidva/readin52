@@ -3,6 +3,11 @@
  * ReadIn52 Configuration
  *
  * For Cloudways deployment - files deployed directly to public_html
+ *
+ * DATABASE SETUP:
+ * 1. Copy config.local.example.php to config.local.php
+ * 2. Update config.local.php with your Cloudways database credentials
+ * 3. config.local.php is gitignored and won't be overwritten on deploy
  */
 
 // Error reporting (disable in production)
@@ -29,21 +34,31 @@ define('TEMPLATE_PATH', ROOT_PATH . '/templates');
 define('PUBLIC_PATH', ROOT_PATH);
 
 // ============================================================
-// DATABASE CONFIGURATION (MySQL/MariaDB)
+// LOAD LOCAL CONFIG (Database credentials, etc.)
 // ============================================================
-// Update these values with your Cloudways database credentials
-// Found in: Cloudways > Application > Access Details > Database
+// If config.local.php exists, load it (contains your DB credentials)
+// This file is gitignored so it won't be overwritten on deploy
 // ============================================================
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'your_database_name');     // e.g., abcdefghij
-define('DB_USER', 'your_database_user');     // e.g., abcdefghij
-define('DB_PASS', 'your_database_password'); // From Cloudways panel
-define('DB_PORT', '3306');
-define('DB_CHARSET', 'utf8mb4');
+$localConfigPath = __DIR__ . '/config.local.php';
+if (file_exists($localConfigPath)) {
+    require_once $localConfigPath;
+}
+
+// ============================================================
+// DEFAULT DATABASE SETTINGS (if not set in config.local.php)
+// ============================================================
+// These are placeholders - create config.local.php with real values
+// ============================================================
+if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
+if (!defined('DB_NAME')) define('DB_NAME', 'your_database_name');
+if (!defined('DB_USER')) define('DB_USER', 'your_database_user');
+if (!defined('DB_PASS')) define('DB_PASS', 'your_database_password');
+if (!defined('DB_PORT')) define('DB_PORT', '3306');
+if (!defined('DB_CHARSET')) define('DB_CHARSET', 'utf8mb4');
 
 // Bible API
 define('BIBLE_API_BASE', 'https://bible.helloao.org/api');
-define('DEFAULT_TRANSLATION', 'eng_kjv');
+if (!defined('DEFAULT_TRANSLATION')) define('DEFAULT_TRANSLATION', 'eng_kjv');
 
 // Security
 define('CSRF_TOKEN_NAME', 'csrf_token');
