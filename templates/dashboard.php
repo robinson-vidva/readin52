@@ -5,15 +5,24 @@ $chapterStats = Progress::getChapterStats($user['id']);
 $currentWeek = get('week', $stats['current_week']);
 $currentWeek = max(1, min(52, intval($currentWeek)));
 $weekData = ReadingPlan::getWeekWithDetails($currentWeek);
-$weekProgress = Progress::getWeekProgress($user['id'], $currentWeek);
 $chapterProgress = Progress::getWeekChapterProgress($user['id'], $currentWeek);
 $weekChapterCounts = Progress::getWeekChapterCounts($user['id'], $currentWeek);
-$categories = ReadingPlan::getCategories();
-$weeklyCompletion = Progress::getWeeklyCompletionCounts($user['id']);
 
-$completedThisWeek = 0;
-foreach ($weekProgress as $p) {
-    if ($p['completed']) $completedThisWeek++;
+// Build flat list of all chapters for the week (for navigation)
+$weekChapters = [];
+foreach ($weekData['readings'] as $categoryId => $reading) {
+    foreach ($reading['passages'] as $passage) {
+        foreach ($passage['chapters'] as $ch) {
+            $key = $passage['book'] . '_' . $ch;
+            $isComplete = isset($chapterProgress[$categoryId][$key]) && $chapterProgress[$categoryId][$key]['completed'];
+            $weekChapters[] = [
+                'category' => $categoryId,
+                'book' => $passage['book'],
+                'chapter' => $ch,
+                'completed' => $isComplete
+            ];
+        }
+    }
 }
 
 ob_start();
@@ -65,7 +74,6 @@ ob_start();
                     <?php for ($w = 1; $w <= 52; $w++): ?>
                         <option value="<?php echo $w; ?>" <?php echo $w == $currentWeek ? 'selected' : ''; ?>>
                             Week <?php echo $w; ?>
-                            <?php if ($weeklyCompletion[$w] == 4): ?> &#10003;<?php endif; ?>
                         </option>
                     <?php endfor; ?>
                 </select>
@@ -84,13 +92,12 @@ ob_start();
             <span class="weekly-text" id="weeklyText"><?php echo $weekChapterCounts['completed']; ?>/<?php echo $weekChapterCounts['total']; ?> chapters this week</span>
         </div>
 
-        <!-- Reading Cards -->
-        <div class="reading-cards">
+        <!-- Reading List -->
+        <div class="reading-list">
             <?php foreach ($weekData['readings'] as $categoryId => $reading): ?>
                 <?php
                 $category = $reading['category'];
                 $categoryChapterProgress = $chapterProgress[$categoryId] ?? [];
-                $isCategoryComplete = Progress::isCategoryComplete($user['id'], $currentWeek, $categoryId);
 
                 // Count completed chapters in this category
                 $catTotalChapters = 0;
@@ -104,55 +111,38 @@ ob_start();
                         }
                     }
                 }
+                $isCategoryComplete = $catCompletedChapters === $catTotalChapters;
                 ?>
-                <div class="reading-card <?php echo $isCategoryComplete ? 'completed' : ''; ?>"
-                     style="--category-color: <?php echo e($category['color']); ?>"
-                     data-category="<?php echo e($categoryId); ?>">
-
-                    <div class="card-header">
-                        <span class="category-badge" style="background-color: <?php echo e($category['color']); ?>">
-                            <?php echo e($category['name']); ?>
-                        </span>
+                <div class="category-section <?php echo $isCategoryComplete ? 'completed' : ''; ?>" data-category="<?php echo e($categoryId); ?>">
+                    <div class="category-header" style="border-left-color: <?php echo e($category['color']); ?>">
+                        <span class="category-name"><?php echo e($category['name']); ?></span>
                         <span class="category-progress"><?php echo $catCompletedChapters; ?>/<?php echo $catTotalChapters; ?></span>
                     </div>
 
-                    <div class="card-body">
-                        <h3 class="reading-reference"><?php echo e($reading['reference']); ?></h3>
-
-                        <div class="chapter-checklist">
-                            <?php foreach ($reading['passages'] as $passage): ?>
-                                <?php
-                                $bookName = ReadingPlan::getBookName($passage['book']);
-                                ?>
-                                <?php foreach ($passage['chapters'] as $ch): ?>
+                    <?php foreach ($reading['passages'] as $passageIndex => $passage): ?>
+                        <?php $bookName = ReadingPlan::getBookName($passage['book']); ?>
+                        <div class="book-section">
+                            <div class="book-name"><?php echo e($bookName); ?></div>
+                            <div class="chapter-list">
+                                <?php foreach ($passage['chapters'] as $chapterIndex => $ch): ?>
                                     <?php
                                     $key = $passage['book'] . '_' . $ch;
                                     $isChapterComplete = isset($categoryChapterProgress[$key]) && $categoryChapterProgress[$key]['completed'];
                                     ?>
-                                    <label class="chapter-check <?php echo $isChapterComplete ? 'checked' : ''; ?>">
-                                        <input type="checkbox"
-                                               <?php echo $isChapterComplete ? 'checked' : ''; ?>
-                                               onchange="toggleChapter(<?php echo $currentWeek; ?>, '<?php echo e($categoryId); ?>', '<?php echo e($passage['book']); ?>', <?php echo $ch; ?>, this)">
-                                        <span class="chapter-label"><?php echo e($bookName); ?> <?php echo $ch; ?></span>
-                                    </label>
+                                    <button class="chapter-item <?php echo $isChapterComplete ? 'completed' : ''; ?>"
+                                            onclick="openChapter('<?php echo e($categoryId); ?>', '<?php echo e($passage['book']); ?>', <?php echo $ch; ?>)"
+                                            data-category="<?php echo e($categoryId); ?>"
+                                            data-book="<?php echo e($passage['book']); ?>"
+                                            data-chapter="<?php echo $ch; ?>">
+                                        <span class="chapter-num">Ch <?php echo $ch; ?></span>
+                                        <?php if ($isChapterComplete): ?>
+                                            <span class="chapter-done">&#10003;</span>
+                                        <?php endif; ?>
+                                    </button>
                                 <?php endforeach; ?>
-                            <?php endforeach; ?>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="card-footer">
-                        <button class="btn btn-read"
-                                onclick="openReader('<?php echo e($reading['passages'][0]['book']); ?>', <?php echo $reading['passages'][0]['chapters'][0]; ?>, '<?php echo e(json_encode($reading['passages'])); ?>')"
-                                style="background-color: <?php echo e($category['color']); ?>">
-                            Read Now
-                        </button>
-                    </div>
-
-                    <?php if ($isCategoryComplete): ?>
-                        <div class="completed-overlay">
-                            <span class="completed-check">&#10003;</span>
-                        </div>
-                    <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -182,22 +172,8 @@ ob_start();
 <div id="readerModal" class="modal">
     <div class="modal-content reader-modal">
         <div class="reader-header">
-            <div class="reader-nav">
-                <button class="reader-nav-btn prev" onclick="navigateChapter(-1)" title="Previous Chapter">
-                    &larr;
-                </button>
-                <h2 id="readerTitle">Loading...</h2>
-                <button class="reader-nav-btn next" onclick="navigateChapter(1)" title="Next Chapter">
-                    &rarr;
-                </button>
-            </div>
+            <h2 id="readerTitle">Loading...</h2>
             <div class="reader-controls">
-                <button class="view-mode-btn active" id="chapterViewBtn" onclick="setViewMode('chapter')" title="Chapter View">
-                    &#x1F4D6;
-                </button>
-                <button class="view-mode-btn" id="verseViewBtn" onclick="setViewMode('verse')" title="Verse by Verse">
-                    &#x1F4DD;
-                </button>
                 <select id="translationSelect" onchange="changeTranslation(this.value)">
                     <?php foreach (ReadingPlan::getTranslations() as $trans): ?>
                         <option value="<?php echo e($trans['id']); ?>"
@@ -209,15 +185,17 @@ ob_start();
                 <button class="modal-close" onclick="closeReader()">&times;</button>
             </div>
         </div>
+        <div class="reader-meta" id="readerMeta">
+            <span class="verse-count" id="verseCount"></span>
+            <span class="reading-time" id="readingTime"></span>
+        </div>
         <div class="reader-body" id="readerContent">
             <div class="loading-spinner"></div>
         </div>
         <div class="reader-footer">
-            <!-- Verse navigation (hidden in chapter mode) -->
-            <div class="verse-nav" id="verseNav" style="display: none;">
-                <button class="verse-nav-btn" onclick="navigateVerse(-1)" title="Previous Verse">&larr; Prev</button>
-                <span class="verse-indicator" id="verseIndicator">Verse 1 of 30</span>
-                <button class="verse-nav-btn" onclick="navigateVerse(1)" title="Next Verse">Next &rarr;</button>
+            <div class="reader-actions">
+                <button class="btn btn-secondary" id="btnSkip" onclick="skipChapter()">Skip</button>
+                <button class="btn btn-primary" id="btnComplete" onclick="markCompleteAndNext()">Mark Complete & Next</button>
             </div>
             <div class="reader-progress">
                 <span id="readerProgress"></span>
@@ -226,9 +204,22 @@ ob_start();
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal confirm-modal">
+    <div class="modal-content confirm-content">
+        <h3>Mark as Complete?</h3>
+        <p>Would you like to mark this chapter as complete before moving on?</p>
+        <div class="confirm-actions">
+            <button class="btn btn-secondary" onclick="confirmSkip()">Skip</button>
+            <button class="btn btn-primary" onclick="confirmComplete()">Mark Complete</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const currentWeek = <?php echo $currentWeek; ?>;
     const userTranslation = '<?php echo e($user['preferred_translation']); ?>';
+    const weekChapters = <?php echo json_encode($weekChapters); ?>;
 </script>
 
 <?php

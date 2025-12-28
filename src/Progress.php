@@ -70,7 +70,38 @@ class Progress
     }
 
     /**
-     * Toggle chapter completion status
+     * Mark chapter as complete (no toggle - only sets to complete)
+     */
+    public static function markChapterComplete(int $userId, int $weekNumber, string $category, string $book, int $chapter): array
+    {
+        if ($weekNumber < 1 || $weekNumber > 52) {
+            return ['success' => false, 'error' => 'Invalid week'];
+        }
+        if (!in_array($category, self::CATEGORIES)) {
+            return ['success' => false, 'error' => 'Invalid category'];
+        }
+
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            INSERT INTO chapter_progress (user_id, week_number, category, book, chapter, completed, completed_at)
+            VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE completed = 1, completed_at = CURRENT_TIMESTAMP
+        ");
+        $stmt->execute([$userId, $weekNumber, $category, $book, $chapter]);
+
+        // Check if all chapters in category are complete
+        $categoryComplete = self::isCategoryComplete($userId, $weekNumber, $category);
+
+        return [
+            'success' => true,
+            'completed' => true,
+            'categoryComplete' => $categoryComplete
+        ];
+    }
+
+    /**
+     * Toggle chapter completion status (legacy - kept for compatibility)
      */
     public static function toggleChapter(int $userId, int $weekNumber, string $category, string $book, int $chapter): array
     {

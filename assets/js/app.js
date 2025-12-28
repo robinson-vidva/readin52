@@ -7,12 +7,13 @@
 
     // State
     let currentTranslation = 'eng_kjv';
-    let currentBook = 'GEN';
-    let currentChapter = 1;
-    let currentPassages = [];
-    let currentVerses = [];      // Store verses for verse-by-verse mode
-    let currentVerseIndex = 0;   // Current verse being shown
-    let viewMode = 'chapter';    // 'chapter' or 'verse'
+    let currentCategory = '';
+    let currentBook = '';
+    let currentChapter = 0;
+    let currentChapterIndex = -1;  // Index in weekChapters array
+    let currentVerses = [];
+    let isCurrentChapterComplete = false;
+    let pendingAction = null;  // For confirmation modal
 
     /**
      * Initialize app
@@ -51,7 +52,10 @@
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(e) {
                 if (e.target === this) {
-                    this.classList.remove('show');
+                    // Don't close if it's the confirmation modal
+                    if (this.id !== 'confirmModal') {
+                        closeReader();
+                    }
                 }
             });
         });
@@ -78,142 +82,23 @@
     };
 
     /**
-     * Toggle reading progress (legacy - category level)
+     * Open chapter reader
      */
-    window.toggleProgress = async function(week, category, button) {
-        try {
-            const response = await fetch('/?route=api/progress', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ week, category })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Update button
-                button.classList.toggle('checked', result.completed);
-                button.innerHTML = result.completed ? '&#10003;' : '';
-
-                // Update card
-                const card = button.closest('.reading-card');
-                if (card) {
-                    card.classList.toggle('completed', result.completed);
-
-                    // Update overlay
-                    let overlay = card.querySelector('.completed-overlay');
-                    if (result.completed && !overlay) {
-                        overlay = document.createElement('div');
-                        overlay.className = 'completed-overlay';
-                        overlay.innerHTML = '<span class="completed-check">&#10003;</span>';
-                        card.appendChild(overlay);
-                    } else if (!result.completed && overlay) {
-                        overlay.remove();
-                    }
-                }
-
-                // Reload page to update progress bars
-                location.reload();
-            }
-        } catch (error) {
-            console.error('Error updating progress:', error);
-            alert('Failed to update progress. Please try again.');
-        }
-    };
-
-    /**
-     * Toggle chapter progress (granular - chapter level)
-     */
-    window.toggleChapter = async function(week, category, book, chapter, checkbox) {
-        try {
-            const response = await fetch('/?route=api/chapter-progress', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ week, category, book, chapter })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Update checkbox label styling
-                const label = checkbox.closest('.chapter-check');
-                if (label) {
-                    label.classList.toggle('checked', result.completed);
-                }
-
-                // Update card if category is complete
-                const card = checkbox.closest('.reading-card');
-                if (card) {
-                    card.classList.toggle('completed', result.categoryComplete);
-
-                    // Update category progress display
-                    const progressSpan = card.querySelector('.category-progress');
-                    if (progressSpan && result.weekCounts) {
-                        // Recalculate category progress
-                        const checkboxes = card.querySelectorAll('.chapter-check input[type="checkbox"]');
-                        const total = checkboxes.length;
-                        const completed = card.querySelectorAll('.chapter-check input[type="checkbox"]:checked').length;
-                        progressSpan.textContent = `${completed}/${total}`;
-                    }
-
-                    // Update overlay
-                    let overlay = card.querySelector('.completed-overlay');
-                    if (result.categoryComplete && !overlay) {
-                        overlay = document.createElement('div');
-                        overlay.className = 'completed-overlay';
-                        overlay.innerHTML = '<span class="completed-check">&#10003;</span>';
-                        card.appendChild(overlay);
-                    } else if (!result.categoryComplete && overlay) {
-                        overlay.remove();
-                    }
-                }
-
-                // Update weekly progress bar
-                if (result.weekCounts) {
-                    const fill = document.getElementById('weeklyFill');
-                    const text = document.getElementById('weeklyText');
-                    if (fill && text) {
-                        const percentage = result.weekCounts.total > 0
-                            ? (result.weekCounts.completed / result.weekCounts.total) * 100
-                            : 0;
-                        fill.style.width = percentage + '%';
-                        text.textContent = `${result.weekCounts.completed}/${result.weekCounts.total} chapters this week`;
-                    }
-                }
-            } else {
-                // Revert checkbox if failed
-                checkbox.checked = !checkbox.checked;
-                alert('Failed to update progress. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error updating chapter progress:', error);
-            checkbox.checked = !checkbox.checked;
-            alert('Failed to update progress. Please try again.');
-        }
-    };
-
-    /**
-     * Open Bible reader modal
-     */
-    window.openReader = function(book, chapter, passagesJson) {
+    window.openChapter = function(category, book, chapter) {
         const modal = document.getElementById('readerModal');
         if (!modal) return;
 
-        // Parse passages
-        try {
-            currentPassages = JSON.parse(passagesJson);
-        } catch (e) {
-            currentPassages = [{ book: book, chapters: [chapter] }];
-        }
-
+        currentCategory = category;
         currentBook = book;
         currentChapter = chapter;
+
+        // Find index in weekChapters
+        if (typeof weekChapters !== 'undefined') {
+            currentChapterIndex = weekChapters.findIndex(ch =>
+                ch.category === category && ch.book === book && ch.chapter === chapter
+            );
+            isCurrentChapterComplete = currentChapterIndex >= 0 && weekChapters[currentChapterIndex].completed;
+        }
 
         // Get translation from select if available
         const select = document.getElementById('translationSelect');
@@ -223,6 +108,7 @@
 
         modal.classList.add('show');
         loadChapter(book, chapter);
+        updateFooterButtons();
     };
 
     /**
@@ -241,7 +127,9 @@
     async function loadChapter(book, chapter) {
         const content = document.getElementById('readerContent');
         const title = document.getElementById('readerTitle');
-        const progress = document.getElementById('readerProgress');
+        const progressEl = document.getElementById('readerProgress');
+        const verseCountEl = document.getElementById('verseCount');
+        const readingTimeEl = document.getElementById('readingTime');
 
         if (!content) return;
 
@@ -255,25 +143,44 @@
                 return;
             }
 
-            // Store verses for verse-by-verse mode
             currentVerses = data.verses;
-            currentVerseIndex = 0;
+
+            // Build HTML
+            let html = '<div class="scripture-text">';
+            let totalWords = 0;
+            data.verses.forEach(verse => {
+                html += `<span class="verse"><sup class="verse-num">${verse.verse}</sup>${verse.text}</span> `;
+                totalWords += verse.text.split(/\s+/).length;
+            });
+            html += '</div>';
+
+            content.innerHTML = html;
 
             // Update title
             if (title) {
                 title.textContent = `${data.bookName} ${chapter}`;
             }
 
-            // Update progress
-            if (progress) {
-                progress.textContent = `Chapter ${chapter} of ${data.totalChapters}`;
+            // Update verse count
+            if (verseCountEl) {
+                verseCountEl.textContent = `${data.verses.length} verses`;
+            }
+
+            // Calculate reading time (~200 words per minute)
+            if (readingTimeEl) {
+                const minutes = Math.ceil(totalWords / 200);
+                readingTimeEl.textContent = `~${minutes} min read`;
+            }
+
+            // Update progress (position in week's reading)
+            if (progressEl && typeof weekChapters !== 'undefined') {
+                const pos = currentChapterIndex + 1;
+                const total = weekChapters.length;
+                progressEl.textContent = `Chapter ${pos} of ${total} this week`;
             }
 
             currentBook = book;
             currentChapter = chapter;
-
-            // Render based on view mode
-            renderContent();
 
         } catch (error) {
             console.error('Error loading chapter:', error);
@@ -282,129 +189,236 @@
     }
 
     /**
-     * Render content based on view mode
+     * Update footer buttons based on current state
      */
-    function renderContent() {
-        const content = document.getElementById('readerContent');
-        const verseNav = document.getElementById('verseNav');
+    function updateFooterButtons() {
+        const btnComplete = document.getElementById('btnComplete');
 
-        if (!content) return;
-
-        if (viewMode === 'chapter') {
-            // Show all verses at once
-            let html = '<div class="scripture-text">';
-            currentVerses.forEach(verse => {
-                html += `<span class="verse"><sup class="verse-num">${verse.verse}</sup>${verse.text}</span> `;
-            });
-            html += '</div>';
-            content.innerHTML = html;
-
-            // Hide verse navigation
-            if (verseNav) verseNav.style.display = 'none';
-        } else {
-            // Show single verse
-            if (currentVerses.length > 0) {
-                const verse = currentVerses[currentVerseIndex];
-                content.innerHTML = `
-                    <div class="verse-single">
-                        <div class="verse-number">Verse ${verse.verse}</div>
-                        <div class="verse-text">${verse.text}</div>
-                    </div>
-                `;
-
-                // Update verse indicator
-                const indicator = document.getElementById('verseIndicator');
-                if (indicator) {
-                    indicator.textContent = `Verse ${currentVerseIndex + 1} of ${currentVerses.length}`;
-                }
+        if (btnComplete) {
+            if (isCurrentChapterComplete) {
+                btnComplete.textContent = 'Next Chapter';
+            } else {
+                btnComplete.textContent = 'Mark Complete & Next';
             }
-
-            // Show verse navigation
-            if (verseNav) verseNav.style.display = 'flex';
         }
     }
 
     /**
-     * Set view mode (chapter or verse)
+     * Mark current chapter as complete and go to next
      */
-    window.setViewMode = function(mode) {
-        viewMode = mode;
+    window.markCompleteAndNext = async function() {
+        // If already complete, just go to next
+        if (isCurrentChapterComplete) {
+            goToNextChapter();
+            return;
+        }
 
-        // Update button states
-        const chapterBtn = document.getElementById('chapterViewBtn');
-        const verseBtn = document.getElementById('verseViewBtn');
+        // Mark as complete
+        await markChapterComplete();
 
-        if (chapterBtn) chapterBtn.classList.toggle('active', mode === 'chapter');
-        if (verseBtn) verseBtn.classList.toggle('active', mode === 'verse');
+        // Go to next
+        goToNextChapter();
+    };
 
-        // Re-render content
-        if (currentVerses.length > 0) {
-            renderContent();
+    /**
+     * Skip chapter without marking complete
+     */
+    window.skipChapter = function() {
+        if (!isCurrentChapterComplete) {
+            // Show confirmation
+            pendingAction = 'skip';
+            showConfirmModal();
+        } else {
+            goToNextChapter();
         }
     };
 
     /**
-     * Navigate to previous/next verse
+     * Show confirmation modal
      */
-    window.navigateVerse = function(direction) {
-        const newIndex = currentVerseIndex + direction;
-
-        if (newIndex >= 0 && newIndex < currentVerses.length) {
-            currentVerseIndex = newIndex;
-            renderContent();
-        } else if (newIndex < 0 && currentVerseIndex === 0) {
-            // Go to previous chapter's last verse
-            navigateChapter(-1);
-            // After loading, go to last verse
-            setTimeout(() => {
-                currentVerseIndex = currentVerses.length - 1;
-                renderContent();
-            }, 500);
-        } else if (newIndex >= currentVerses.length) {
-            // Go to next chapter's first verse
-            navigateChapter(1);
+    function showConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        if (modal) {
+            modal.classList.add('show');
         }
+    }
+
+    /**
+     * Hide confirmation modal
+     */
+    function hideConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    /**
+     * Confirm skip (from modal)
+     */
+    window.confirmSkip = function() {
+        hideConfirmModal();
+        goToNextChapter();
     };
 
     /**
-     * Navigate to previous/next chapter
+     * Confirm complete (from modal)
      */
-    window.navigateChapter = function(direction) {
-        let newChapter = currentChapter + direction;
-        let newBook = currentBook;
+    window.confirmComplete = async function() {
+        hideConfirmModal();
+        await markChapterComplete();
+        goToNextChapter();
+    };
 
-        const totalChapters = BibleAPI.getTotalChapters(currentBook);
+    /**
+     * Mark current chapter as complete
+     */
+    async function markChapterComplete() {
+        try {
+            const response = await fetch('/?route=api/chapter-progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    week: currentWeek,
+                    category: currentCategory,
+                    book: currentBook,
+                    chapter: currentChapter
+                })
+            });
 
-        // Check if we need to change books
-        if (newChapter < 1) {
-            // Find previous book in passages
-            const currentPassageIndex = currentPassages.findIndex(p => p.book === currentBook);
-            if (currentPassageIndex > 0) {
-                newBook = currentPassages[currentPassageIndex - 1].book;
-                newChapter = BibleAPI.getTotalChapters(newBook);
-            } else {
-                return; // Can't go back further
+            const result = await response.json();
+
+            if (result.success) {
+                isCurrentChapterComplete = true;
+
+                // Update weekChapters array
+                if (currentChapterIndex >= 0) {
+                    weekChapters[currentChapterIndex].completed = true;
+                }
+
+                // Update chapter item in the list
+                updateChapterItem(currentCategory, currentBook, currentChapter, true);
+
+                // Update weekly progress bar
+                if (result.weekCounts) {
+                    updateWeeklyProgress(result.weekCounts);
+                }
+
+                return true;
             }
-        } else if (newChapter > totalChapters) {
-            // Find next book in passages
-            const currentPassageIndex = currentPassages.findIndex(p => p.book === currentBook);
-            if (currentPassageIndex < currentPassages.length - 1) {
-                newBook = currentPassages[currentPassageIndex + 1].book;
-                newChapter = 1;
+        } catch (error) {
+            console.error('Error marking chapter complete:', error);
+        }
+        return false;
+    }
+
+    /**
+     * Update chapter item appearance in the list
+     */
+    function updateChapterItem(category, book, chapter, completed) {
+        const item = document.querySelector(
+            `.chapter-item[data-category="${category}"][data-book="${book}"][data-chapter="${chapter}"]`
+        );
+        if (item) {
+            if (completed) {
+                item.classList.add('completed');
+                if (!item.querySelector('.chapter-done')) {
+                    const checkmark = document.createElement('span');
+                    checkmark.className = 'chapter-done';
+                    checkmark.innerHTML = '&#10003;';
+                    item.appendChild(checkmark);
+                }
             } else {
-                return; // Can't go forward further
+                item.classList.remove('completed');
+                const checkmark = item.querySelector('.chapter-done');
+                if (checkmark) checkmark.remove();
             }
         }
 
-        loadChapter(newBook, newChapter);
-    };
+        // Update category progress
+        updateCategoryProgress(category);
+    }
+
+    /**
+     * Update category progress display
+     */
+    function updateCategoryProgress(category) {
+        const section = document.querySelector(`.category-section[data-category="${category}"]`);
+        if (!section) return;
+
+        const items = section.querySelectorAll('.chapter-item');
+        const completed = section.querySelectorAll('.chapter-item.completed').length;
+        const total = items.length;
+
+        const progressEl = section.querySelector('.category-progress');
+        if (progressEl) {
+            progressEl.textContent = `${completed}/${total}`;
+        }
+
+        // Update section completed state
+        if (completed === total) {
+            section.classList.add('completed');
+        } else {
+            section.classList.remove('completed');
+        }
+    }
+
+    /**
+     * Update weekly progress bar
+     */
+    function updateWeeklyProgress(counts) {
+        const fill = document.getElementById('weeklyFill');
+        const text = document.getElementById('weeklyText');
+
+        if (fill && text) {
+            const percentage = counts.total > 0 ? (counts.completed / counts.total) * 100 : 0;
+            fill.style.width = percentage + '%';
+            text.textContent = `${counts.completed}/${counts.total} chapters this week`;
+        }
+    }
+
+    /**
+     * Go to next chapter in the week's reading
+     */
+    function goToNextChapter() {
+        if (typeof weekChapters === 'undefined' || currentChapterIndex < 0) {
+            closeReader();
+            return;
+        }
+
+        const nextIndex = currentChapterIndex + 1;
+
+        // Check if we've reached the end
+        if (nextIndex >= weekChapters.length) {
+            // Week complete, go back to list
+            closeReader();
+            // Optionally show a message
+            return;
+        }
+
+        // Load next chapter
+        const next = weekChapters[nextIndex];
+        currentChapterIndex = nextIndex;
+        currentCategory = next.category;
+        currentBook = next.book;
+        currentChapter = next.chapter;
+        isCurrentChapterComplete = next.completed;
+
+        loadChapter(next.book, next.chapter);
+        updateFooterButtons();
+    }
 
     /**
      * Change translation
      */
     window.changeTranslation = function(translation) {
         currentTranslation = translation;
-        loadChapter(currentBook, currentChapter);
+        if (currentBook && currentChapter) {
+            loadChapter(currentBook, currentChapter);
+        }
     };
 
     // Initialize when DOM is ready
