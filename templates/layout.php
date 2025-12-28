@@ -75,7 +75,7 @@
     <?php if (Auth::isLoggedIn()): ?>
     <footer class="footer">
         <div class="container">
-            <p>&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. Journey Through Scripture in 52 Weeks.</p>
+            <p>&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. <span class="footer-tagline">Journey Through Scripture in 52 Weeks.</span></p>
         </div>
     </footer>
     <?php endif; ?>
