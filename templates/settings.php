@@ -58,7 +58,7 @@ ob_start();
                             </div>
 
                             <div class="form-group">
-                                <label for="preferred_translation">Bible Translation</label>
+                                <label for="preferred_translation">Primary Translation</label>
                                 <select id="preferred_translation" name="preferred_translation">
                                     <?php foreach ($translations as $trans): ?>
                                         <option value="<?php echo e($trans['id']); ?>"
@@ -67,7 +67,21 @@ ob_start();
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <small class="form-hint">Select your preferred Bible translation for reading</small>
+                                <small class="form-hint">Your main Bible translation for reading</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="secondary_translation">Secondary Translation (Optional)</label>
+                                <select id="secondary_translation" name="secondary_translation">
+                                    <option value="">None - Single translation only</option>
+                                    <?php foreach ($translations as $trans): ?>
+                                        <option value="<?php echo e($trans['id']); ?>"
+                                                <?php echo $trans['id'] === ($user['secondary_translation'] ?? '') ? 'selected' : ''; ?>>
+                                            <?php echo e($trans['name']); ?> (<?php echo e($trans['language']); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="form-hint">Compare with a second translation while reading</small>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Save Settings</button>

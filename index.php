@@ -182,6 +182,7 @@ try {
                     $data['error'] = 'Invalid request. Please try again.';
                 } else {
                     $translation = post('preferred_translation', 'eng_kjv');
+                    $secondaryTranslation = post('secondary_translation', '');
                     $theme = post('theme', 'auto');
                     // Validate theme value
                     if (!in_array($theme, ['light', 'dark', 'auto'])) {
@@ -189,8 +190,14 @@ try {
                     }
                     $userId = Auth::getUserId();
 
+                    // Set secondary to null if empty or same as primary
+                    if ($secondaryTranslation === '' || $secondaryTranslation === $translation) {
+                        $secondaryTranslation = null;
+                    }
+
                     if (User::update($userId, [
                         'preferred_translation' => $translation,
+                        'secondary_translation' => $secondaryTranslation,
                         'theme' => $theme
                     ])) {
                         $data['success'] = 'Settings saved successfully.';

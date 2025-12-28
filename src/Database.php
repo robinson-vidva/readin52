@@ -217,6 +217,12 @@ class Database
             $pdo->exec("ALTER TABLE users ADD COLUMN theme ENUM('light', 'dark', 'auto') DEFAULT 'auto' AFTER preferred_translation");
         }
 
+        // Add secondary_translation column to users table if not exists
+        $columns = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('secondary_translation', $columns)) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN secondary_translation VARCHAR(20) DEFAULT NULL AFTER preferred_translation");
+        }
+
         // Create reading_categories table if not exists
         $stmt = $pdo->query("SHOW TABLES LIKE 'reading_categories'");
         if ($stmt->fetch() === false) {

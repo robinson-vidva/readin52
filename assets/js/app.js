@@ -155,6 +155,7 @@ async function loadChapter(book, chapter) {
             return;
         }
 
+        // Load primary translation
         const data = await BibleAPI.getChapter(currentTranslation, book, chapter);
         console.log('BibleAPI response:', data);
 
@@ -165,16 +166,43 @@ async function loadChapter(book, chapter) {
 
         currentVerses = data.verses;
 
-        // Build HTML
-        let html = '<div class="scripture-text">';
+        // Store primary data for dual mode
+        if (typeof cachedPrimaryData !== 'undefined') {
+            cachedPrimaryData = data;
+            cachedSecondaryData = null;
+        }
+
+        // Load secondary translation if enabled
+        let secondaryData = null;
+        if (typeof hasDualTranslation !== 'undefined' && hasDualTranslation && secondaryTranslation) {
+            try {
+                secondaryData = await BibleAPI.getChapter(secondaryTranslation, book, chapter);
+                if (!secondaryData.error) {
+                    cachedSecondaryData = secondaryData;
+                }
+            } catch (e) {
+                console.log('Secondary translation load failed:', e);
+            }
+        }
+
+        // Count words for reading time
         let totalWords = 0;
         data.verses.forEach(function(verse) {
-            html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
             totalWords += verse.text.split(/\s+/).length;
         });
-        html += '</div>';
 
-        content.innerHTML = html;
+        // Render based on current view mode
+        if (typeof currentViewMode !== 'undefined' && hasDualTranslation) {
+            renderContent(data, secondaryData, currentViewMode);
+        } else {
+            // Build HTML for single translation
+            let html = '<div class="scripture-text">';
+            data.verses.forEach(function(verse) {
+                html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        }
 
         // Update title
         if (title) {
