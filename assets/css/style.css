@@ -1075,16 +1075,10 @@ h1, h2, h3, h4, h5, h6 {
     gap: var(--spacing-md);
 }
 
-@media (max-width: 600px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 .stat-card {
     background: linear-gradient(135deg, var(--surface) 0%, var(--background) 100%);
-    padding: var(--spacing-xl);
-    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
     text-align: center;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
@@ -1092,31 +1086,57 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
 }
 
 .stat-card .stat-icon {
-    font-size: 2.5rem;
-    margin-bottom: var(--spacing-md);
+    font-size: 1.75rem;
+    margin-bottom: var(--spacing-sm);
     display: block;
 }
 
 .stat-card .stat-value {
     display: block;
-    font-size: 2.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--primary-brown);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 2px;
     font-family: var(--font-heading);
 }
 
 .stat-card .stat-label {
     color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.7rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Mobile Stats - Horizontal compact layout */
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-sm);
+    }
+
+    .stat-card {
+        padding: var(--spacing-md) var(--spacing-sm);
+        border-radius: var(--radius-md);
+    }
+
+    .stat-card .stat-icon {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.6rem;
+    }
 }
 
 /* ============ Modal ============ */
