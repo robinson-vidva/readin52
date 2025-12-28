@@ -15,6 +15,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
+// Prevent Varnish/proxy caching of dynamic pages
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+
 // Detect HTTPS (Cloudways uses proxy, check X-Forwarded-Proto)
 $isHttps = (
     (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
