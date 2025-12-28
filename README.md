@@ -17,16 +17,19 @@ ReadIn52 is a progressive web app that helps you read through the entire Bible i
 ## Requirements
 
 - PHP 8.0+
-- SQLite 3
+- SQLite 3 (pdo_sqlite extension)
 - mod_rewrite enabled
 
-## Installation
+## Cloudways Deployment (GitHub)
 
-1. Upload files to your web server
-2. Ensure `data/` directory is writable
-3. Visit `/install.php` in your browser
-4. Follow the installation steps
-5. **Delete `install.php` after installation**
+This app is structured for direct deployment to Cloudways Custom PHP via GitHub:
+
+1. Create a Custom PHP application on Cloudways
+2. Connect your GitHub repository
+3. Deploy to `public_html/` (repo contents go directly to public_html)
+4. Ensure PHP 8.0+ and sqlite3/pdo_sqlite extensions are enabled
+5. Visit `https://yourdomain.com/install.php`
+6. **Delete `install.php` after installation**
 
 ## Default Accounts
 
@@ -48,26 +51,35 @@ After installation, two accounts are created:
 ## File Structure
 
 ```
-readin52/
-├── config/
+public_html/              # Document root (Cloudways)
+├── index.php             # Main router
+├── manifest.json         # PWA manifest
+├── sw.js                 # Service worker
+├── install.php           # Installation script (delete after setup)
+├── .htaccess             # URL rewriting & security
+├── assets/
+│   ├── css/style.css
+│   ├── js/app.js
+│   ├── js/bible-api.js
+│   └── images/
+├── config/               # Protected - no web access
+│   ├── .htaccess
 │   ├── config.php
 │   └── reading-plan.json
-├── data/
-│   └── readin52.db (created on install)
-├── public/
-│   ├── index.php
-│   ├── manifest.json
-│   ├── sw.js
+├── data/                 # Protected - no web access
 │   ├── .htaccess
-│   └── assets/
-├── src/
+│   ├── .gitkeep
+│   └── readin52.db       # Created on install
+├── src/                  # Protected - no web access
+│   ├── .htaccess
 │   ├── Database.php
 │   ├── Auth.php
 │   ├── User.php
 │   ├── Progress.php
 │   ├── ReadingPlan.php
 │   └── helpers.php
-├── templates/
+├── templates/            # Protected - no web access
+│   ├── .htaccess
 │   ├── layout.php
 │   ├── home.php
 │   ├── dashboard.php
@@ -76,12 +88,19 @@ readin52/
 │   ├── reader.php
 │   ├── profile.php
 │   └── admin/
-├── install.php
-├── .htaccess
 ├── .gitignore
 ├── README.md
 └── LICENSE
 ```
+
+## Security
+
+- Sensitive directories (config, src, templates, data) are protected via .htaccess
+- HTTPS is enforced automatically in production
+- CSRF protection on all forms
+- Password hashing with bcrypt
+- SQL injection prevention via PDO prepared statements
+- XSS prevention via output escaping
 
 ## License
 

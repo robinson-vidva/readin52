@@ -6,12 +6,12 @@
  */
 
 // Load configuration
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/config/config.php';
 
 // Check if app is installed
 if (!Database::isInstalled()) {
     // Redirect to install script if exists
-    if (file_exists(__DIR__ . '/../install.php')) {
+    if (file_exists(__DIR__ . '/install.php')) {
         header('Location: /install.php');
         exit;
     }

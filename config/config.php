@@ -1,6 +1,8 @@
 <?php
 /**
  * ReadIn52 Configuration
+ *
+ * For Cloudways deployment - files deployed directly to public_html
  */
 
 // Error reporting (disable in production)
@@ -18,13 +20,13 @@ define('APP_NAME', 'ReadIn52');
 define('APP_TAGLINE', 'Journey Through Scripture in 52 Weeks');
 define('APP_VERSION', '1.0.0');
 
-// Paths
-define('ROOT_PATH', dirname(__DIR__));
-define('CONFIG_PATH', ROOT_PATH . '/config');
+// Paths - All relative to document root (public_html)
+define('ROOT_PATH', __DIR__ . '/..');
+define('CONFIG_PATH', __DIR__);
 define('DATA_PATH', ROOT_PATH . '/data');
 define('SRC_PATH', ROOT_PATH . '/src');
 define('TEMPLATE_PATH', ROOT_PATH . '/templates');
-define('PUBLIC_PATH', ROOT_PATH . '/public');
+define('PUBLIC_PATH', ROOT_PATH); // Root is now public
 
 // Database
 define('DB_PATH', DATA_PATH . '/readin52.db');
