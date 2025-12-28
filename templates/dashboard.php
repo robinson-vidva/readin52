@@ -114,7 +114,7 @@ ob_start();
                 $isCategoryComplete = $catCompletedChapters === $catTotalChapters;
                 ?>
                 <div class="category-section <?php echo $isCategoryComplete ? 'completed' : ''; ?>" data-category="<?php echo e($categoryId); ?>">
-                    <div class="category-header" style="border-left-color: <?php echo e($category['color']); ?>">
+                    <div class="category-header">
                         <span class="category-name"><?php echo e($category['name']); ?></span>
                         <span class="category-progress"><?php echo $catCompletedChapters; ?>/<?php echo $catTotalChapters; ?></span>
                     </div>

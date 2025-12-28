@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo APP_VERSION; ?>">
 </head>
 <body class="admin-page">
     <div class="admin-layout">
@@ -94,7 +94,7 @@
         </main>
     </div>
 
-    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/app.js?v=<?php echo APP_VERSION; ?>"></script>
     <script>
         // Sidebar toggle for mobile
         document.getElementById('sidebarToggle')?.addEventListener('click', function() {
