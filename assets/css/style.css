@@ -924,28 +924,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .category-section.completed {
-    opacity: 0.75;
+    opacity: 0.8;
 }
 
-.category-section.completed .category-header::after {
-    content: '✓ Complete';
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--success-green);
-    background-color: #e8f5e9;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    margin-left: auto;
-    margin-right: var(--spacing-md);
+.category-section.completed .category-progress {
+    background-color: rgba(255,255,255,0.3);
+}
+
+.category-section.completed .category-progress::before {
+    content: '✓ ';
 }
 
 .category-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: var(--spacing-md) var(--spacing-lg);
     background: linear-gradient(135deg, var(--cat-color, var(--primary-brown)) 0%, var(--cat-color-dark, var(--primary-dark)) 100%);
     color: white;
-    border-left: none;
 }
 
 /* Category-specific colors */
@@ -971,20 +967,21 @@ h1, h2, h3, h4, h5, h6 {
 
 .category-name {
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: white;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .category-progress {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: white;
-    background-color: rgba(255,255,255,0.2);
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-md);
-    backdrop-filter: blur(4px);
+    background-color: rgba(0,0,0,0.2);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-sm);
+    min-width: 45px;
+    text-align: center;
 }
 
 .book-section {
