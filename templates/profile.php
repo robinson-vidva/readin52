@@ -25,22 +25,22 @@ ob_start();
         </div>
 
         <!-- Reading Stats Overview -->
-        <div class="stats-banner" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; color: white;">
+        <div class="stats-banner" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
             <div class="stat-item" style="text-align: center;">
-                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['total_completed']; ?></span>
-                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Readings</span>
+                <span style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2; color: #ffffff;"><?php echo $stats['total_completed']; ?></span>
+                <span style="display: block; font-size: 0.85rem; color: rgba(255,255,255,0.9); margin-top: 0.25rem;">Readings</span>
             </div>
             <div class="stat-item" style="text-align: center;">
-                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['percentage']; ?>%</span>
-                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Complete</span>
+                <span style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2; color: #ffffff;"><?php echo $stats['percentage']; ?>%</span>
+                <span style="display: block; font-size: 0.85rem; color: rgba(255,255,255,0.9); margin-top: 0.25rem;">Complete</span>
             </div>
             <div class="stat-item" style="text-align: center;">
-                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['streak']; ?></span>
-                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Week Streak</span>
+                <span style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2; color: #ffffff;"><?php echo $stats['streak']; ?></span>
+                <span style="display: block; font-size: 0.85rem; color: rgba(255,255,255,0.9); margin-top: 0.25rem;">Week Streak</span>
             </div>
             <div class="stat-item" style="text-align: center;">
-                <span class="stat-value" style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2;"><?php echo $stats['current_week']; ?></span>
-                <span class="stat-label" style="display: block; font-size: 0.85rem; opacity: 0.9; margin-top: 0.25rem;">Current Week</span>
+                <span style="display: block; font-size: 2rem; font-weight: 700; line-height: 1.2; color: #ffffff;"><?php echo $stats['current_week']; ?></span>
+                <span style="display: block; font-size: 0.85rem; color: rgba(255,255,255,0.9); margin-top: 0.25rem;">Current Week</span>
             </div>
         </div>
 
