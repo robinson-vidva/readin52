@@ -96,7 +96,7 @@ class User
         $fields = [];
         $values = [];
 
-        $allowedFields = ['name', 'email', 'role', 'preferred_translation'];
+        $allowedFields = ['name', 'email', 'role', 'preferred_translation', 'theme'];
 
         foreach ($allowedFields as $field) {
             if (isset($data[$field])) {
