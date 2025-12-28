@@ -1,0 +1,48 @@
+# Database
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
+# Keep data directory
+!data/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Vendor (if using Composer later)
+/vendor/
+
+# Node (if using npm later)
+/node_modules/
+
+# Temp files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Cache
+.cache/
+
+# Backups
+*.bak
+*.backup
+
+# Install file (should be deleted after installation)
+# install.php
