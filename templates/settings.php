@@ -70,6 +70,60 @@ ob_start();
                     </form>
                 </div>
             </div>
+
+            <!-- Reset Progress -->
+            <div class="profile-card danger-zone">
+                <div class="card-header">
+                    <h2>Reset Progress</h2>
+                </div>
+                <div class="card-body">
+                    <?php if (isset($resetSuccess)): ?>
+                        <div class="alert alert-success"><?php echo e($resetSuccess); ?></div>
+                    <?php endif; ?>
+
+                    <?php if (isset($resetError)): ?>
+                        <div class="alert alert-error"><?php echo e($resetError); ?></div>
+                    <?php endif; ?>
+
+                    <p class="danger-text">This will permanently delete all your reading progress. You'll start fresh from Week 1.</p>
+
+                    <form method="POST" action="/?route=settings/reset-progress" class="profile-form" id="resetProgressForm">
+                        <?php echo csrfField(); ?>
+
+                        <div class="form-group">
+                            <label for="reset_password">Enter your password to confirm</label>
+                            <input type="password" id="reset_password" name="password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger">Reset All Progress</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delete Account -->
+            <div class="profile-card danger-zone">
+                <div class="card-header">
+                    <h2>Delete Account</h2>
+                </div>
+                <div class="card-body">
+                    <?php if (isset($deleteError)): ?>
+                        <div class="alert alert-error"><?php echo e($deleteError); ?></div>
+                    <?php endif; ?>
+
+                    <p class="danger-text">This will permanently delete your account and all associated data. This action cannot be undone.</p>
+
+                    <form method="POST" action="/?route=settings/delete-account" class="profile-form" id="deleteAccountForm">
+                        <?php echo csrfField(); ?>
+
+                        <div class="form-group">
+                            <label for="delete_password">Enter your password to confirm</label>
+                            <input type="password" id="delete_password" name="password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger">Delete My Account</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -96,6 +150,20 @@ document.querySelectorAll('.theme-option input').forEach(radio => {
             }
         }
     });
+});
+
+// Reset Progress confirmation
+document.getElementById('resetProgressForm')?.addEventListener('submit', function(e) {
+    if (!confirm('Are you sure you want to reset all your reading progress? This cannot be undone.')) {
+        e.preventDefault();
+    }
+});
+
+// Delete Account confirmation
+document.getElementById('deleteAccountForm')?.addEventListener('submit', function(e) {
+    if (!confirm('Are you sure you want to permanently delete your account? This action cannot be undone.')) {
+        e.preventDefault();
+    }
 });
 </script>
 

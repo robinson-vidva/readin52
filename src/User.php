@@ -139,13 +139,33 @@ class User
     }
 
     /**
-     * Delete user
+     * Delete user and all associated data
      */
     public static function delete(int $id): bool
     {
         $pdo = Database::getInstance();
-        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-        return $stmt->execute([$id]);
+
+        try {
+            $pdo->beginTransaction();
+
+            // Delete user's reading progress
+            $stmt = $pdo->prepare("DELETE FROM reading_progress WHERE user_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete user's chapter progress
+            $stmt = $pdo->prepare("DELETE FROM chapter_progress WHERE user_id = ?");
+            $stmt->execute([$id]);
+
+            // Delete user
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$id]);
+
+            $pdo->commit();
+            return true;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return false;
+        }
     }
 
     /**

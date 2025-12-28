@@ -543,4 +543,30 @@ class Progress
 
         return $counts;
     }
+
+    /**
+     * Delete all progress for a user
+     */
+    public static function deleteAllProgress(int $userId): bool
+    {
+        $pdo = Database::getInstance();
+
+        try {
+            $pdo->beginTransaction();
+
+            // Delete category-level progress
+            $stmt = $pdo->prepare("DELETE FROM reading_progress WHERE user_id = ?");
+            $stmt->execute([$userId]);
+
+            // Delete chapter-level progress
+            $stmt = $pdo->prepare("DELETE FROM chapter_progress WHERE user_id = ?");
+            $stmt->execute([$userId]);
+
+            $pdo->commit();
+            return true;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return false;
+        }
+    }
 }

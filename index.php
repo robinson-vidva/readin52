@@ -203,6 +203,56 @@ try {
             render('settings', $data);
             break;
 
+        case 'settings/reset-progress':
+            Auth::requireAuth();
+
+            if ($method === 'POST') {
+                if (!validateCsrf()) {
+                    setFlash('error', 'Invalid request. Please try again.');
+                } else {
+                    $password = post('password', '');
+                    $userId = Auth::getUserId();
+
+                    if (!User::verifyPassword($userId, $password)) {
+                        setFlash('error', 'Incorrect password.');
+                    } elseif (Progress::deleteAllProgress($userId)) {
+                        setFlash('success', 'Your reading progress has been reset.');
+                    } else {
+                        setFlash('error', 'Failed to reset progress. Please try again.');
+                    }
+                }
+            }
+
+            redirect('/?route=settings');
+            break;
+
+        case 'settings/delete-account':
+            Auth::requireAuth();
+
+            if ($method === 'POST') {
+                if (!validateCsrf()) {
+                    setFlash('error', 'Invalid request. Please try again.');
+                } else {
+                    $password = post('password', '');
+                    $userId = Auth::getUserId();
+
+                    if (!User::verifyPassword($userId, $password)) {
+                        setFlash('error', 'Incorrect password.');
+                        redirect('/?route=settings');
+                    } elseif (User::delete($userId)) {
+                        Auth::logout();
+                        setFlash('success', 'Your account has been deleted.');
+                        redirect('/?route=login');
+                    } else {
+                        setFlash('error', 'Failed to delete account. Please try again.');
+                        redirect('/?route=settings');
+                    }
+                }
+            }
+
+            redirect('/?route=settings');
+            break;
+
         // ============ API Routes ============
 
         case 'api/progress':

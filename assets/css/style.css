@@ -1579,6 +1579,26 @@ h1, h2, h3, h4, h5, h6 {
     padding: var(--spacing-lg);
 }
 
+/* Danger Zone Cards */
+.profile-card.danger-zone {
+    border: 1px solid var(--error-red);
+}
+
+.profile-card.danger-zone .card-header {
+    background-color: rgba(211, 47, 47, 0.1);
+    border-bottom-color: var(--error-red);
+}
+
+.profile-card.danger-zone .card-header h2 {
+    color: var(--error-red);
+}
+
+.danger-text {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.5;
+}
+
 .stats-overview {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -2276,6 +2296,15 @@ h1, h2, h3, h4, h5, h6 {
 [data-theme="dark"] .card-header {
     background-color: rgba(255,255,255,0.05);
     border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .profile-card.danger-zone {
+    border-color: #EF5350;
+}
+
+[data-theme="dark"] .profile-card.danger-zone .card-header {
+    background-color: rgba(239, 83, 80, 0.15);
+    border-bottom-color: #EF5350;
 }
 
 [data-theme="dark"] input,
