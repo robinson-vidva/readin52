@@ -42,6 +42,7 @@
             <div class="navbar-menu" id="navbarMenu">
                 <a href="/?route=dashboard" class="nav-link <?php echo activeClass('dashboard'); ?>">Dashboard</a>
                 <a href="/?route=profile" class="nav-link <?php echo activeClass('profile'); ?>">Profile</a>
+                <a href="/?route=settings" class="nav-link <?php echo activeClass('settings'); ?>">Settings</a>
                 <?php if (Auth::isAdmin()): ?>
                     <a href="/?route=admin" class="nav-link <?php echo strpos(currentRoute(), 'admin') === 0 ? 'active' : ''; ?>">Admin</a>
                 <?php endif; ?>

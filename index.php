@@ -144,12 +144,8 @@ try {
 
                     if ($action === 'update_profile') {
                         $name = trim(post('name', ''));
-                        $translation = post('preferred_translation', 'eng_kjv');
 
-                        if (User::update($userId, [
-                            'name' => $name,
-                            'preferred_translation' => $translation
-                        ])) {
+                        if (User::update($userId, ['name' => $name])) {
                             $data['success'] = 'Profile updated successfully.';
                         } else {
                             $data['error'] = 'Failed to update profile.';
@@ -175,6 +171,28 @@ try {
             }
 
             render('profile', $data);
+            break;
+
+        case 'settings':
+            Auth::requireAuth();
+            $data = [];
+
+            if ($method === 'POST') {
+                if (!validateCsrf()) {
+                    $data['error'] = 'Invalid request. Please try again.';
+                } else {
+                    $translation = post('preferred_translation', 'eng_kjv');
+                    $userId = Auth::getUserId();
+
+                    if (User::update($userId, ['preferred_translation' => $translation])) {
+                        $data['success'] = 'Settings saved successfully.';
+                    } else {
+                        $data['error'] = 'Failed to save settings.';
+                    }
+                }
+            }
+
+            render('settings', $data);
             break;
 
         // ============ API Routes ============

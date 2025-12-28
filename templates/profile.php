@@ -1,7 +1,6 @@
 <?php
 $user = Auth::getUser();
 $stats = Progress::getStats($user['id']);
-$translations = ReadingPlan::getTranslations();
 
 ob_start();
 ?>
@@ -10,7 +9,7 @@ ob_start();
     <div class="container">
         <div class="page-header">
             <h1>My Profile</h1>
-            <p>Manage your account settings and preferences</p>
+            <p>Manage your account information</p>
         </div>
 
         <div class="profile-grid">
@@ -43,18 +42,6 @@ ob_start();
                             <label for="email">Email Address</label>
                             <input type="email" id="email" value="<?php echo e($user['email']); ?>" disabled>
                             <small class="form-hint">Email cannot be changed</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="preferred_translation">Preferred Translation</label>
-                            <select id="preferred_translation" name="preferred_translation">
-                                <?php foreach ($translations as $trans): ?>
-                                    <option value="<?php echo e($trans['id']); ?>"
-                                            <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
-                                        <?php echo e($trans['name']); ?> (<?php echo e($trans['language']); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Save Changes</button>
