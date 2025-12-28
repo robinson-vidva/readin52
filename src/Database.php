@@ -23,13 +23,24 @@ class Database
     private static function connect(): PDO
     {
         try {
+            // Build DSN - port is optional (defaults to 3306)
             $dsn = sprintf(
-                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+                'mysql:host=%s;dbname=%s;charset=%s',
                 DB_HOST,
-                DB_PORT,
                 DB_NAME,
                 DB_CHARSET
             );
+
+            // Add port only if explicitly set and not default
+            if (defined('DB_PORT') && DB_PORT && DB_PORT !== '3306') {
+                $dsn = sprintf(
+                    'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+                    DB_HOST,
+                    DB_PORT,
+                    DB_NAME,
+                    DB_CHARSET
+                );
+            }
 
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
