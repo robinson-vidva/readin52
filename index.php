@@ -182,9 +182,17 @@ try {
                     $data['error'] = 'Invalid request. Please try again.';
                 } else {
                     $translation = post('preferred_translation', 'eng_kjv');
+                    $theme = post('theme', 'auto');
+                    // Validate theme value
+                    if (!in_array($theme, ['light', 'dark', 'auto'])) {
+                        $theme = 'auto';
+                    }
                     $userId = Auth::getUserId();
 
-                    if (User::update($userId, ['preferred_translation' => $translation])) {
+                    if (User::update($userId, [
+                        'preferred_translation' => $translation,
+                        'theme' => $theme
+                    ])) {
                         $data['success'] = 'Settings saved successfully.';
                     } else {
                         $data['error'] = 'Failed to save settings.';

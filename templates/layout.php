@@ -1,3 +1,11 @@
+<?php
+// Get user theme preference
+$userTheme = 'auto';
+if (Auth::isLoggedIn()) {
+    $currentUser = Auth::getUser();
+    $userTheme = $currentUser['theme'] ?? 'auto';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +15,20 @@
     <meta name="theme-color" content="#5D4037">
 
     <title><?php echo isset($pageTitle) ? e($pageTitle) . ' - ' : ''; ?><?php echo e(ReadingPlan::getAppName()); ?></title>
+
+    <!-- Theme initialization (runs early to prevent flash) -->
+    <script>
+    (function() {
+        var theme = '<?php echo e($userTheme); ?>';
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (theme === 'dark' || (theme === 'auto' && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    })();
+    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
