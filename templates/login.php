@@ -43,7 +43,7 @@
                 <div class="alert alert-success"><?php echo e($successFlash); ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="/login" class="auth-form">
+            <form method="POST" action="/?route=login" class="auth-form">
                 <?php echo csrfField(); ?>
 
                 <div class="form-group">
@@ -82,7 +82,7 @@
 
             <?php if (Auth::isRegistrationEnabled()): ?>
                 <div class="auth-footer">
-                    <p>Don't have an account? <a href="/register">Create one</a></p>
+                    <p>Don't have an account? <a href="/?route=register">Create one</a></p>
                 </div>
             <?php endif; ?>
         </div>

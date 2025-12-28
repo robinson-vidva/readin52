@@ -28,7 +28,7 @@
     <?php if (Auth::isLoggedIn()): ?>
     <nav class="navbar">
         <div class="container">
-            <a href="/dashboard" class="navbar-brand">
+            <a href="/?route=dashboard" class="navbar-brand">
                 <span class="brand-icon">&#x1F4D6;</span>
                 <?php echo e(ReadingPlan::getAppName()); ?>
             </a>
@@ -40,12 +40,12 @@
             </button>
 
             <div class="navbar-menu" id="navbarMenu">
-                <a href="/dashboard" class="nav-link <?php echo activeClass('dashboard'); ?>">Dashboard</a>
-                <a href="/profile" class="nav-link <?php echo activeClass('profile'); ?>">Profile</a>
+                <a href="/?route=dashboard" class="nav-link <?php echo activeClass('dashboard'); ?>">Dashboard</a>
+                <a href="/?route=profile" class="nav-link <?php echo activeClass('profile'); ?>">Profile</a>
                 <?php if (Auth::isAdmin()): ?>
-                    <a href="/admin" class="nav-link <?php echo strpos(currentRoute(), 'admin') === 0 ? 'active' : ''; ?>">Admin</a>
+                    <a href="/?route=admin" class="nav-link <?php echo strpos(currentRoute(), 'admin') === 0 ? 'active' : ''; ?>">Admin</a>
                 <?php endif; ?>
-                <a href="/logout" class="nav-link">Logout</a>
+                <a href="/?route=logout" class="nav-link">Logout</a>
             </div>
         </div>
     </nav>

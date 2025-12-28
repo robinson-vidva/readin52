@@ -12,7 +12,7 @@ ob_start();
     <!-- Export/Import -->
     <div class="toolbar">
         <div class="toolbar-left">
-            <a href="/admin/reading-plan/export" class="btn btn-secondary">Export JSON</a>
+            <a href="/?route=admin/reading-plan/export" class="btn btn-secondary">Export JSON</a>
             <button class="btn btn-secondary" onclick="showImportModal()">Import JSON</button>
         </div>
     </div>
@@ -25,7 +25,7 @@ ob_start();
         <div class="card-body">
             <div class="week-grid">
                 <?php for ($w = 1; $w <= 52; $w++): ?>
-                    <a href="/admin/reading-plan?week=<?php echo $w; ?>"
+                    <a href="/?route=admin/reading-plan&week=<?php echo $w; ?>"
                        class="week-btn <?php echo $w == $selectedWeek ? 'active' : ''; ?>">
                         <?php echo $w; ?>
                     </a>
@@ -48,7 +48,7 @@ ob_start();
                 <div class="alert alert-error"><?php echo e($error); ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="/admin/reading-plan" class="reading-plan-form">
+            <form method="POST" action="/?route=admin/reading-plan" class="reading-plan-form">
                 <?php echo csrfField(); ?>
                 <input type="hidden" name="week" value="<?php echo $selectedWeek; ?>">
 
@@ -116,7 +116,7 @@ ob_start();
                         <?php foreach ($weeks as $week): ?>
                             <tr class="<?php echo $week['week'] == $selectedWeek ? 'highlight' : ''; ?>">
                                 <td>
-                                    <a href="/admin/reading-plan?week=<?php echo $week['week']; ?>">
+                                    <a href="/?route=admin/reading-plan&week=<?php echo $week['week']; ?>">
                                         Week <?php echo $week['week']; ?>
                                     </a>
                                 </td>
@@ -141,7 +141,7 @@ ob_start();
             <h2>Import Reading Plan</h2>
             <button class="modal-close" onclick="closeImportModal()">&times;</button>
         </div>
-        <form method="POST" action="/admin/reading-plan/import" enctype="multipart/form-data" class="modal-body">
+        <form method="POST" action="/?route=admin/reading-plan/import" enctype="multipart/form-data" class="modal-body">
             <?php echo csrfField(); ?>
 
             <div class="form-group">

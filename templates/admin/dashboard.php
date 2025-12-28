@@ -49,7 +49,7 @@ ob_start();
         <div class="admin-card">
             <div class="card-header">
                 <h2>Recent Users</h2>
-                <a href="/admin/users" class="btn btn-sm">View All</a>
+                <a href="/?route=admin/users" class="btn btn-sm">View All</a>
             </div>
             <div class="card-body">
                 <table class="admin-table">
@@ -86,19 +86,19 @@ ob_start();
             </div>
             <div class="card-body">
                 <div class="quick-actions">
-                    <a href="/admin/users" class="action-btn">
+                    <a href="/?route=admin/users" class="action-btn">
                         <span class="action-icon">&#x1F465;</span>
                         <span class="action-text">Manage Users</span>
                     </a>
-                    <a href="/admin/reading-plan" class="action-btn">
+                    <a href="/?route=admin/reading-plan" class="action-btn">
                         <span class="action-icon">&#x1F4D6;</span>
                         <span class="action-text">Edit Reading Plan</span>
                     </a>
-                    <a href="/admin/settings" class="action-btn">
+                    <a href="/?route=admin/settings" class="action-btn">
                         <span class="action-icon">&#x2699;</span>
                         <span class="action-text">App Settings</span>
                     </a>
-                    <a href="/dashboard" class="action-btn">
+                    <a href="/?route=dashboard" class="action-btn">
                         <span class="action-icon">&#x1F3E0;</span>
                         <span class="action-text">View App</span>
                     </a>
@@ -127,8 +127,8 @@ ob_start();
                     <span class="info-value"><?php echo PHP_VERSION; ?></span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">SQLite Version</span>
-                    <span class="info-value"><?php echo SQLite3::version()['versionString']; ?></span>
+                    <span class="info-label">MySQL Version</span>
+                    <span class="info-value"><?php echo Database::getInstance()->getAttribute(PDO::ATTR_SERVER_VERSION); ?></span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Registration</span>

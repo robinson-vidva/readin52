@@ -21,7 +21,7 @@ ob_start();
                 <div class="alert alert-error"><?php echo e($error); ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="/admin/settings" class="settings-form">
+            <form method="POST" action="/?route=admin/settings" class="settings-form">
                 <?php echo csrfField(); ?>
 
                 <div class="form-section">
@@ -80,7 +80,7 @@ ob_start();
                     <h4>Clear All Reading Progress</h4>
                     <p>Delete all reading progress for all users. This cannot be undone.</p>
                 </div>
-                <form method="POST" action="/admin/settings" onsubmit="return confirm('Are you sure? This will delete ALL reading progress for ALL users!');">
+                <form method="POST" action="/?route=admin/settings" onsubmit="return confirm('Are you sure? This will delete ALL reading progress for ALL users!');">
                     <?php echo csrfField(); ?>
                     <input type="hidden" name="action" value="clear_progress">
                     <button type="submit" class="btn btn-danger">Clear Progress</button>
@@ -92,7 +92,7 @@ ob_start();
                     <h4>Reset to Default Settings</h4>
                     <p>Reset all settings to their default values.</p>
                 </div>
-                <form method="POST" action="/admin/settings" onsubmit="return confirm('Are you sure you want to reset all settings?');">
+                <form method="POST" action="/?route=admin/settings" onsubmit="return confirm('Are you sure you want to reset all settings?');">
                     <?php echo csrfField(); ?>
                     <input type="hidden" name="action" value="reset_settings">
                     <button type="submit" class="btn btn-danger">Reset Settings</button>

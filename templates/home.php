@@ -55,9 +55,9 @@
                 </div>
 
                 <div class="home-actions">
-                    <a href="/login" class="btn btn-primary btn-lg">Sign In</a>
+                    <a href="/?route=login" class="btn btn-primary btn-lg">Sign In</a>
                     <?php if (Auth::isRegistrationEnabled()): ?>
-                        <a href="/register" class="btn btn-outline btn-lg">Create Account</a>
+                        <a href="/?route=register" class="btn btn-outline btn-lg">Create Account</a>
                     <?php endif; ?>
                 </div>
 

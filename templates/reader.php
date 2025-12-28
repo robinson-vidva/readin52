@@ -29,7 +29,7 @@ ob_start();
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="/?route=dashboard" class="btn btn-secondary">Back to Dashboard</a>
             </div>
         </div>
 
@@ -80,7 +80,7 @@ ob_start();
             document.getElementById('readerProgress').textContent = `Chapter ${chapter} of ${data.totalChapters}`;
 
             // Update URL without reload
-            history.replaceState(null, '', `/reader/${book}/${chapter}`);
+            history.replaceState(null, '', `/?route=reader/${book}/${chapter}`);
 
             currentBook = book;
             currentChapter = chapter;

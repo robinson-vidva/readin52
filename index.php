@@ -33,14 +33,14 @@ try {
         case '':
         case 'home':
             if (Auth::isLoggedIn()) {
-                redirect('/dashboard');
+                redirect('/?route=dashboard');
             }
             render('home');
             break;
 
         case 'login':
             if (Auth::isLoggedIn()) {
-                redirect('/dashboard');
+                redirect('/?route=dashboard');
             }
 
             if ($method === 'POST') {
@@ -56,7 +56,7 @@ try {
 
                 if ($result['success']) {
                     setFlash('success', 'Welcome back!');
-                    redirect('/dashboard');
+                    redirect('/?route=dashboard');
                 } else {
                     render('login', [
                         'error' => $result['error'],
@@ -70,12 +70,12 @@ try {
 
         case 'register':
             if (Auth::isLoggedIn()) {
-                redirect('/dashboard');
+                redirect('/?route=dashboard');
             }
 
             if (!Auth::isRegistrationEnabled()) {
                 setFlash('error', 'Registration is currently disabled.');
-                redirect('/login');
+                redirect('/?route=login');
             }
 
             if ($method === 'POST') {
@@ -102,7 +102,7 @@ try {
 
                 if ($result['success']) {
                     setFlash('success', 'Account created! Please sign in.');
-                    redirect('/login');
+                    redirect('/?route=login');
                 } else {
                     render('register', [
                         'error' => $result['error'],
@@ -118,7 +118,7 @@ try {
         case 'logout':
             Auth::logout();
             setFlash('success', 'You have been logged out.');
-            redirect('/login');
+            redirect('/?route=login');
             break;
 
         // ============ Authenticated Routes ============
@@ -235,7 +235,7 @@ try {
                         } else {
                             setFlash('error', 'Failed to update user.');
                         }
-                        redirect('/admin/users');
+                        redirect('/?route=admin/users');
                     } elseif ($action === 'delete' && $userId) {
                         if ($userId === Auth::getUserId()) {
                             setFlash('error', 'You cannot delete your own account.');
@@ -244,7 +244,7 @@ try {
                         } else {
                             setFlash('error', 'Failed to delete user.');
                         }
-                        redirect('/admin/users');
+                        redirect('/?route=admin/users');
                     }
                 }
             }
@@ -313,7 +313,7 @@ try {
                 }
             }
 
-            redirect('/admin/reading-plan');
+            redirect('/?route=admin/reading-plan');
             break;
 
         case 'admin/settings':

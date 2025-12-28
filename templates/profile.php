@@ -28,7 +28,7 @@ ob_start();
                         <div class="alert alert-error"><?php echo e($error); ?></div>
                     <?php endif; ?>
 
-                    <form method="POST" action="/profile" class="profile-form">
+                    <form method="POST" action="/?route=profile" class="profile-form">
                         <?php echo csrfField(); ?>
                         <input type="hidden" name="action" value="update_profile">
 
@@ -76,7 +76,7 @@ ob_start();
                         <div class="alert alert-error"><?php echo e($passwordError); ?></div>
                     <?php endif; ?>
 
-                    <form method="POST" action="/profile" class="profile-form">
+                    <form method="POST" action="/?route=profile" class="profile-form">
                         <?php echo csrfField(); ?>
                         <input type="hidden" name="action" value="change_password">
 
@@ -178,7 +178,7 @@ ob_start();
 
 <script>
     // Password confirmation validation
-    document.querySelector('form[action="/profile"] input[name="confirm_password"]')
+    document.querySelector('form[action="/?route=profile"] input[name="confirm_password"]')
         ?.closest('form')
         ?.addEventListener('submit', function(e) {
             const newPass = this.querySelector('#new_password').value;

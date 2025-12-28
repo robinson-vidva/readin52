@@ -221,7 +221,7 @@ class Auth
     public static function requireAuth(): void
     {
         if (!self::isLoggedIn()) {
-            redirect('/login');
+            redirect('/?route=login');
         }
     }
 
@@ -232,7 +232,7 @@ class Auth
     {
         self::requireAuth();
         if (!self::isAdmin()) {
-            redirect('/dashboard');
+            redirect('/?route=dashboard');
         }
     }
 }

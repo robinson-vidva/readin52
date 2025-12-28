@@ -20,7 +20,7 @@
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
-                <a href="/admin" class="admin-logo">
+                <a href="/?route=admin" class="admin-logo">
                     <span class="logo-icon">&#x1F4D6;</span>
                     <span class="logo-text"><?php echo e(ReadingPlan::getAppName()); ?></span>
                 </a>
@@ -28,30 +28,30 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a href="/admin" class="nav-item <?php echo currentRoute() === 'admin' ? 'active' : ''; ?>">
+                <a href="/?route=admin" class="nav-item <?php echo currentRoute() === 'admin' ? 'active' : ''; ?>">
                     <span class="nav-icon">&#x1F4CA;</span>
                     Dashboard
                 </a>
-                <a href="/admin/users" class="nav-item <?php echo currentRoute() === 'admin/users' ? 'active' : ''; ?>">
+                <a href="/?route=admin/users" class="nav-item <?php echo currentRoute() === 'admin/users' ? 'active' : ''; ?>">
                     <span class="nav-icon">&#x1F465;</span>
                     Users
                 </a>
-                <a href="/admin/reading-plan" class="nav-item <?php echo currentRoute() === 'admin/reading-plan' ? 'active' : ''; ?>">
+                <a href="/?route=admin/reading-plan" class="nav-item <?php echo currentRoute() === 'admin/reading-plan' ? 'active' : ''; ?>">
                     <span class="nav-icon">&#x1F4D6;</span>
                     Reading Plan
                 </a>
-                <a href="/admin/settings" class="nav-item <?php echo currentRoute() === 'admin/settings' ? 'active' : ''; ?>">
+                <a href="/?route=admin/settings" class="nav-item <?php echo currentRoute() === 'admin/settings' ? 'active' : ''; ?>">
                     <span class="nav-icon">&#x2699;</span>
                     Settings
                 </a>
             </nav>
 
             <div class="sidebar-footer">
-                <a href="/dashboard" class="nav-item">
+                <a href="/?route=dashboard" class="nav-item">
                     <span class="nav-icon">&#x2190;</span>
                     Back to App
                 </a>
-                <a href="/logout" class="nav-item">
+                <a href="/?route=logout" class="nav-item">
                     <span class="nav-icon">&#x1F6AA;</span>
                     Logout
                 </a>

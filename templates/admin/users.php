@@ -9,12 +9,13 @@ ob_start();
 <div class="admin-users">
     <!-- Search & Actions -->
     <div class="toolbar">
-        <form method="GET" action="/admin/users" class="search-form">
+        <form method="GET" action="/" class="search-form">
+            <input type="hidden" name="route" value="admin/users">
             <input type="text" name="search" placeholder="Search users..."
                    value="<?php echo e($search); ?>">
             <button type="submit" class="btn btn-primary">Search</button>
             <?php if ($search): ?>
-                <a href="/admin/users" class="btn btn-secondary">Clear</a>
+                <a href="/?route=admin/users" class="btn btn-secondary">Clear</a>
             <?php endif; ?>
         </form>
     </div>
@@ -89,7 +90,7 @@ ob_start();
             <h2>Edit User</h2>
             <button class="modal-close" onclick="closeEditModal()">&times;</button>
         </div>
-        <form method="POST" action="/admin/users" class="modal-body">
+        <form method="POST" action="/?route=admin/users" class="modal-body">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="user_id" id="editUserId">
@@ -143,7 +144,7 @@ ob_start();
             <h2>Delete User</h2>
             <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
         </div>
-        <form method="POST" action="/admin/users" class="modal-body">
+        <form method="POST" action="/?route=admin/users" class="modal-body">
             <?php echo csrfField(); ?>
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="user_id" id="deleteUserId">

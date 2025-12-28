@@ -36,7 +36,7 @@
                 <div class="alert alert-error"><?php echo e($error); ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="/register" class="auth-form">
+            <form method="POST" action="/?route=register" class="auth-form">
                 <?php echo csrfField(); ?>
 
                 <div class="form-group">
@@ -94,7 +94,7 @@
             </form>
 
             <div class="auth-footer">
-                <p>Already have an account? <a href="/login">Sign in</a></p>
+                <p>Already have an account? <a href="/?route=login">Sign in</a></p>
             </div>
         </div>
     </div>

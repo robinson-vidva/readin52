@@ -71,7 +71,7 @@
      * Go to specific week
      */
     window.goToWeek = function(week) {
-        window.location.href = '/dashboard?week=' + week;
+        window.location.href = '/?route=dashboard&week=' + week;
     };
 
     /**
@@ -79,7 +79,7 @@
      */
     window.toggleProgress = async function(week, category, button) {
         try {
-            const response = await fetch('/api/progress', {
+            const response = await fetch('/?route=api/progress', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
