@@ -32,7 +32,7 @@ The config system ensures your database credentials are NOT overwritten on deplo
 4. **Configure database credentials (one-time setup):**
    - Go to Cloudways > Application > Access Details > Database
    - Copy DB Name, Username, and Password
-   - Via SSH or File Manager, create `config/config.local.php`:
+   - Via SSH or File Manager, create `config/db.php`:
      ```php
      <?php
      define('DB_HOST', 'localhost');
@@ -42,15 +42,15 @@ The config system ensures your database credentials are NOT overwritten on deplo
      define('DB_PORT', '3306');
      define('DB_CHARSET', 'utf8mb4');
      ```
-   - Or copy `config/config.local.example.php` to `config/config.local.php` and edit it
+   - Or copy `config/db.example.php` to `config/db.php` and edit it
 5. Visit `https://yourdomain.com/install.php`
 6. **Delete `install.php` after installation**
 
-### Why config.local.php?
+### Why db.php?
 
-- `config.local.php` is gitignored - it won't be overwritten when you deploy
+- `db.php` is gitignored - won't be overwritten when you deploy
 - Your database credentials stay safe across all future deployments
-- The main `config.php` loads your local config automatically
+- The main `config.php` loads db.php automatically
 
 ## Default Accounts
 
@@ -85,9 +85,9 @@ public_html/              # Document root (Cloudways)
 │   └── images/
 ├── config/               # Protected - no web access
 │   ├── .htaccess
-│   ├── config.php            # Main config (loads local config)
-│   ├── config.local.php      # YOUR credentials (gitignored)
-│   ├── config.local.example.php  # Template for local config
+│   ├── config.php            # Main config (loads db.php)
+│   ├── db.php                # YOUR credentials (gitignored)
+│   ├── db.example.php        # Template for db.php
 │   └── reading-plan.json
 ├── data/                 # Protected - no web access
 │   ├── .htaccess

@@ -25,8 +25,8 @@ logs/
 .env.local
 .env.*.local
 
-# Local config (contains DB credentials - not tracked)
-config/config.local.php
+# Database credentials (not tracked)
+config/db.php
 
 # Vendor (if using Composer later)
 /vendor/

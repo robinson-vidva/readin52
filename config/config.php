@@ -5,9 +5,9 @@
  * For Cloudways deployment - files deployed directly to public_html
  *
  * DATABASE SETUP:
- * 1. Copy config.local.example.php to config.local.php
- * 2. Update config.local.php with your Cloudways database credentials
- * 3. config.local.php is gitignored and won't be overwritten on deploy
+ * 1. Copy db.example.php to db.php
+ * 2. Update db.php with your Cloudways database credentials
+ * 3. db.php is gitignored and won't be overwritten on deploy
  */
 
 // Error reporting (disable in production)
@@ -34,20 +34,20 @@ define('TEMPLATE_PATH', ROOT_PATH . '/templates');
 define('PUBLIC_PATH', ROOT_PATH);
 
 // ============================================================
-// LOAD LOCAL CONFIG (Database credentials, etc.)
+// LOAD DATABASE CREDENTIALS
 // ============================================================
-// If config.local.php exists, load it (contains your DB credentials)
+// If db.php exists, load it (contains your DB credentials)
 // This file is gitignored so it won't be overwritten on deploy
 // ============================================================
-$localConfigPath = __DIR__ . '/config.local.php';
-if (file_exists($localConfigPath)) {
-    require_once $localConfigPath;
+$dbConfigPath = __DIR__ . '/db.php';
+if (file_exists($dbConfigPath)) {
+    require_once $dbConfigPath;
 }
 
 // ============================================================
-// DEFAULT DATABASE SETTINGS (if not set in config.local.php)
+// DEFAULT DATABASE SETTINGS (if not set in db.php)
 // ============================================================
-// These are placeholders - create config.local.php with real values
+// These are placeholders - create db.php with real values
 // ============================================================
 if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
 if (!defined('DB_NAME')) define('DB_NAME', 'your_database_name');
