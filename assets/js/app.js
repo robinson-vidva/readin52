@@ -19,9 +19,12 @@
      * Initialize app
      */
     function init() {
+        console.log('ReadIn52 app initializing...');
+
         // Get user translation if available
         if (typeof userTranslation !== 'undefined') {
             currentTranslation = userTranslation;
+            console.log('User translation:', currentTranslation);
         }
 
         // Setup navbar toggle
@@ -29,6 +32,8 @@
 
         // Setup modals
         setupModals();
+
+        console.log('ReadIn52 app initialized. openChapter is:', typeof window.openChapter);
     }
 
     /**
@@ -85,8 +90,12 @@
      * Open chapter reader
      */
     window.openChapter = function(category, book, chapter) {
+        console.log('openChapter called:', category, book, chapter);
         const modal = document.getElementById('readerModal');
-        if (!modal) return;
+        if (!modal) {
+            console.error('readerModal not found!');
+            return;
+        }
 
         currentCategory = category;
         currentBook = book;
@@ -125,18 +134,29 @@
      * Load chapter content
      */
     async function loadChapter(book, chapter) {
+        console.log('loadChapter called:', book, chapter);
         const content = document.getElementById('readerContent');
         const title = document.getElementById('readerTitle');
         const progressEl = document.getElementById('readerProgress');
         const verseCountEl = document.getElementById('verseCount');
         const readingTimeEl = document.getElementById('readingTime');
 
-        if (!content) return;
+        if (!content) {
+            console.error('readerContent not found!');
+            return;
+        }
 
         content.innerHTML = '<div class="loading-spinner"></div>';
 
         try {
+            console.log('Calling BibleAPI.getChapter:', currentTranslation, book, chapter);
+            if (typeof BibleAPI === 'undefined') {
+                console.error('BibleAPI is not defined!');
+                content.innerHTML = '<p class="error">BibleAPI not loaded. Please refresh the page.</p>';
+                return;
+            }
             const data = await BibleAPI.getChapter(currentTranslation, book, chapter);
+            console.log('BibleAPI response:', data);
 
             if (data.error) {
                 content.innerHTML = '<p class="error">Failed to load chapter. Please try again.</p>';
