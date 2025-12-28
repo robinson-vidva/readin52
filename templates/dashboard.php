@@ -173,6 +173,7 @@ ob_start();
     <div class="modal-content reader-modal">
         <div class="reader-header">
             <h2 id="readerTitle">Loading...</h2>
+            <button class="reader-close" onclick="closeReader()" aria-label="Close">&times;</button>
             <div class="reader-controls">
                 <select id="translationSelect" onchange="changeTranslation(this.value)">
                     <?php foreach (ReadingPlan::getTranslations() as $trans): ?>
@@ -182,7 +183,6 @@ ob_start();
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <button class="modal-close" onclick="closeReader()">&times;</button>
             </div>
         </div>
         <div class="reader-meta" id="readerMeta">
