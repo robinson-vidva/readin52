@@ -113,23 +113,16 @@ ob_start();
                     <span class="info-value"><?php echo PHP_VERSION; ?></span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">SQLite Version</span>
-                    <span class="info-value"><?php echo SQLite3::version()['versionString']; ?></span>
+                    <span class="info-label">MySQL Version</span>
+                    <span class="info-value"><?php echo Database::getInstance()->getAttribute(PDO::ATTR_SERVER_VERSION); ?></span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Database Path</span>
-                    <span class="info-value"><?php echo e(DB_PATH); ?></span>
+                    <span class="info-label">Database Name</span>
+                    <span class="info-value"><?php echo e(DB_NAME); ?></span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Database Size</span>
-                    <span class="info-value">
-                        <?php
-                        $size = filesize(DB_PATH);
-                        echo $size > 1048576
-                            ? round($size / 1048576, 2) . ' MB'
-                            : round($size / 1024, 2) . ' KB';
-                        ?>
-                    </span>
+                    <span class="info-label">Database Host</span>
+                    <span class="info-value"><?php echo e(DB_HOST); ?></span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">App Version</span>

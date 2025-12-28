@@ -1,6 +1,6 @@
 <?php
 /**
- * Database class - SQLite PDO wrapper
+ * Database class - MySQL/MariaDB PDO wrapper
  */
 class Database
 {
@@ -23,28 +23,37 @@ class Database
     private static function connect(): PDO
     {
         try {
-            $pdo = new PDO('sqlite:' . DB_PATH);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            $pdo->exec('PRAGMA foreign_keys = ON');
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+                DB_HOST,
+                DB_PORT,
+                DB_NAME,
+                DB_CHARSET
+            );
+
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+            ];
+
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
             return $pdo;
+
         } catch (PDOException $e) {
             throw new Exception('Database connection failed: ' . $e->getMessage());
         }
     }
 
     /**
-     * Check if database exists and is initialized
+     * Check if database tables exist (app is installed)
      */
     public static function isInstalled(): bool
     {
-        if (!file_exists(DB_PATH)) {
-            return false;
-        }
-
         try {
             $pdo = self::getInstance();
-            $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='users'");
+            $stmt = $pdo->query("SHOW TABLES LIKE 'users'");
             return $stmt->fetch() !== false;
         } catch (Exception $e) {
             return false;
@@ -58,49 +67,56 @@ class Database
     {
         $pdo = self::getInstance();
 
-        $schema = "
+        // Users table
+        $pdo->exec("
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                name TEXT NOT NULL,
-                role TEXT DEFAULT 'user' CHECK(role IN ('admin', 'user')),
-                preferred_translation TEXT DEFAULT 'eng_kjv',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                last_login DATETIME
-            );
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                role ENUM('admin', 'user') DEFAULT 'user',
+                preferred_translation VARCHAR(20) DEFAULT 'eng_kjv',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                last_login TIMESTAMP NULL,
+                INDEX idx_users_email (email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
 
+        // Reading progress table
+        $pdo->exec("
             CREATE TABLE IF NOT EXISTS reading_progress (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                week_number INTEGER NOT NULL CHECK(week_number BETWEEN 1 AND 52),
-                category TEXT NOT NULL CHECK(category IN ('poetry', 'history', 'prophecy', 'gospels')),
-                completed INTEGER DEFAULT 0,
-                completed_at DATETIME,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                week_number TINYINT NOT NULL,
+                category ENUM('poetry', 'history', 'prophecy', 'gospels') NOT NULL,
+                completed TINYINT(1) DEFAULT 0,
+                completed_at TIMESTAMP NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                UNIQUE(user_id, week_number, category)
-            );
+                UNIQUE KEY unique_progress (user_id, week_number, category),
+                INDEX idx_progress_user (user_id),
+                INDEX idx_progress_week (week_number)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
 
+        // Settings table
+        $pdo->exec("
             CREATE TABLE IF NOT EXISTS settings (
-                key TEXT PRIMARY KEY,
-                value TEXT
-            );
+                `key` VARCHAR(50) PRIMARY KEY,
+                `value` TEXT
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
 
+        // Login attempts table (for rate limiting)
+        $pdo->exec("
             CREATE TABLE IF NOT EXISTS login_attempts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL,
-                ip_address TEXT NOT NULL,
-                attempted_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_progress_user ON reading_progress(user_id);
-            CREATE INDEX IF NOT EXISTS idx_progress_week ON reading_progress(week_number);
-            CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-            CREATE INDEX IF NOT EXISTS idx_login_attempts_email ON login_attempts(email, attempted_at);
-        ";
-
-        $pdo->exec($schema);
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                ip_address VARCHAR(45) NOT NULL,
+                attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_login_attempts (email, attempted_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
     }
 
     /**
@@ -117,7 +133,7 @@ class Database
             ['registration_enabled', '1']
         ];
 
-        $stmt = $pdo->prepare("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)");
+        $stmt = $pdo->prepare("INSERT IGNORE INTO settings (`key`, `value`) VALUES (?, ?)");
         foreach ($settings as $setting) {
             $stmt->execute($setting);
         }
@@ -129,7 +145,7 @@ class Database
     public static function getSetting(string $key, $default = null)
     {
         $pdo = self::getInstance();
-        $stmt = $pdo->prepare("SELECT value FROM settings WHERE key = ?");
+        $stmt = $pdo->prepare("SELECT `value` FROM settings WHERE `key` = ?");
         $stmt->execute([$key]);
         $result = $stmt->fetch();
         return $result ? $result['value'] : $default;
@@ -141,7 +157,7 @@ class Database
     public static function setSetting(string $key, string $value): void
     {
         $pdo = self::getInstance();
-        $stmt = $pdo->prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)");
         $stmt->execute([$key, $value]);
     }
 }

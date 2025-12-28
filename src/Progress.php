@@ -72,13 +72,15 @@ class Progress
 
         if ($completed) {
             $stmt = $pdo->prepare("
-                INSERT OR REPLACE INTO reading_progress (user_id, week_number, category, completed, completed_at)
+                INSERT INTO reading_progress (user_id, week_number, category, completed, completed_at)
                 VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)
+                ON DUPLICATE KEY UPDATE completed = 1, completed_at = CURRENT_TIMESTAMP
             ");
         } else {
             $stmt = $pdo->prepare("
-                INSERT OR REPLACE INTO reading_progress (user_id, week_number, category, completed, completed_at)
+                INSERT INTO reading_progress (user_id, week_number, category, completed, completed_at)
                 VALUES (?, ?, ?, 0, NULL)
+                ON DUPLICATE KEY UPDATE completed = 0, completed_at = NULL
             ");
         }
 

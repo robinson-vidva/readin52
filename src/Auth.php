@@ -186,7 +186,7 @@ class Auth
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as attempts
             FROM login_attempts
-            WHERE email = ? AND attempted_at > datetime('now', '-' || ? || ' seconds')
+            WHERE email = ? AND attempted_at > DATE_SUB(NOW(), INTERVAL ? SECOND)
         ");
         $stmt->execute([$email, LOGIN_RATE_WINDOW]);
         $result = $stmt->fetch();

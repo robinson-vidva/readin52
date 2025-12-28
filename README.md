@@ -17,7 +17,7 @@ ReadIn52 is a progressive web app that helps you read through the entire Bible i
 ## Requirements
 
 - PHP 8.0+
-- SQLite 3 (pdo_sqlite extension)
+- MySQL 5.7+ or MariaDB 10.3+
 - mod_rewrite enabled
 
 ## Cloudways Deployment (GitHub)
@@ -27,7 +27,15 @@ This app is structured for direct deployment to Cloudways Custom PHP via GitHub:
 1. Create a Custom PHP application on Cloudways
 2. Connect your GitHub repository
 3. Deploy to `public_html/` (repo contents go directly to public_html)
-4. Ensure PHP 8.0+ and sqlite3/pdo_sqlite extensions are enabled
+4. **Configure database credentials:**
+   - Go to Cloudways > Application > Access Details > Database
+   - Copy DB Name, Username, and Password
+   - Edit `config/config.php` and update:
+     ```php
+     define('DB_NAME', 'your_database_name');
+     define('DB_USER', 'your_database_user');
+     define('DB_PASS', 'your_database_password');
+     ```
 5. Visit `https://yourdomain.com/install.php`
 6. **Delete `install.php` after installation**
 
@@ -43,7 +51,7 @@ After installation, two accounts are created:
 ## Tech Stack
 
 - **Backend**: PHP 8.0+
-- **Database**: SQLite 3
+- **Database**: MySQL/MariaDB
 - **Frontend**: Vanilla HTML/CSS/JS
 - **Bible API**: HelloAO (bible.helloao.org)
 - **PWA**: Service Worker + Web App Manifest
@@ -68,8 +76,7 @@ public_html/              # Document root (Cloudways)
 │   └── reading-plan.json
 ├── data/                 # Protected - no web access
 │   ├── .htaccess
-│   ├── .gitkeep
-│   └── readin52.db       # Created on install
+│   └── .gitkeep
 ├── src/                  # Protected - no web access
 │   ├── .htaccess
 │   ├── Database.php

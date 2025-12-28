@@ -26,10 +26,20 @@ define('CONFIG_PATH', __DIR__);
 define('DATA_PATH', ROOT_PATH . '/data');
 define('SRC_PATH', ROOT_PATH . '/src');
 define('TEMPLATE_PATH', ROOT_PATH . '/templates');
-define('PUBLIC_PATH', ROOT_PATH); // Root is now public
+define('PUBLIC_PATH', ROOT_PATH);
 
-// Database
-define('DB_PATH', DATA_PATH . '/readin52.db');
+// ============================================================
+// DATABASE CONFIGURATION (MySQL/MariaDB)
+// ============================================================
+// Update these values with your Cloudways database credentials
+// Found in: Cloudways > Application > Access Details > Database
+// ============================================================
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'your_database_name');     // e.g., abcdefghij
+define('DB_USER', 'your_database_user');     // e.g., abcdefghij
+define('DB_PASS', 'your_database_password'); // From Cloudways panel
+define('DB_PORT', '3306');
+define('DB_CHARSET', 'utf8mb4');
 
 // Bible API
 define('BIBLE_API_BASE', 'https://bible.helloao.org/api');

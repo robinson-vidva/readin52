@@ -102,7 +102,7 @@ $messages = [];
 $errors = [];
 
 try {
-    // Step 1: Create data directory
+    // Step 1: Create data directory (for session storage, logs, etc.)
     if (!is_dir(DATA_PATH)) {
         if (mkdir(DATA_PATH, 0755, true)) {
             $messages[] = 'Created data directory';
@@ -113,9 +113,13 @@ try {
         $messages[] = 'Data directory already exists';
     }
 
-    // Step 2: Check if database already exists
-    if (file_exists(DB_PATH)) {
-        $messages[] = 'Database already exists - checking tables...';
+    // Step 2: Test database connection
+    try {
+        Database::getInstance();
+        $messages[] = 'Database connection successful';
+    } catch (Exception $e) {
+        $errors[] = 'Database connection failed: ' . $e->getMessage();
+        throw $e;
     }
 
     // Step 3: Initialize database schema

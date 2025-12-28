@@ -82,7 +82,7 @@ class User
         $pdo = Database::getInstance();
         $stmt = $pdo->query("
             SELECT COUNT(*) as count FROM users
-            WHERE last_login > datetime('now', '-30 days')
+            WHERE last_login > DATE_SUB(NOW(), INTERVAL 30 DAY)
         ");
         return (int) $stmt->fetch()['count'];
     }
