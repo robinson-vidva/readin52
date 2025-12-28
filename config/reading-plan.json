@@ -7,10 +7,10 @@
     {"id": "tam_irv", "name": "Indian Revised Version - Tamil", "language": "Tamil", "direction": "ltr"}
   ],
   "categories": [
-    {"id": "poetry", "name": "Poetry & Wisdom Lit", "color": "#8B4513"},
-    {"id": "history", "name": "History & Law", "color": "#2E8B57"},
-    {"id": "prophecy", "name": "Chronicles & Prophecy", "color": "#4169E1"},
-    {"id": "gospels", "name": "Gospels & Epistles", "color": "#8B0000"}
+    {"id": "poetry", "name": "Psalms & Wisdom", "color": "#8B4513"},
+    {"id": "history", "name": "Law & History", "color": "#2E8B57"},
+    {"id": "prophecy", "name": "Prophetic Books", "color": "#4169E1"},
+    {"id": "gospels", "name": "Gospel & Letters", "color": "#8B0000"}
   ],
   "weeks": [
     {"week": 1, "readings": {"poetry": {"reference": "Psalms 1-3", "passages": [{"book": "PSA", "chapters": [1,2,3]}]}, "history": {"reference": "Genesis 1-7", "passages": [{"book": "GEN", "chapters": [1,2,3,4,5,6,7]}]}, "prophecy": {"reference": "1 Chronicles 1-7", "passages": [{"book": "1CH", "chapters": [1,2,3,4,5,6,7]}]}, "gospels": {"reference": "Luke 1-6", "passages": [{"book": "LUK", "chapters": [1,2,3,4,5,6]}]}}},
