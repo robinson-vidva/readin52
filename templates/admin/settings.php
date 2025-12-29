@@ -38,9 +38,9 @@ ob_start();
                     <div class="form-group">
                         <label for="default_translation">Default Translation</label>
                         <input type="hidden" id="default_translation" name="default_translation" value="<?php echo e($defaultTranslation); ?>">
-                        <div class="searchable-select" id="defaultTransSelect">
-                            <button type="button" class="searchable-select-trigger" aria-haspopup="listbox">
-                                <span class="selected-text">
+                        <div class="searchable-select" id="defaultTransSelect" style="position: relative; width: 100%;">
+                            <button type="button" class="searchable-select-trigger" aria-haspopup="listbox" style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; font-size: 1rem;">
+                                <span class="selected-text" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                     <?php
                                     foreach ($translationsByLanguage as $lang => $langTranslations) {
                                         foreach ($langTranslations as $t) {
@@ -54,11 +54,11 @@ ob_start();
                                 </span>
                                 <span class="arrow">&#9662;</span>
                             </button>
-                            <div class="searchable-select-dropdown">
-                                <div class="searchable-select-search">
-                                    <input type="text" placeholder="Search translations..." autocomplete="off">
+                            <div class="searchable-select-dropdown" style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000; max-height: 320px; overflow: hidden;">
+                                <div class="searchable-select-search" style="padding: 0.75rem; border-bottom: 1px solid #eee; background: #fff;">
+                                    <input type="text" placeholder="Search translations..." autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                                 </div>
-                                <div class="searchable-select-options">
+                                <div class="searchable-select-options" style="max-height: 250px; overflow-y: auto;">
                                     <?php foreach ($translationsByLanguage as $language => $langTranslations): ?>
                                         <div class="searchable-select-group"><?php echo e($language); ?></div>
                                         <?php foreach ($langTranslations as $trans): ?>

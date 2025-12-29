@@ -2820,14 +2820,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .searchable-select-dropdown {
-    display: none;
+    display: none !important;
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    background-color: var(--surface, #ffffff);
-    border: 1px solid var(--border-color, #e0e0e0);
-    border-radius: var(--radius-md, 8px);
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     z-index: 1000;
     max-height: 320px;
@@ -2836,7 +2836,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .searchable-select.open .searchable-select-dropdown {
-    display: flex;
+    display: flex !important;
+}
+
+/* Ensure dropdown works in admin settings form */
+.admin-settings .searchable-select-dropdown,
+.settings-form .searchable-select-dropdown,
+.form-group .searchable-select-dropdown {
+    display: none !important;
+}
+
+.admin-settings .searchable-select.open .searchable-select-dropdown,
+.settings-form .searchable-select.open .searchable-select-dropdown,
+.form-group .searchable-select.open .searchable-select-dropdown {
+    display: flex !important;
 }
 
 .searchable-select-search {
