@@ -176,23 +176,24 @@ ob_start();
             <button class="reader-close" onclick="closeReader()" aria-label="Close">&times;</button>
             <div class="reader-controls">
                 <?php if (!empty($user['secondary_translation'])): ?>
-                    <div class="translation-toggle" style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button type="button" class="trans-btn active" id="btnPrimary" onclick="showTranslation('primary')" style="padding: 0.5rem 1rem; border: 2px solid var(--primary, #5D4037); background: var(--primary, #5D4037); color: white; border-radius: 6px 0 0 6px; cursor: pointer; font-size: 0.875rem;">
-                            <?php
-                            $primaryTrans = array_filter(ReadingPlan::getTranslations(), fn($t) => $t['id'] === $user['preferred_translation']);
-                            echo e(reset($primaryTrans)['name'] ?? 'Primary');
-                            ?>
-                        </button>
-                        <button type="button" class="trans-btn" id="btnSecondary" onclick="showTranslation('secondary')" style="padding: 0.5rem 1rem; border: 2px solid var(--primary, #5D4037); background: transparent; color: var(--primary, #5D4037); border-radius: 0; cursor: pointer; font-size: 0.875rem; margin-left: -2px;">
-                            <?php
-                            $secondaryTrans = array_filter(ReadingPlan::getTranslations(), fn($t) => $t['id'] === $user['secondary_translation']);
-                            echo e(reset($secondaryTrans)['name'] ?? 'Secondary');
-                            ?>
-                        </button>
-                        <button type="button" class="trans-btn" id="btnBoth" onclick="showTranslation('both')" style="padding: 0.5rem 1rem; border: 2px solid var(--primary, #5D4037); background: transparent; color: var(--primary, #5D4037); border-radius: 0 6px 6px 0; cursor: pointer; font-size: 0.875rem; margin-left: -2px;">
-                            Both
-                        </button>
+                    <?php
+                    $primaryTrans = array_filter(ReadingPlan::getTranslations(), fn($t) => $t['id'] === $user['preferred_translation']);
+                    $secondaryTrans = array_filter(ReadingPlan::getTranslations(), fn($t) => $t['id'] === $user['secondary_translation']);
+                    $primaryName = reset($primaryTrans)['name'] ?? 'Primary';
+                    $secondaryName = reset($secondaryTrans)['name'] ?? 'Secondary';
+                    ?>
+                    <div class="translation-toggle" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span id="currentTransName" style="font-size: 0.8rem; color: var(--text-secondary, #666); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo e($primaryName); ?></span>
+                        <label class="toggle-switch" style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer;">
+                            <input type="checkbox" id="translationToggle" style="opacity: 0; width: 0; height: 0;" onchange="toggleTranslation(this.checked)">
+                            <span style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary, #5D4037); border-radius: 24px; transition: 0.3s;"></span>
+                            <span id="toggleKnob" style="position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s;"></span>
+                        </label>
                     </div>
+                    <script>
+                        const primaryTransName = '<?php echo e($primaryName); ?>';
+                        const secondaryTransName = '<?php echo e($secondaryName); ?>';
+                    </script>
                 <?php else: ?>
                     <?php
                     $translationsByLang = ReadingPlan::getTranslationsGroupedByLanguage();
@@ -263,28 +264,34 @@ ob_start();
     const hasDualTranslation = <?php echo !empty($user['secondary_translation']) ? 'true' : 'false'; ?>;
     const weekChapters = <?php echo json_encode($weekChapters); ?>;
     // Use var to make these global (accessible from app.js)
-    var currentViewMode = 'primary'; // 'primary', 'secondary', 'both'
+    var currentViewMode = 'primary'; // 'primary' or 'secondary'
     var cachedPrimaryData = null;
     var cachedSecondaryData = null;
 
-    function showTranslation(mode) {
-        currentViewMode = mode;
+    function toggleTranslation(isSecondary) {
+        currentViewMode = isSecondary ? 'secondary' : 'primary';
 
-        // Update button styles
-        document.querySelectorAll('.trans-btn').forEach(btn => {
-            btn.style.background = 'transparent';
-            btn.style.color = 'var(--primary, #5D4037)';
-            btn.classList.remove('active');
-        });
+        // Update toggle knob position
+        const knob = document.getElementById('toggleKnob');
+        if (knob) {
+            knob.style.left = isSecondary ? '23px' : '3px';
+        }
 
-        const activeBtn = document.getElementById('btn' + mode.charAt(0).toUpperCase() + mode.slice(1));
-        if (activeBtn) {
-            activeBtn.style.background = 'var(--primary, #5D4037)';
-            activeBtn.style.color = 'white';
-            activeBtn.classList.add('active');
+        // Update displayed translation name
+        const nameEl = document.getElementById('currentTransName');
+        if (nameEl && typeof primaryTransName !== 'undefined' && typeof secondaryTransName !== 'undefined') {
+            nameEl.textContent = isSecondary ? secondaryTransName : primaryTransName;
         }
 
         // Re-render with cached data
+        if (cachedPrimaryData) {
+            renderContent(cachedPrimaryData, cachedSecondaryData, currentViewMode);
+        }
+    }
+
+    // Legacy function for compatibility
+    function showTranslation(mode) {
+        currentViewMode = mode;
         if (cachedPrimaryData) {
             renderContent(cachedPrimaryData, cachedSecondaryData, mode);
         }
@@ -293,42 +300,7 @@ ob_start();
     function renderContent(primaryData, secondaryData, mode) {
         const content = document.getElementById('readerContent');
 
-        if (mode === 'both') {
-            if (secondaryData && secondaryData.verses && secondaryData.verses.length > 0) {
-                // Side-by-side view
-                let html = '<div class="dual-scripture" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">';
-
-                // Primary column
-                html += '<div class="scripture-column" style="border-right: 1px solid var(--border-color, #e0e0e0); padding-right: 1rem;">';
-                html += '<h4 style="margin: 0 0 1rem; color: var(--primary, #5D4037); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px;">' + (primaryData.translationName || 'Primary') + '</h4>';
-                html += '<div class="scripture-text">';
-                primaryData.verses.forEach(verse => {
-                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
-                });
-                html += '</div></div>';
-
-                // Secondary column
-                html += '<div class="scripture-column" style="padding-left: 1rem;">';
-                html += '<h4 style="margin: 0 0 1rem; color: var(--primary, #5D4037); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px;">' + (secondaryData.translationName || 'Secondary') + '</h4>';
-                html += '<div class="scripture-text">';
-                secondaryData.verses.forEach(verse => {
-                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
-                });
-                html += '</div></div>';
-
-                html += '</div>';
-                content.innerHTML = html;
-            } else {
-                // Secondary not available - show message with primary
-                let html = '<div class="alert alert-warning" style="margin-bottom: 1rem; padding: 0.75rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">Secondary translation could not be loaded. Showing primary translation only.</div>';
-                html += '<div class="scripture-text">';
-                primaryData.verses.forEach(verse => {
-                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
-                });
-                html += '</div>';
-                content.innerHTML = html;
-            }
-        } else if (mode === 'secondary') {
+        if (mode === 'secondary') {
             if (secondaryData && secondaryData.verses && secondaryData.verses.length > 0) {
                 let html = '<div class="scripture-text">';
                 secondaryData.verses.forEach(verse => {
@@ -337,8 +309,13 @@ ob_start();
                 html += '</div>';
                 content.innerHTML = html;
             } else {
-                // Secondary not available
-                let html = '<div class="alert alert-warning" style="padding: 0.75rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">Secondary translation could not be loaded.</div>';
+                // Secondary not available - show warning and fall back to primary
+                let html = '<div class="alert alert-warning" style="margin-bottom: 1rem; padding: 0.75rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">Secondary translation not available for this chapter.</div>';
+                html += '<div class="scripture-text">';
+                primaryData.verses.forEach(verse => {
+                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
+                });
+                html += '</div>';
                 content.innerHTML = html;
             }
         } else {
