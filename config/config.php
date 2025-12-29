@@ -56,7 +56,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Application settings
 define('APP_NAME', 'ReadIn52');
 define('APP_TAGLINE', 'Journey Through Scripture in 52 Weeks');
-define('APP_VERSION', '1.5.1');
+define('APP_VERSION', '1.5.2');
 
 // Paths - All relative to document root (public_html)
 define('ROOT_PATH', __DIR__ . '/..');
