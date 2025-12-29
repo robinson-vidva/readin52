@@ -37,6 +37,32 @@ class ReadingPlan
     }
 
     /**
+     * Get translations grouped by language
+     */
+    public static function getTranslationsGroupedByLanguage(): array
+    {
+        $translations = self::getTranslations();
+        $grouped = [];
+
+        foreach ($translations as $trans) {
+            $lang = $trans['language'] ?? 'Other';
+            if (!isset($grouped[$lang])) {
+                $grouped[$lang] = [];
+            }
+            $grouped[$lang][] = $trans;
+        }
+
+        // Sort languages alphabetically, but put English first
+        uksort($grouped, function($a, $b) {
+            if ($a === 'English') return -1;
+            if ($b === 'English') return 1;
+            return strcasecmp($a, $b);
+        });
+
+        return $grouped;
+    }
+
+    /**
      * Get categories from database
      */
     public static function getCategories(): array

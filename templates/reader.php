@@ -5,7 +5,7 @@ $chapter = $chapter ?? 1;
 $translation = $user['preferred_translation'] ?? 'eng_kjv';
 $secondaryTranslation = $user['secondary_translation'] ?? '';
 $bookName = ReadingPlan::getBookName($book);
-$translations = ReadingPlan::getTranslations();
+$translationsByLanguage = ReadingPlan::getTranslationsGroupedByLanguage();
 
 ob_start();
 ?>
@@ -24,18 +24,21 @@ ob_start();
             </div>
             <div class="reader-controls">
                 <?php if (!empty($secondaryTranslation)): ?>
+                    <?php
+                    $allTranslations = ReadingPlan::getTranslations();
+                    $primaryTransName = 'Primary';
+                    $secTransName = 'Secondary';
+                    foreach ($allTranslations as $t) {
+                        if ($t['id'] === $translation) $primaryTransName = $t['name'];
+                        if ($t['id'] === $secondaryTranslation) $secTransName = $t['name'];
+                    }
+                    ?>
                     <div class="translation-toggle" style="display: flex; gap: 0; align-items: center;">
                         <button type="button" class="trans-btn active" id="btnPrimary" onclick="showTranslation('primary')" style="padding: 0.5rem 1rem; border: 2px solid var(--primary, #5D4037); background: var(--primary, #5D4037); color: white; border-radius: 6px 0 0 6px; cursor: pointer; font-size: 0.875rem;">
-                            <?php
-                            $primaryTrans = array_filter($translations, fn($t) => $t['id'] === $translation);
-                            echo e(reset($primaryTrans)['name'] ?? 'Primary');
-                            ?>
+                            <?php echo e($primaryTransName); ?>
                         </button>
                         <button type="button" class="trans-btn" id="btnSecondary" onclick="showTranslation('secondary')" style="padding: 0.5rem 1rem; border: 2px solid var(--primary, #5D4037); background: transparent; color: var(--primary, #5D4037); border-radius: 0; cursor: pointer; font-size: 0.875rem; margin-left: -2px;">
-                            <?php
-                            $secTrans = array_filter($translations, fn($t) => $t['id'] === $secondaryTranslation);
-                            echo e(reset($secTrans)['name'] ?? 'Secondary');
-                            ?>
+                            <?php echo e($secTransName); ?>
                         </button>
                         <button type="button" class="trans-btn" id="btnBoth" onclick="showTranslation('both')" style="padding: 0.5rem 1rem; border: 2px solid var(--primary, #5D4037); background: transparent; color: var(--primary, #5D4037); border-radius: 0 6px 6px 0; cursor: pointer; font-size: 0.875rem; margin-left: -2px;">
                             Both
@@ -43,11 +46,15 @@ ob_start();
                     </div>
                 <?php else: ?>
                     <select id="translationSelect" onchange="changeTranslation(this.value)">
-                        <?php foreach ($translations as $trans): ?>
-                            <option value="<?php echo e($trans['id']); ?>"
-                                    <?php echo $trans['id'] === $translation ? 'selected' : ''; ?>>
-                                <?php echo e($trans['name']); ?>
-                            </option>
+                        <?php foreach (ReadingPlan::getTranslationsGroupedByLanguage() as $language => $langTranslations): ?>
+                            <optgroup label="<?php echo e($language); ?>">
+                                <?php foreach ($langTranslations as $trans): ?>
+                                    <option value="<?php echo e($trans['id']); ?>"
+                                            <?php echo $trans['id'] === $translation ? 'selected' : ''; ?>>
+                                        <?php echo e($trans['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
                         <?php endforeach; ?>
                     </select>
                 <?php endif; ?>

@@ -1,6 +1,6 @@
 <?php
 $user = Auth::getUser();
-$translations = ReadingPlan::getTranslations();
+$translationsByLanguage = ReadingPlan::getTranslationsGroupedByLanguage();
 $currentTheme = $user['theme'] ?? 'auto';
 $initials = getUserInitials($user['name']);
 $avatarColor = getAvatarColor($user['name']);
@@ -60,11 +60,15 @@ ob_start();
                             <div class="form-group">
                                 <label for="preferred_translation">Primary Translation</label>
                                 <select id="preferred_translation" name="preferred_translation">
-                                    <?php foreach ($translations as $trans): ?>
-                                        <option value="<?php echo e($trans['id']); ?>"
-                                                <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
-                                            <?php echo e($trans['name']); ?> (<?php echo e($trans['language']); ?>)
-                                        </option>
+                                    <?php foreach ($translationsByLanguage as $language => $langTranslations): ?>
+                                        <optgroup label="<?php echo e($language); ?>">
+                                            <?php foreach ($langTranslations as $trans): ?>
+                                                <option value="<?php echo e($trans['id']); ?>"
+                                                        <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
+                                                    <?php echo e($trans['name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
                                     <?php endforeach; ?>
                                 </select>
                                 <small class="form-hint">Your main Bible translation for reading</small>
@@ -74,11 +78,15 @@ ob_start();
                                 <label for="secondary_translation">Secondary Translation (Optional)</label>
                                 <select id="secondary_translation" name="secondary_translation">
                                     <option value="">None - Single translation only</option>
-                                    <?php foreach ($translations as $trans): ?>
-                                        <option value="<?php echo e($trans['id']); ?>"
-                                                <?php echo $trans['id'] === ($user['secondary_translation'] ?? '') ? 'selected' : ''; ?>>
-                                            <?php echo e($trans['name']); ?> (<?php echo e($trans['language']); ?>)
-                                        </option>
+                                    <?php foreach ($translationsByLanguage as $language => $langTranslations): ?>
+                                        <optgroup label="<?php echo e($language); ?>">
+                                            <?php foreach ($langTranslations as $trans): ?>
+                                                <option value="<?php echo e($trans['id']); ?>"
+                                                        <?php echo $trans['id'] === ($user['secondary_translation'] ?? '') ? 'selected' : ''; ?>>
+                                                    <?php echo e($trans['name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
                                     <?php endforeach; ?>
                                 </select>
                                 <small class="form-hint">Compare with a second translation while reading</small>

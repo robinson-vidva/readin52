@@ -195,11 +195,15 @@ ob_start();
                     </div>
                 <?php else: ?>
                     <select id="translationSelect" onchange="changeTranslation(this.value)">
-                        <?php foreach (ReadingPlan::getTranslations() as $trans): ?>
-                            <option value="<?php echo e($trans['id']); ?>"
-                                    <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
-                                <?php echo e($trans['name']); ?>
-                            </option>
+                        <?php foreach (ReadingPlan::getTranslationsGroupedByLanguage() as $language => $langTranslations): ?>
+                            <optgroup label="<?php echo e($language); ?>">
+                                <?php foreach ($langTranslations as $trans): ?>
+                                    <option value="<?php echo e($trans['id']); ?>"
+                                            <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
+                                        <?php echo e($trans['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
                         <?php endforeach; ?>
                     </select>
                 <?php endif; ?>
