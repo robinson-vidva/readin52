@@ -2774,6 +2774,172 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 600px;
 }
 
+/* ============ Searchable Select Dropdown ============ */
+.searchable-select {
+    position: relative;
+    width: 100%;
+}
+
+.searchable-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--surface);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    text-align: left;
+}
+
+.searchable-select-trigger:hover,
+.searchable-select-trigger:focus {
+    outline: none;
+    border-color: var(--primary-brown);
+    box-shadow: 0 0 0 3px rgba(93, 64, 55, 0.1);
+}
+
+.searchable-select-trigger .selected-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.searchable-select-trigger .arrow {
+    margin-left: 0.5rem;
+    transition: transform var(--transition-fast);
+}
+
+.searchable-select.open .searchable-select-trigger .arrow {
+    transform: rotate(180deg);
+}
+
+.searchable-select-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    max-height: 320px;
+    overflow: hidden;
+}
+
+.searchable-select.open .searchable-select-dropdown {
+    display: block;
+}
+
+.searchable-select-search {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    background-color: var(--surface);
+}
+
+.searchable-select-search input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: var(--background);
+}
+
+.searchable-select-search input:focus {
+    outline: none;
+    border-color: var(--primary-brown);
+}
+
+.searchable-select-options {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.searchable-select-option {
+    padding: 0.625rem 1rem;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.searchable-select-option:hover {
+    background-color: var(--background);
+}
+
+.searchable-select-option.selected {
+    background-color: rgba(93, 64, 55, 0.1);
+    color: var(--primary-brown);
+    font-weight: 600;
+}
+
+.searchable-select-option.hidden {
+    display: none;
+}
+
+.searchable-select-group {
+    padding: 0.5rem 1rem 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: var(--background);
+    position: sticky;
+    top: 0;
+}
+
+.searchable-select-no-results {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Dark mode support for searchable select */
+[data-theme="dark"] .searchable-select-trigger {
+    background-color: #2A2A2A;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .searchable-select-dropdown {
+    background-color: #2A2A2A;
+    border-color: #444;
+}
+
+[data-theme="dark"] .searchable-select-search {
+    background-color: #2A2A2A;
+    border-bottom-color: #444;
+}
+
+[data-theme="dark"] .searchable-select-search input {
+    background-color: #1E1E1E;
+    border-color: #444;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .searchable-select-option:hover {
+    background-color: #3A3A3A;
+}
+
+[data-theme="dark"] .searchable-select-option.selected {
+    background-color: rgba(141, 110, 99, 0.2);
+}
+
+[data-theme="dark"] .searchable-select-group {
+    background-color: #1E1E1E;
+}
+
 @media (max-width: 480px) {
     .theme-selector {
         flex-direction: row;

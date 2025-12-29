@@ -194,18 +194,42 @@ ob_start();
                         </button>
                     </div>
                 <?php else: ?>
-                    <select id="translationSelect" onchange="changeTranslation(this.value)">
-                        <?php foreach (ReadingPlan::getTranslationsGroupedByLanguage() as $language => $langTranslations): ?>
-                            <optgroup label="<?php echo e($language); ?>">
-                                <?php foreach ($langTranslations as $trans): ?>
-                                    <option value="<?php echo e($trans['id']); ?>"
-                                            <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
-                                        <?php echo e($trans['name']); ?>
-                                    </option>
+                    <?php $translationsByLang = ReadingPlan::getTranslationsGroupedByLanguage(); ?>
+                    <div class="searchable-select" id="readerTransSelect" style="min-width: 200px;">
+                        <button type="button" class="searchable-select-trigger" aria-haspopup="listbox" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">
+                            <span class="selected-text">
+                                <?php
+                                foreach ($translationsByLang as $lang => $translations) {
+                                    foreach ($translations as $t) {
+                                        if ($t['id'] === $user['preferred_translation']) {
+                                            echo e($lang . ' (' . $t['name'] . ')');
+                                            break 2;
+                                        }
+                                    }
+                                }
+                                ?>
+                            </span>
+                            <span class="arrow">&#9662;</span>
+                        </button>
+                        <div class="searchable-select-dropdown">
+                            <div class="searchable-select-search">
+                                <input type="text" placeholder="Search translations..." autocomplete="off">
+                            </div>
+                            <div class="searchable-select-options">
+                                <?php foreach ($translationsByLang as $language => $langTranslations): ?>
+                                    <div class="searchable-select-group"><?php echo e($language); ?></div>
+                                    <?php foreach ($langTranslations as $trans): ?>
+                                        <div class="searchable-select-option <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>"
+                                             data-value="<?php echo e($trans['id']); ?>"
+                                             data-label="<?php echo e($language . ' (' . $trans['name'] . ')'); ?>"
+                                             data-search="<?php echo e(strtolower($language . ' ' . $trans['name'])); ?>">
+                                            <?php echo e($language); ?> (<?php echo e($trans['name']); ?>)
+                                        </div>
+                                    <?php endforeach; ?>
                                 <?php endforeach; ?>
-                            </optgroup>
-                        <?php endforeach; ?>
-                    </select>
+                            </div>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -311,6 +335,103 @@ ob_start();
             content.innerHTML = html;
         }
     }
+
+    // Searchable Select for Translation (when not in dual mode)
+    function initReaderTranslationSelect() {
+        const container = document.getElementById('readerTransSelect');
+        if (!container) return;
+
+        const trigger = container.querySelector('.searchable-select-trigger');
+        const searchInput = container.querySelector('.searchable-select-search input');
+        const options = container.querySelectorAll('.searchable-select-option');
+        const selectedText = trigger.querySelector('.selected-text');
+
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = container.classList.contains('open');
+            document.querySelectorAll('.searchable-select.open').forEach(el => {
+                if (el !== container) el.classList.remove('open');
+            });
+            container.classList.toggle('open');
+            if (!isOpen) {
+                searchInput.value = '';
+                filterReaderOptions('');
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('input', function() {
+            filterReaderOptions(this.value.toLowerCase());
+        });
+
+        searchInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        function filterReaderOptions(query) {
+            options.forEach(option => {
+                const searchText = option.dataset.search || option.textContent.toLowerCase();
+                option.classList.toggle('hidden', query !== '' && !searchText.includes(query));
+            });
+            const groups = container.querySelectorAll('.searchable-select-group');
+            groups.forEach(group => {
+                let nextSibling = group.nextElementSibling;
+                let hasVisibleOption = false;
+                while (nextSibling && !nextSibling.classList.contains('searchable-select-group')) {
+                    if (nextSibling.classList.contains('searchable-select-option') &&
+                        !nextSibling.classList.contains('hidden')) {
+                        hasVisibleOption = true;
+                        break;
+                    }
+                    nextSibling = nextSibling.nextElementSibling;
+                }
+                group.style.display = hasVisibleOption ? '' : 'none';
+            });
+        }
+
+        options.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const value = this.dataset.value;
+                const label = this.dataset.label;
+                options.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedText.textContent = label;
+                container.classList.remove('open');
+                // Change translation and reload chapter
+                changeTranslation(value);
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!container.contains(e.target)) {
+                container.classList.remove('open');
+            }
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                container.classList.remove('open');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const visibleOptions = Array.from(options).filter(o => !o.classList.contains('hidden'));
+                if (visibleOptions.length > 0) visibleOptions[0].click();
+            }
+        });
+    }
+
+    function changeTranslation(translation) {
+        // Update user translation preference and reload chapter
+        if (typeof currentCategory !== 'undefined' && typeof currentBook !== 'undefined' && typeof currentChapter !== 'undefined') {
+            loadChapter(currentCategory, currentBook, currentChapter, translation);
+        }
+    }
+
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initReaderTranslationSelect();
+    });
 </script>
 
 <?php
