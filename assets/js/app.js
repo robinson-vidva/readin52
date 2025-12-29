@@ -170,19 +170,31 @@ async function loadChapter(book, chapter) {
         if (typeof cachedPrimaryData !== 'undefined') {
             cachedPrimaryData = data;
             cachedSecondaryData = null;
+            console.log('Stored primary data, cachedPrimaryData set');
         }
 
         // Load secondary translation if enabled
         let secondaryData = null;
-        if (typeof hasDualTranslation !== 'undefined' && hasDualTranslation && secondaryTranslation) {
+        console.log('Dual translation check:', {
+            hasDualDefined: typeof hasDualTranslation !== 'undefined',
+            hasDualValue: typeof hasDualTranslation !== 'undefined' ? hasDualTranslation : 'N/A',
+            secondaryTrans: typeof secondaryTranslation !== 'undefined' ? secondaryTranslation : 'N/A'
+        });
+
+        if (typeof hasDualTranslation !== 'undefined' && hasDualTranslation && typeof secondaryTranslation !== 'undefined' && secondaryTranslation) {
             try {
+                console.log('Loading secondary translation:', secondaryTranslation);
                 secondaryData = await BibleAPI.getChapter(secondaryTranslation, book, chapter);
+                console.log('Secondary API response:', secondaryData);
                 if (!secondaryData.error) {
                     cachedSecondaryData = secondaryData;
+                    console.log('Secondary translation loaded successfully');
                 }
             } catch (e) {
                 console.log('Secondary translation load failed:', e);
             }
+        } else {
+            console.log('Secondary translation not enabled or not set');
         }
 
         // Count words for reading time
@@ -192,7 +204,8 @@ async function loadChapter(book, chapter) {
         });
 
         // Render based on current view mode
-        if (typeof currentViewMode !== 'undefined' && hasDualTranslation) {
+        if (typeof currentViewMode !== 'undefined' && typeof hasDualTranslation !== 'undefined' && hasDualTranslation) {
+            console.log('Rendering with dual mode, currentViewMode:', currentViewMode);
             renderContent(data, secondaryData, currentViewMode);
         } else {
             // Build HTML for single translation
