@@ -262,9 +262,10 @@ ob_start();
     const secondaryTranslation = '<?php echo e($user['secondary_translation'] ?? ''); ?>';
     const hasDualTranslation = <?php echo !empty($user['secondary_translation']) ? 'true' : 'false'; ?>;
     const weekChapters = <?php echo json_encode($weekChapters); ?>;
-    let currentViewMode = 'primary'; // 'primary', 'secondary', 'both'
-    let cachedPrimaryData = null;
-    let cachedSecondaryData = null;
+    // Use var to make these global (accessible from app.js)
+    var currentViewMode = 'primary'; // 'primary', 'secondary', 'both'
+    var cachedPrimaryData = null;
+    var cachedSecondaryData = null;
 
     function showTranslation(mode) {
         currentViewMode = mode;
