@@ -182,17 +182,12 @@ ob_start();
                     $primaryName = reset($primaryTrans)['name'] ?? 'Primary';
                     $secondaryName = reset($secondaryTrans)['name'] ?? 'Secondary';
                     ?>
-                    <div class="translation-selector" style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem;">
-                        <div class="translation-toggle" style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span id="labelPrimary" style="font-size: 0.7rem; font-weight: 600; color: var(--primary, #5D4037); transition: 0.3s;">1st</span>
-                            <label class="toggle-switch" style="position: relative; display: inline-block; width: 36px; height: 20px; cursor: pointer;" title="Switch translation">
-                                <input type="checkbox" id="translationToggle" style="opacity: 0; width: 0; height: 0;" onchange="toggleTranslation(this.checked)">
-                                <span style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 20px; transition: 0.3s;"></span>
-                                <span id="toggleKnob" style="position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></span>
-                            </label>
-                            <span id="labelSecondary" style="font-size: 0.7rem; font-weight: 500; color: var(--text-secondary, #999); transition: 0.3s;">2nd</span>
+                    <div class="translation-selector" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem;">
+                        <div class="segmented-control" style="display: inline-flex; background: #e8e8e8; border-radius: 6px; padding: 2px;">
+                            <button type="button" id="btn1st" onclick="toggleTranslation(false)" style="padding: 4px 12px; font-size: 0.7rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; background: #fff; color: var(--primary, #5D4037); box-shadow: 0 1px 2px rgba(0,0,0,0.1);">1st</button>
+                            <button type="button" id="btn2nd" onclick="toggleTranslation(true)" style="padding: 4px 12px; font-size: 0.7rem; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; background: transparent; color: #666;">2nd</button>
                         </div>
-                        <span id="currentTransName" style="font-size: 0.7rem; color: var(--text-secondary, #666); text-align: center; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo e($primaryName); ?></span>
+                        <span id="currentTransName" style="font-size: 0.65rem; color: var(--text-secondary, #888); text-align: center; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo e($primaryName); ?></span>
                     </div>
                     <script>
                         const primaryTransName = '<?php echo e($primaryName); ?>';
@@ -275,26 +270,28 @@ ob_start();
     function toggleTranslation(isSecondary) {
         currentViewMode = isSecondary ? 'secondary' : 'primary';
 
-        // Update toggle knob position
-        const knob = document.getElementById('toggleKnob');
-        if (knob) {
-            knob.style.left = isSecondary ? '19px' : '3px';
-        }
-
-        // Update label highlighting
-        const labelPrimary = document.getElementById('labelPrimary');
-        const labelSecondary = document.getElementById('labelSecondary');
-        if (labelPrimary && labelSecondary) {
+        // Update segmented control button styles
+        const btn1st = document.getElementById('btn1st');
+        const btn2nd = document.getElementById('btn2nd');
+        if (btn1st && btn2nd) {
             if (isSecondary) {
-                labelPrimary.style.color = 'var(--text-secondary, #999)';
-                labelPrimary.style.fontWeight = '500';
-                labelSecondary.style.color = 'var(--primary, #5D4037)';
-                labelSecondary.style.fontWeight = '600';
+                btn1st.style.background = 'transparent';
+                btn1st.style.color = '#666';
+                btn1st.style.fontWeight = '500';
+                btn1st.style.boxShadow = 'none';
+                btn2nd.style.background = '#fff';
+                btn2nd.style.color = 'var(--primary, #5D4037)';
+                btn2nd.style.fontWeight = '600';
+                btn2nd.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
             } else {
-                labelPrimary.style.color = 'var(--primary, #5D4037)';
-                labelPrimary.style.fontWeight = '600';
-                labelSecondary.style.color = 'var(--text-secondary, #999)';
-                labelSecondary.style.fontWeight = '500';
+                btn1st.style.background = '#fff';
+                btn1st.style.color = 'var(--primary, #5D4037)';
+                btn1st.style.fontWeight = '600';
+                btn1st.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+                btn2nd.style.background = 'transparent';
+                btn2nd.style.color = '#666';
+                btn2nd.style.fontWeight = '500';
+                btn2nd.style.boxShadow = 'none';
             }
         }
 
