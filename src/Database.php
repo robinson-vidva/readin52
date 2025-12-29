@@ -268,6 +268,157 @@ class Database
 
         // Import reading plan from JSON if tables are empty
         self::importReadingPlanFromJson();
+
+        // Seed additional Bible translations
+        self::seedBibleTranslations();
+    }
+
+    /**
+     * Seed comprehensive list of Bible translations from HelloAO API
+     */
+    public static function seedBibleTranslations(): void
+    {
+        $pdo = self::getInstance();
+
+        // Check if we already have many translations
+        $stmt = $pdo->query("SELECT COUNT(*) as count FROM bible_translations");
+        $count = (int) $stmt->fetch()['count'];
+        if ($count > 20) {
+            return; // Already seeded
+        }
+
+        $translations = [
+            // English Translations
+            ['id' => 'BSB', 'name' => 'Berean Standard Bible', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'eng_kjv', 'name' => 'King James Version', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engkjvcpb', 'name' => 'King James Version (Cambridge)', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'eng_ukjv', 'name' => 'Updated King James Version', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engwebpb', 'name' => 'World English Bible', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engwebbe', 'name' => 'World English Bible British Edition', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engwebme', 'name' => 'World English Bible Messianic Edition', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engwmb', 'name' => 'World Messianic Bible', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engwmbb', 'name' => 'World Messianic Bible British Edition', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engoebcw', 'name' => 'Open English Bible (Commonwealth)', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engoebcus', 'name' => 'Open English Bible (US)', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engasv', 'name' => 'American Standard Version', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engDBY', 'name' => 'Darby Bible', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engYLT', 'name' => "Young's Literal Translation", 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engWEB', 'name' => 'Webster Bible', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engBBE', 'name' => 'Bible in Basic English', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engt4t', 'name' => 'Translation for Translators', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engULB', 'name' => 'Unlocked Literal Bible', 'language' => 'English', 'direction' => 'ltr'],
+            ['id' => 'engUDB', 'name' => 'Unlocked Dynamic Bible', 'language' => 'English', 'direction' => 'ltr'],
+
+            // Spanish Translations
+            ['id' => 'sparvg', 'name' => 'Reina Valera Gómez', 'language' => 'Spanish', 'direction' => 'ltr'],
+            ['id' => 'sparv1909', 'name' => 'Reina Valera 1909', 'language' => 'Spanish', 'direction' => 'ltr'],
+            ['id' => 'spablh', 'name' => 'Biblia Libre para el Mundo', 'language' => 'Spanish', 'direction' => 'ltr'],
+            ['id' => 'spasev', 'name' => 'Spanish Free Bible Version', 'language' => 'Spanish', 'direction' => 'ltr'],
+
+            // Portuguese Translations
+            ['id' => 'poracf', 'name' => 'Almeida Corrigida Fiel', 'language' => 'Portuguese', 'direction' => 'ltr'],
+            ['id' => 'porara', 'name' => 'Almeida Revista e Atualizada', 'language' => 'Portuguese', 'direction' => 'ltr'],
+            ['id' => 'porblivre', 'name' => 'Bíblia Livre', 'language' => 'Portuguese', 'direction' => 'ltr'],
+
+            // French Translations
+            ['id' => 'fraLSG', 'name' => 'Louis Segond 1910', 'language' => 'French', 'direction' => 'ltr'],
+            ['id' => 'fraPDV', 'name' => 'Parole de Vie', 'language' => 'French', 'direction' => 'ltr'],
+            ['id' => 'frafob', 'name' => 'French Ostervald', 'language' => 'French', 'direction' => 'ltr'],
+            ['id' => 'fradby', 'name' => 'French Darby', 'language' => 'French', 'direction' => 'ltr'],
+
+            // German Translations
+            ['id' => 'deuelo', 'name' => 'Elberfelder 1905', 'language' => 'German', 'direction' => 'ltr'],
+            ['id' => 'deulut1912', 'name' => 'Luther 1912', 'language' => 'German', 'direction' => 'ltr'],
+            ['id' => 'deumeng', 'name' => 'Menge Bibel', 'language' => 'German', 'direction' => 'ltr'],
+            ['id' => 'deusch2000', 'name' => 'Schlachter 2000', 'language' => 'German', 'direction' => 'ltr'],
+
+            // Chinese Translations
+            ['id' => 'cmncuvs', 'name' => 'Chinese Union Version Simplified', 'language' => 'Chinese', 'direction' => 'ltr'],
+            ['id' => 'cmncuvt', 'name' => 'Chinese Union Version Traditional', 'language' => 'Chinese', 'direction' => 'ltr'],
+            ['id' => 'cmnclv', 'name' => 'Chinese Literal Version', 'language' => 'Chinese', 'direction' => 'ltr'],
+
+            // Korean Translations
+            ['id' => 'korKRV', 'name' => 'Korean Revised Version', 'language' => 'Korean', 'direction' => 'ltr'],
+            ['id' => 'korHKJV', 'name' => 'Korean KJV', 'language' => 'Korean', 'direction' => 'ltr'],
+
+            // Russian Translations
+            ['id' => 'russynod', 'name' => 'Russian Synodal', 'language' => 'Russian', 'direction' => 'ltr'],
+            ['id' => 'ruscar', 'name' => 'Russian Carpatho-Rusyn', 'language' => 'Russian', 'direction' => 'ltr'],
+
+            // Arabic Translations
+            ['id' => 'arbvdab', 'name' => 'Arabic Bible Van Dyck', 'language' => 'Arabic', 'direction' => 'rtl'],
+            ['id' => 'arbnav', 'name' => 'Arabic New Arabic Version', 'language' => 'Arabic', 'direction' => 'rtl'],
+
+            // Hebrew Translations
+            ['id' => 'hebmod', 'name' => 'Hebrew Modern', 'language' => 'Hebrew', 'direction' => 'rtl'],
+            ['id' => 'hebSPMT', 'name' => 'Hebrew Samaritan Pentateuch', 'language' => 'Hebrew', 'direction' => 'rtl'],
+
+            // Greek Translations
+            ['id' => 'grctr', 'name' => 'Greek Textus Receptus', 'language' => 'Greek', 'direction' => 'ltr'],
+            ['id' => 'grcsblgnt', 'name' => 'SBL Greek New Testament', 'language' => 'Greek', 'direction' => 'ltr'],
+
+            // Latin Translations
+            ['id' => 'latvul', 'name' => 'Latin Vulgate', 'language' => 'Latin', 'direction' => 'ltr'],
+            ['id' => 'latclem', 'name' => 'Clementine Vulgate', 'language' => 'Latin', 'direction' => 'ltr'],
+
+            // Italian Translations
+            ['id' => 'itariveduta', 'name' => 'Italian Riveduta', 'language' => 'Italian', 'direction' => 'ltr'],
+            ['id' => 'itanuoriveduta', 'name' => 'Italian Nuova Riveduta', 'language' => 'Italian', 'direction' => 'ltr'],
+            ['id' => 'itadiodati', 'name' => 'Italian Diodati', 'language' => 'Italian', 'direction' => 'ltr'],
+
+            // Dutch Translations
+            ['id' => 'nldHTB', 'name' => 'Dutch Het Boek', 'language' => 'Dutch', 'direction' => 'ltr'],
+            ['id' => 'nldsv', 'name' => 'Dutch Staten Vertaling', 'language' => 'Dutch', 'direction' => 'ltr'],
+
+            // Polish Translations
+            ['id' => 'polGdanska', 'name' => 'Polish Gdańska', 'language' => 'Polish', 'direction' => 'ltr'],
+            ['id' => 'polUBG', 'name' => 'Polish UBG', 'language' => 'Polish', 'direction' => 'ltr'],
+
+            // Romanian Translations
+            ['id' => 'roncor', 'name' => 'Romanian Cornilescu', 'language' => 'Romanian', 'direction' => 'ltr'],
+            ['id' => 'ronvdc', 'name' => 'Romanian VDC', 'language' => 'Romanian', 'direction' => 'ltr'],
+
+            // Japanese Translations
+            ['id' => 'jpnkou', 'name' => 'Japanese Kougo-yaku', 'language' => 'Japanese', 'direction' => 'ltr'],
+
+            // Vietnamese Translations
+            ['id' => 'vievnt', 'name' => 'Vietnamese 1934', 'language' => 'Vietnamese', 'direction' => 'ltr'],
+
+            // Filipino Translations
+            ['id' => 'tagalog', 'name' => 'Tagalog Ang Biblia', 'language' => 'Filipino', 'direction' => 'ltr'],
+            ['id' => 'tglMBB', 'name' => 'Tagalog MBB', 'language' => 'Filipino', 'direction' => 'ltr'],
+
+            // Hindi Translations
+            ['id' => 'hinirv', 'name' => 'Hindi IRV', 'language' => 'Hindi', 'direction' => 'ltr'],
+
+            // Indonesian Translations
+            ['id' => 'indtb', 'name' => 'Indonesian Terjemahan Baru', 'language' => 'Indonesian', 'direction' => 'ltr'],
+
+            // Swahili Translations
+            ['id' => 'swaulb', 'name' => 'Swahili Union Version', 'language' => 'Swahili', 'direction' => 'ltr'],
+
+            // Tamil Translations
+            ['id' => 'tamirv', 'name' => 'Tamil IRV', 'language' => 'Tamil', 'direction' => 'ltr'],
+
+            // Telugu Translations
+            ['id' => 'telirv', 'name' => 'Telugu IRV', 'language' => 'Telugu', 'direction' => 'ltr'],
+
+            // Ukrainian Translations
+            ['id' => 'ukr', 'name' => 'Ukrainian Bible', 'language' => 'Ukrainian', 'direction' => 'ltr'],
+
+            // Afrikaans Translations
+            ['id' => 'afrafr83', 'name' => 'Afrikaans 1983', 'language' => 'Afrikaans', 'direction' => 'ltr'],
+        ];
+
+        $stmt = $pdo->prepare("INSERT IGNORE INTO bible_translations (id, name, language, direction) VALUES (?, ?, ?, ?)");
+        foreach ($translations as $trans) {
+            $stmt->execute([
+                $trans['id'],
+                $trans['name'],
+                $trans['language'],
+                $trans['direction']
+            ]);
+        }
     }
 
     /**
