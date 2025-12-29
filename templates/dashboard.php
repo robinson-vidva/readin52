@@ -181,18 +181,24 @@ ob_start();
                     $secondaryTrans = array_filter(ReadingPlan::getTranslations(), fn($t) => $t['id'] === $user['secondary_translation']);
                     $primaryName = reset($primaryTrans)['name'] ?? 'Primary';
                     $secondaryName = reset($secondaryTrans)['name'] ?? 'Secondary';
+                    // Get short names (first word or abbreviation)
+                    $primaryShort = explode(' ', $primaryName)[0];
+                    $secondaryShort = explode(' ', $secondaryName)[0];
                     ?>
-                    <div class="translation-toggle" style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span id="currentTransName" style="font-size: 0.8rem; color: var(--text-secondary, #666); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo e($primaryName); ?></span>
-                        <label class="toggle-switch" style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer;">
+                    <div class="translation-toggle" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span id="labelPrimary" style="font-size: 0.75rem; font-weight: 600; color: var(--primary, #5D4037); transition: 0.3s;"><?php echo e($primaryShort); ?></span>
+                        <label class="toggle-switch" style="position: relative; display: inline-block; width: 40px; height: 22px; cursor: pointer;" title="Switch translation">
                             <input type="checkbox" id="translationToggle" style="opacity: 0; width: 0; height: 0;" onchange="toggleTranslation(this.checked)">
-                            <span style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary, #5D4037); border-radius: 24px; transition: 0.3s;"></span>
-                            <span id="toggleKnob" style="position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s;"></span>
+                            <span style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 22px; transition: 0.3s;"></span>
+                            <span id="toggleKnob" style="position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></span>
                         </label>
+                        <span id="labelSecondary" style="font-size: 0.75rem; font-weight: 500; color: var(--text-secondary, #999); transition: 0.3s;"><?php echo e($secondaryShort); ?></span>
                     </div>
                     <script>
                         const primaryTransName = '<?php echo e($primaryName); ?>';
                         const secondaryTransName = '<?php echo e($secondaryName); ?>';
+                        const primaryShortName = '<?php echo e($primaryShort); ?>';
+                        const secondaryShortName = '<?php echo e($secondaryShort); ?>';
                     </script>
                 <?php else: ?>
                     <?php
@@ -274,13 +280,24 @@ ob_start();
         // Update toggle knob position
         const knob = document.getElementById('toggleKnob');
         if (knob) {
-            knob.style.left = isSecondary ? '23px' : '3px';
+            knob.style.left = isSecondary ? '21px' : '3px';
         }
 
-        // Update displayed translation name
-        const nameEl = document.getElementById('currentTransName');
-        if (nameEl && typeof primaryTransName !== 'undefined' && typeof secondaryTransName !== 'undefined') {
-            nameEl.textContent = isSecondary ? secondaryTransName : primaryTransName;
+        // Update label highlighting
+        const labelPrimary = document.getElementById('labelPrimary');
+        const labelSecondary = document.getElementById('labelSecondary');
+        if (labelPrimary && labelSecondary) {
+            if (isSecondary) {
+                labelPrimary.style.color = 'var(--text-secondary, #999)';
+                labelPrimary.style.fontWeight = '500';
+                labelSecondary.style.color = 'var(--primary, #5D4037)';
+                labelSecondary.style.fontWeight = '600';
+            } else {
+                labelPrimary.style.color = 'var(--primary, #5D4037)';
+                labelPrimary.style.fontWeight = '600';
+                labelSecondary.style.color = 'var(--text-secondary, #999)';
+                labelSecondary.style.fontWeight = '500';
+            }
         }
 
         // Re-render with cached data
