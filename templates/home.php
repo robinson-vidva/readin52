@@ -63,17 +63,28 @@
 
                 <div class="home-stats">
                     <div class="stat">
-                        <span class="stat-value">208</span>
-                        <span class="stat-label">Readings</span>
+                        <span class="stat-value">1,189</span>
+                        <span class="stat-label">Chapters</span>
                     </div>
                     <div class="stat">
                         <span class="stat-value">66</span>
                         <span class="stat-label">Books</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">1</span>
-                        <span class="stat-label">Year</span>
+                        <span class="stat-value">52</span>
+                        <span class="stat-label">Weeks</span>
                     </div>
+                    <div class="stat">
+                        <span class="stat-value">208</span>
+                        <span class="stat-label">Readings</span>
+                    </div>
+                </div>
+
+                <div class="home-verse" style="margin-top: 2rem; padding: 1.25rem; background: rgba(255,255,255,0.1); border-radius: 12px; border-left: 3px solid rgba(255,255,255,0.4);">
+                    <p style="font-family: 'Merriweather', serif; font-style: italic; font-size: 1rem; color: rgba(255,255,255,0.95); margin: 0; line-height: 1.6;">
+                        "So faith comes from hearing, and hearing through the word of Christ."
+                    </p>
+                    <span style="display: block; margin-top: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">— Romans 10:17 (ESV)</span>
                 </div>
             </div>
         </div>
