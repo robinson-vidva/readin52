@@ -133,22 +133,28 @@ try {
 
         case 'profile':
             Auth::requireAuth();
+            render('profile');
+            break;
+
+        case 'settings':
+            Auth::requireAuth();
             $data = [];
 
             if ($method === 'POST') {
                 if (!validateCsrf()) {
                     $data['error'] = 'Invalid request. Please try again.';
                 } else {
-                    $action = post('action', '');
+                    $action = post('action', 'save_preferences');
                     $userId = Auth::getUserId();
 
-                    if ($action === 'update_profile') {
+                    if ($action === 'update_name') {
                         $name = trim(post('name', ''));
-
-                        if (User::update($userId, ['name' => $name])) {
-                            $data['success'] = 'Profile updated successfully.';
+                        if (empty($name)) {
+                            $data['nameError'] = 'Name is required.';
+                        } elseif (User::update($userId, ['name' => $name])) {
+                            $data['nameSuccess'] = 'Name updated successfully.';
                         } else {
-                            $data['error'] = 'Failed to update profile.';
+                            $data['nameError'] = 'Failed to update name.';
                         }
                     } elseif ($action === 'change_password') {
                         $currentPassword = post('current_password', '');
@@ -166,44 +172,31 @@ try {
                         } else {
                             $data['passwordError'] = 'Failed to change password.';
                         }
-                    }
-                }
-            }
-
-            render('profile', $data);
-            break;
-
-        case 'settings':
-            Auth::requireAuth();
-            $data = [];
-
-            if ($method === 'POST') {
-                if (!validateCsrf()) {
-                    $data['error'] = 'Invalid request. Please try again.';
-                } else {
-                    $userId = Auth::getUserId();
-                    $translation = post('preferred_translation', 'eng_kjv');
-                    $secondaryTranslation = post('secondary_translation', '');
-                    $theme = post('theme', 'auto');
-
-                    // Validate theme value
-                    if (!in_array($theme, ['light', 'dark', 'auto'])) {
-                        $theme = 'auto';
-                    }
-
-                    // Set secondary to null if empty or same as primary
-                    if ($secondaryTranslation === '' || $secondaryTranslation === $translation) {
-                        $secondaryTranslation = null;
-                    }
-
-                    if (User::update($userId, [
-                        'preferred_translation' => $translation,
-                        'secondary_translation' => $secondaryTranslation,
-                        'theme' => $theme
-                    ])) {
-                        $data['success'] = 'Settings saved successfully.';
                     } else {
-                        $data['error'] = 'Failed to save settings.';
+                        // Default: save preferences (theme, translations)
+                        $translation = post('preferred_translation', 'eng_kjv');
+                        $secondaryTranslation = post('secondary_translation', '');
+                        $theme = post('theme', 'auto');
+
+                        // Validate theme value
+                        if (!in_array($theme, ['light', 'dark', 'auto'])) {
+                            $theme = 'auto';
+                        }
+
+                        // Set secondary to null if empty or same as primary
+                        if ($secondaryTranslation === '' || $secondaryTranslation === $translation) {
+                            $secondaryTranslation = null;
+                        }
+
+                        if (User::update($userId, [
+                            'preferred_translation' => $translation,
+                            'secondary_translation' => $secondaryTranslation,
+                            'theme' => $theme
+                        ])) {
+                            $data['prefsSuccess'] = 'Preferences saved successfully.';
+                        } else {
+                            $data['prefsError'] = 'Failed to save preferences.';
+                        }
                     }
                 }
             }
