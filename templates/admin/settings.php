@@ -72,6 +72,29 @@ ob_start();
         </div>
     </div>
 
+    <!-- Bible Translations -->
+    <div class="admin-card">
+        <div class="card-header">
+            <h2>Bible Translations</h2>
+        </div>
+        <div class="card-body">
+            <div class="info-list">
+                <div class="info-row">
+                    <span class="info-label">Available Translations</span>
+                    <span class="info-value"><?php echo count($translations); ?></span>
+                </div>
+            </div>
+            <p style="margin: 1rem 0; color: var(--text-secondary, #666);">
+                Sync the list of available Bible translations from the HelloAO API to ensure users can access all supported translations.
+            </p>
+            <form method="POST" action="/?route=admin/settings" style="margin-top: 1rem;">
+                <?php echo csrfField(); ?>
+                <input type="hidden" name="action" value="sync_translations">
+                <button type="submit" class="btn btn-primary">Sync Translations from API</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Danger Zone -->
     <div class="admin-card danger-zone">
         <div class="card-header">

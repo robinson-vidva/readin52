@@ -450,7 +450,14 @@ try {
                 } else {
                     $action = post('action', '');
 
-                    if ($action === 'clear_progress') {
+                    if ($action === 'sync_translations') {
+                        $result = Database::syncTranslationsFromAPI();
+                        if ($result['success']) {
+                            $data['success'] = 'Synced ' . $result['imported'] . ' translations from HelloAO API.';
+                        } else {
+                            $data['error'] = $result['error'];
+                        }
+                    } elseif ($action === 'clear_progress') {
                         $pdo = Database::getInstance();
                         $pdo->exec('DELETE FROM reading_progress');
                         $data['success'] = 'All reading progress has been cleared.';

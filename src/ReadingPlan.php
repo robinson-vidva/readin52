@@ -340,6 +340,14 @@ class ReadingPlan
     }
 
     /**
+     * Clear translations cache (call after syncing)
+     */
+    public static function clearTranslationsCache(): void
+    {
+        self::$translationsCache = null;
+    }
+
+    /**
      * Get book name from ID
      */
     public static function getBookName(string $bookId): string
