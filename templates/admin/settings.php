@@ -2,6 +2,7 @@
 $appName = Database::getSetting('app_name', 'ReadIn52');
 $defaultTranslation = Database::getSetting('default_translation', 'eng_kjv');
 $registrationEnabled = Database::getSetting('registration_enabled', '1');
+$appLogo = Database::getSetting('app_logo', '');
 $translations = ReadingPlan::getTranslations();
 $translationsByLanguage = ReadingPlan::getTranslationsGroupedByLanguage();
 
@@ -9,6 +10,54 @@ ob_start();
 ?>
 
 <div class="admin-settings">
+    <!-- App Branding -->
+    <div class="admin-card">
+        <div class="card-header">
+            <h2>App Branding</h2>
+        </div>
+        <div class="card-body">
+            <?php if (isset($logoSuccess)): ?>
+                <div class="alert alert-success"><?php echo e($logoSuccess); ?></div>
+            <?php endif; ?>
+            <?php if (isset($logoError)): ?>
+                <div class="alert alert-error"><?php echo e($logoError); ?></div>
+            <?php endif; ?>
+
+            <div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
+                <div style="text-align: center;">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary, #666); margin-bottom: 0.5rem;">Current Logo</p>
+                    <?php if (!empty($appLogo) && file_exists(ROOT_PATH . '/uploads/logos/' . $appLogo)): ?>
+                        <img src="/uploads/logos/<?php echo e($appLogo); ?>" alt="App Logo" style="max-width: 200px; max-height: 80px; border-radius: 8px; border: 1px solid #eee; background: #fff; padding: 0.5rem;">
+                    <?php else: ?>
+                        <div style="width: 160px; height: 60px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 2rem; border: 1px dashed #ddd;">&#x1F4D6;</div>
+                        <p style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">Default icon</p>
+                    <?php endif; ?>
+                </div>
+
+                <div style="flex: 1; min-width: 250px;">
+                    <form method="POST" action="/?route=admin/settings" enctype="multipart/form-data">
+                        <?php echo csrfField(); ?>
+                        <input type="hidden" name="action" value="upload_logo">
+                        <div class="form-group" style="margin-bottom: 0.75rem;">
+                            <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Upload New Logo</label>
+                            <input type="file" name="logo" accept=".png,.jpg,.jpeg,.svg" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <small style="display: block; color: #888; font-size: 0.75rem; margin-bottom: 0.75rem;">PNG, JPG, or SVG. Max 500KB. Recommended: 200x80px or similar aspect ratio.</small>
+                        <button type="submit" class="btn btn-primary">Upload Logo</button>
+                    </form>
+
+                    <?php if (!empty($appLogo)): ?>
+                        <form method="POST" action="/?route=admin/settings" style="margin-top: 0.75rem;">
+                            <?php echo csrfField(); ?>
+                            <input type="hidden" name="action" value="remove_logo">
+                            <button type="submit" class="btn btn-outline" style="color: #999; border-color: #ddd;">Remove Logo</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="admin-card">
         <div class="card-header">
             <h2>Application Settings</h2>
