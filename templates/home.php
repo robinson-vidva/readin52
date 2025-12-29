@@ -46,9 +46,10 @@
                     </div>
                 </div>
 
-                <div class="home-categories">
+                <div class="home-categories" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
                     <?php foreach (ReadingPlan::getCategories() as $category): ?>
-                        <span class="category-badge" style="background-color: <?php echo e($category['color']); ?>">
+                        <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: rgba(255,255,255,0.9);">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: <?php echo e($category['color']); ?>;"></span>
                             <?php echo e($category['name']); ?>
                         </span>
                     <?php endforeach; ?>
@@ -80,11 +81,11 @@
                     </div>
                 </div>
 
-                <div class="home-verse" style="margin-top: 2rem; padding: 1.25rem; background: rgba(255,255,255,0.1); border-radius: 12px; border-left: 3px solid rgba(255,255,255,0.4);">
-                    <p style="font-family: 'Merriweather', serif; font-style: italic; font-size: 1rem; color: rgba(255,255,255,0.95); margin: 0; line-height: 1.6;">
-                        "So faith comes from hearing, and hearing through the word of Christ."
+                <div class="home-verse" style="margin-top: 2rem; padding: 1rem 0; text-align: center;">
+                    <p style="font-family: 'Merriweather', serif; font-style: italic; font-size: 0.95rem; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.6;">
+                        "So then faith cometh by hearing, and hearing by the word of God."
                     </p>
-                    <span style="display: block; margin-top: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);">— Romans 10:17 (ESV)</span>
+                    <span style="display: block; margin-top: 0.4rem; font-size: 0.8rem; color: rgba(255,255,255,0.6);">— Romans 10:17 (KJV)</span>
                 </div>
             </div>
         </div>

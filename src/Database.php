@@ -223,6 +223,12 @@ class Database
             $pdo->exec("ALTER TABLE users ADD COLUMN secondary_translation VARCHAR(20) DEFAULT NULL AFTER preferred_translation");
         }
 
+        // Add custom_logo column to users table if not exists
+        $columns = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('custom_logo', $columns)) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN custom_logo VARCHAR(255) DEFAULT NULL AFTER theme");
+        }
+
         // Create reading_categories table if not exists
         $stmt = $pdo->query("SHOW TABLES LIKE 'reading_categories'");
         if ($stmt->fetch() === false) {

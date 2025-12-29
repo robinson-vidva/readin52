@@ -3,11 +3,13 @@
 $userTheme = 'auto';
 $navInitials = '';
 $navAvatarColor = '#5D4037';
+$userCustomLogo = '';
 if (Auth::isLoggedIn()) {
     $currentUser = Auth::getUser();
     $userTheme = $currentUser['theme'] ?? 'auto';
     $navInitials = getUserInitials($currentUser['name']);
     $navAvatarColor = getAvatarColor($currentUser['name']);
+    $userCustomLogo = $currentUser['custom_logo'] ?? '';
 }
 ?>
 <!DOCTYPE html>
@@ -70,7 +72,11 @@ if (Auth::isLoggedIn()) {
     <nav class="navbar">
         <div class="container">
             <a href="/?route=dashboard" class="navbar-brand">
-                <span class="brand-icon">&#x1F4D6;</span>
+                <?php if (!empty($userCustomLogo) && file_exists(ROOT_PATH . '/uploads/logos/' . $userCustomLogo)): ?>
+                    <img src="/uploads/logos/<?php echo e($userCustomLogo); ?>" alt="Logo" style="max-height: 32px; max-width: 120px; vertical-align: middle; margin-right: 0.5rem;">
+                <?php else: ?>
+                    <span class="brand-icon">&#x1F4D6;</span>
+                <?php endif; ?>
                 <?php echo e(ReadingPlan::getAppName()); ?>
             </a>
 

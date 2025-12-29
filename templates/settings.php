@@ -155,6 +155,47 @@ ob_start();
                         <a href="/?route=profile" class="btn btn-outline btn-block" style="display: block; width: 100%; text-align: center; padding: 0.75rem 1rem; border: 2px solid var(--primary, #5D4037); color: var(--primary, #5D4037); border-radius: 8px; text-decoration: none; font-weight: 600;">Edit Profile</a>
                     </div>
                 </div>
+
+                <!-- Custom Logo Upload -->
+                <div class="profile-card" style="background: var(--card-bg, #fff); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 1rem;">
+                    <div class="card-header" style="padding: 1rem 1.5rem 0;">
+                        <h3 style="font-size: 1rem; margin: 0;">Custom Logo</h3>
+                    </div>
+                    <div class="card-body" style="padding: 1rem 1.5rem 1.5rem;">
+                        <?php if (isset($logoSuccess)): ?>
+                            <div class="alert alert-success" style="margin-bottom: 1rem; padding: 0.5rem; font-size: 0.85rem;"><?php echo e($logoSuccess); ?></div>
+                        <?php endif; ?>
+                        <?php if (isset($logoError)): ?>
+                            <div class="alert alert-error" style="margin-bottom: 1rem; padding: 0.5rem; font-size: 0.85rem;"><?php echo e($logoError); ?></div>
+                        <?php endif; ?>
+
+                        <div style="text-align: center; margin-bottom: 1rem;">
+                            <?php if (!empty($user['custom_logo']) && file_exists(ROOT_PATH . '/uploads/logos/' . $user['custom_logo'])): ?>
+                                <img src="/uploads/logos/<?php echo e($user['custom_logo']); ?>" alt="Custom Logo" style="max-width: 120px; max-height: 60px; border-radius: 8px; border: 1px solid #eee;">
+                            <?php else: ?>
+                                <div style="width: 120px; height: 60px; background: #f5f5f5; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: #999; font-size: 2rem;">&#x1F4D6;</div>
+                            <?php endif; ?>
+                        </div>
+
+                        <form method="POST" action="/?route=settings" enctype="multipart/form-data">
+                            <?php echo csrfField(); ?>
+                            <input type="hidden" name="action" value="upload_logo">
+                            <div class="form-group" style="margin-bottom: 0.75rem;">
+                                <input type="file" name="logo" accept=".png,.jpg,.jpeg,.svg" style="width: 100%; font-size: 0.8rem; padding: 0.4rem; border: 1px solid #ddd; border-radius: 6px;">
+                            </div>
+                            <small style="display: block; color: #888; font-size: 0.7rem; margin-bottom: 0.75rem;">PNG, JPG, or SVG. Max 500KB. Will be resized to 200x100px.</small>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.5rem; font-size: 0.85rem;">Upload Logo</button>
+                        </form>
+
+                        <?php if (!empty($user['custom_logo'])): ?>
+                            <form method="POST" action="/?route=settings" style="margin-top: 0.5rem;">
+                                <?php echo csrfField(); ?>
+                                <input type="hidden" name="action" value="remove_logo">
+                                <button type="submit" class="btn btn-outline" style="width: 100%; padding: 0.4rem; font-size: 0.8rem; color: #999; border-color: #ddd;">Remove Logo</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
 

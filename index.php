@@ -181,28 +181,121 @@ try {
                 if (!validateCsrf()) {
                     $data['error'] = 'Invalid request. Please try again.';
                 } else {
-                    $translation = post('preferred_translation', 'eng_kjv');
-                    $secondaryTranslation = post('secondary_translation', '');
-                    $theme = post('theme', 'auto');
-                    // Validate theme value
-                    if (!in_array($theme, ['light', 'dark', 'auto'])) {
-                        $theme = 'auto';
-                    }
+                    $action = post('action', '');
                     $userId = Auth::getUserId();
 
-                    // Set secondary to null if empty or same as primary
-                    if ($secondaryTranslation === '' || $secondaryTranslation === $translation) {
-                        $secondaryTranslation = null;
-                    }
+                    if ($action === 'upload_logo') {
+                        // Handle logo upload
+                        $uploadDir = ROOT_PATH . '/uploads/logos/';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0755, true);
+                        }
 
-                    if (User::update($userId, [
-                        'preferred_translation' => $translation,
-                        'secondary_translation' => $secondaryTranslation,
-                        'theme' => $theme
-                    ])) {
-                        $data['success'] = 'Settings saved successfully.';
+                        if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                            $file = $_FILES['logo'];
+                            $maxSize = 500 * 1024; // 500KB
+
+                            if ($file['size'] > $maxSize) {
+                                $data['logoError'] = 'File too large. Maximum 500KB allowed.';
+                            } else {
+                                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                                $allowed = ['png', 'jpg', 'jpeg', 'svg'];
+
+                                if (!in_array($ext, $allowed)) {
+                                    $data['logoError'] = 'Invalid file type. Use PNG, JPG, or SVG.';
+                                } else {
+                                    // Delete old logo if exists
+                                    $user = Auth::getUser();
+                                    if (!empty($user['custom_logo']) && file_exists($uploadDir . $user['custom_logo'])) {
+                                        unlink($uploadDir . $user['custom_logo']);
+                                    }
+
+                                    // Generate unique filename
+                                    $filename = 'logo_' . $userId . '_' . time() . '.' . $ext;
+                                    $destPath = $uploadDir . $filename;
+
+                                    if (move_uploaded_file($file['tmp_name'], $destPath)) {
+                                        // Resize image if it's not SVG
+                                        if ($ext !== 'svg' && function_exists('imagecreatefrompng')) {
+                                            $maxWidth = 200;
+                                            $maxHeight = 100;
+                                            list($width, $height) = getimagesize($destPath);
+
+                                            if ($width > $maxWidth || $height > $maxHeight) {
+                                                $ratio = min($maxWidth / $width, $maxHeight / $height);
+                                                $newWidth = (int)($width * $ratio);
+                                                $newHeight = (int)($height * $ratio);
+
+                                                $thumb = imagecreatetruecolor($newWidth, $newHeight);
+                                                imagesavealpha($thumb, true);
+                                                $transparent = imagecolorallocatealpha($thumb, 0, 0, 0, 127);
+                                                imagefill($thumb, 0, 0, $transparent);
+
+                                                if ($ext === 'png') {
+                                                    $source = imagecreatefrompng($destPath);
+                                                } else {
+                                                    $source = imagecreatefromjpeg($destPath);
+                                                }
+
+                                                imagecopyresampled($thumb, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+                                                if ($ext === 'png') {
+                                                    imagepng($thumb, $destPath);
+                                                } else {
+                                                    imagejpeg($thumb, $destPath, 90);
+                                                }
+
+                                                imagedestroy($thumb);
+                                                imagedestroy($source);
+                                            }
+                                        }
+
+                                        if (User::update($userId, ['custom_logo' => $filename])) {
+                                            $data['logoSuccess'] = 'Logo uploaded successfully.';
+                                        } else {
+                                            $data['logoError'] = 'Failed to save logo.';
+                                        }
+                                    } else {
+                                        $data['logoError'] = 'Failed to upload file.';
+                                    }
+                                }
+                            }
+                        } else {
+                            $data['logoError'] = 'Please select a valid file.';
+                        }
+                    } elseif ($action === 'remove_logo') {
+                        // Remove logo
+                        $user = Auth::getUser();
+                        $uploadDir = ROOT_PATH . '/uploads/logos/';
+                        if (!empty($user['custom_logo']) && file_exists($uploadDir . $user['custom_logo'])) {
+                            unlink($uploadDir . $user['custom_logo']);
+                        }
+                        User::update($userId, ['custom_logo' => null]);
+                        $data['logoSuccess'] = 'Logo removed.';
                     } else {
-                        $data['error'] = 'Failed to save settings.';
+                        // Regular settings update
+                        $translation = post('preferred_translation', 'eng_kjv');
+                        $secondaryTranslation = post('secondary_translation', '');
+                        $theme = post('theme', 'auto');
+                        // Validate theme value
+                        if (!in_array($theme, ['light', 'dark', 'auto'])) {
+                            $theme = 'auto';
+                        }
+
+                        // Set secondary to null if empty or same as primary
+                        if ($secondaryTranslation === '' || $secondaryTranslation === $translation) {
+                            $secondaryTranslation = null;
+                        }
+
+                        if (User::update($userId, [
+                            'preferred_translation' => $translation,
+                            'secondary_translation' => $secondaryTranslation,
+                            'theme' => $theme
+                        ])) {
+                            $data['success'] = 'Settings saved successfully.';
+                        } else {
+                            $data['error'] = 'Failed to save settings.';
+                        }
                     }
                 }
             }
