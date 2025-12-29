@@ -194,41 +194,33 @@ ob_start();
                         </button>
                     </div>
                 <?php else: ?>
-                    <?php $translationsByLang = ReadingPlan::getTranslationsGroupedByLanguage(); ?>
-                    <div class="searchable-select" id="readerTransSelect" style="min-width: 200px;">
-                        <button type="button" class="searchable-select-trigger" aria-haspopup="listbox" style="padding: 0.5rem 0.75rem; font-size: 0.875rem;">
-                            <span class="selected-text">
-                                <?php
-                                foreach ($translationsByLang as $lang => $translations) {
-                                    foreach ($translations as $t) {
-                                        if ($t['id'] === $user['preferred_translation']) {
-                                            echo e($lang . ' (' . $t['name'] . ')');
-                                            break 2;
-                                        }
-                                    }
-                                }
-                                ?>
-                            </span>
-                            <span class="arrow">&#9662;</span>
-                        </button>
-                        <div class="searchable-select-dropdown">
-                            <div class="searchable-select-search">
-                                <input type="text" placeholder="Search translations..." autocomplete="off">
-                            </div>
-                            <div class="searchable-select-options">
-                                <?php foreach ($translationsByLang as $language => $langTranslations): ?>
-                                    <div class="searchable-select-group"><?php echo e($language); ?></div>
-                                    <?php foreach ($langTranslations as $trans): ?>
-                                        <div class="searchable-select-option <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>"
-                                             data-value="<?php echo e($trans['id']); ?>"
-                                             data-label="<?php echo e($language . ' (' . $trans['name'] . ')'); ?>"
-                                             data-search="<?php echo e(strtolower($language . ' ' . $trans['name'])); ?>">
-                                            <?php echo e($language); ?> (<?php echo e($trans['name']); ?>)
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
+                    <?php
+                    $translationsByLang = ReadingPlan::getTranslationsGroupedByLanguage();
+                    $readerLang = 'English';
+                    foreach ($translationsByLang as $lang => $translations) {
+                        foreach ($translations as $t) {
+                            if ($t['id'] === $user['preferred_translation']) {
+                                $readerLang = $lang;
+                                break 2;
+                            }
+                        }
+                    }
+                    ?>
+                    <div style="display: flex; gap: 0.25rem; align-items: center;">
+                        <select id="readerLangSelect" style="padding: 0.4rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd; border-radius: 6px; min-width: 100px;">
+                            <?php foreach ($translationsByLang as $language => $langTranslations): ?>
+                                <option value="<?php echo e($language); ?>" <?php echo $language === $readerLang ? 'selected' : ''; ?>>
+                                    <?php echo e($language); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <select id="readerTransSelect" style="padding: 0.4rem 0.5rem; font-size: 0.8rem; border: 1px solid #ddd; border-radius: 6px; min-width: 140px;">
+                            <?php foreach ($translationsByLang[$readerLang] ?? [] as $trans): ?>
+                                <option value="<?php echo e($trans['id']); ?>" <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
+                                    <?php echo e($trans['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                 <?php endif; ?>
             </div>
@@ -336,90 +328,8 @@ ob_start();
         }
     }
 
-    // Searchable Select for Translation (when not in dual mode)
-    function initReaderTranslationSelect() {
-        const container = document.getElementById('readerTransSelect');
-        if (!container) return;
-
-        const trigger = container.querySelector('.searchable-select-trigger');
-        const searchInput = container.querySelector('.searchable-select-search input');
-        const options = container.querySelectorAll('.searchable-select-option');
-        const selectedText = trigger.querySelector('.selected-text');
-
-        trigger.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const isOpen = container.classList.contains('open');
-            document.querySelectorAll('.searchable-select.open').forEach(el => {
-                if (el !== container) el.classList.remove('open');
-            });
-            container.classList.toggle('open');
-            if (!isOpen) {
-                searchInput.value = '';
-                filterReaderOptions('');
-                searchInput.focus();
-            }
-        });
-
-        searchInput.addEventListener('input', function() {
-            filterReaderOptions(this.value.toLowerCase());
-        });
-
-        searchInput.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-
-        function filterReaderOptions(query) {
-            options.forEach(option => {
-                const searchText = option.dataset.search || option.textContent.toLowerCase();
-                option.classList.toggle('hidden', query !== '' && !searchText.includes(query));
-            });
-            const groups = container.querySelectorAll('.searchable-select-group');
-            groups.forEach(group => {
-                let nextSibling = group.nextElementSibling;
-                let hasVisibleOption = false;
-                while (nextSibling && !nextSibling.classList.contains('searchable-select-group')) {
-                    if (nextSibling.classList.contains('searchable-select-option') &&
-                        !nextSibling.classList.contains('hidden')) {
-                        hasVisibleOption = true;
-                        break;
-                    }
-                    nextSibling = nextSibling.nextElementSibling;
-                }
-                group.style.display = hasVisibleOption ? '' : 'none';
-            });
-        }
-
-        options.forEach(option => {
-            option.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const value = this.dataset.value;
-                const label = this.dataset.label;
-                options.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                selectedText.textContent = label;
-                container.classList.remove('open');
-                // Change translation and reload chapter
-                changeTranslation(value);
-            });
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!container.contains(e.target)) {
-                container.classList.remove('open');
-            }
-        });
-
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                container.classList.remove('open');
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                const visibleOptions = Array.from(options).filter(o => !o.classList.contains('hidden'));
-                if (visibleOptions.length > 0) visibleOptions[0].click();
-            }
-        });
-    }
+    // Translation data for reader dropdown
+    const readerTranslationsByLang = <?php echo json_encode($translationsByLang ?? ReadingPlan::getTranslationsGroupedByLanguage()); ?>;
 
     function changeTranslation(translation) {
         // Update user translation preference and reload chapter
@@ -428,9 +338,34 @@ ob_start();
         }
     }
 
-    // Initialize on DOM ready
+    // Initialize reader translation dropdowns
     document.addEventListener('DOMContentLoaded', function() {
-        initReaderTranslationSelect();
+        const readerLangSelect = document.getElementById('readerLangSelect');
+        const readerTransSelect = document.getElementById('readerTransSelect');
+
+        if (readerLangSelect && readerTransSelect) {
+            // When language changes, update translation options
+            readerLangSelect.addEventListener('change', function() {
+                const selectedLang = this.value;
+                const translations = readerTranslationsByLang[selectedLang] || [];
+                readerTransSelect.innerHTML = '';
+                translations.forEach(trans => {
+                    const option = document.createElement('option');
+                    option.value = trans.id;
+                    option.textContent = trans.name;
+                    readerTransSelect.appendChild(option);
+                });
+                // Auto-select first translation and reload chapter
+                if (translations.length > 0) {
+                    changeTranslation(translations[0].id);
+                }
+            });
+
+            // When translation changes, reload chapter
+            readerTransSelect.addEventListener('change', function() {
+                changeTranslation(this.value);
+            });
+        }
     });
 </script>
 

@@ -57,96 +57,78 @@ ob_start();
                                 <small class="form-hint">Auto follows your device's system preference</small>
                             </div>
 
+                            <?php
+                            // Find current primary language
+                            $primaryLang = 'English';
+                            foreach ($translationsByLanguage as $lang => $translations) {
+                                foreach ($translations as $t) {
+                                    if ($t['id'] === $user['preferred_translation']) {
+                                        $primaryLang = $lang;
+                                        break 2;
+                                    }
+                                }
+                            }
+
+                            // Find current secondary language
+                            $secondaryLang = '';
+                            $secondaryTrans = $user['secondary_translation'] ?? '';
+                            if ($secondaryTrans) {
+                                foreach ($translationsByLanguage as $lang => $translations) {
+                                    foreach ($translations as $t) {
+                                        if ($t['id'] === $secondaryTrans) {
+                                            $secondaryLang = $lang;
+                                            break 2;
+                                        }
+                                    }
+                                }
+                            }
+                            ?>
+
                             <div class="form-group">
-                                <label for="preferred_translation">Primary Translation</label>
+                                <label>Primary Translation</label>
                                 <input type="hidden" id="preferred_translation" name="preferred_translation" value="<?php echo e($user['preferred_translation']); ?>">
-                                <div class="searchable-select" id="primaryTransSelect">
-                                    <button type="button" class="searchable-select-trigger" aria-haspopup="listbox">
-                                        <span class="selected-text">
-                                            <?php
-                                            foreach ($translationsByLanguage as $lang => $translations) {
-                                                foreach ($translations as $t) {
-                                                    if ($t['id'] === $user['preferred_translation']) {
-                                                        echo e($lang . ' (' . $t['name'] . ')');
-                                                        break 2;
-                                                    }
-                                                }
-                                            }
-                                            ?>
-                                        </span>
-                                        <span class="arrow">&#9662;</span>
-                                    </button>
-                                    <div class="searchable-select-dropdown">
-                                        <div class="searchable-select-search">
-                                            <input type="text" placeholder="Search translations..." autocomplete="off">
-                                        </div>
-                                        <div class="searchable-select-options">
-                                            <?php foreach ($translationsByLanguage as $language => $langTranslations): ?>
-                                                <div class="searchable-select-group"><?php echo e($language); ?></div>
-                                                <?php foreach ($langTranslations as $trans): ?>
-                                                    <div class="searchable-select-option <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>"
-                                                         data-value="<?php echo e($trans['id']); ?>"
-                                                         data-label="<?php echo e($language . ' (' . $trans['name'] . ')'); ?>"
-                                                         data-search="<?php echo e(strtolower($language . ' ' . $trans['name'])); ?>">
-                                                        <?php echo e($language); ?> (<?php echo e($trans['name']); ?>)
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <select id="primaryLangSelect" class="form-control" style="flex: 1; min-width: 140px;">
+                                        <?php foreach ($translationsByLanguage as $language => $langTranslations): ?>
+                                            <option value="<?php echo e($language); ?>" <?php echo $language === $primaryLang ? 'selected' : ''; ?>>
+                                                <?php echo e($language); ?> (<?php echo count($langTranslations); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <select id="primaryTransSelect" class="form-control" style="flex: 2; min-width: 180px;">
+                                        <?php foreach ($translationsByLanguage[$primaryLang] ?? [] as $trans): ?>
+                                            <option value="<?php echo e($trans['id']); ?>" <?php echo $trans['id'] === $user['preferred_translation'] ? 'selected' : ''; ?>>
+                                                <?php echo e($trans['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                                 <small class="form-hint">Your main Bible translation for reading</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="secondary_translation">Secondary Translation (Optional)</label>
+                                <label>Secondary Translation (Optional)</label>
                                 <input type="hidden" id="secondary_translation" name="secondary_translation" value="<?php echo e($user['secondary_translation'] ?? ''); ?>">
-                                <div class="searchable-select" id="secondaryTransSelect">
-                                    <button type="button" class="searchable-select-trigger" aria-haspopup="listbox">
-                                        <span class="selected-text">
-                                            <?php
-                                            $found = false;
-                                            $secondaryTrans = $user['secondary_translation'] ?? '';
-                                            if ($secondaryTrans) {
-                                                foreach ($translationsByLanguage as $lang => $translations) {
-                                                    foreach ($translations as $t) {
-                                                        if ($t['id'] === $secondaryTrans) {
-                                                            echo e($lang . ' (' . $t['name'] . ')');
-                                                            $found = true;
-                                                            break 2;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            if (!$found) echo 'None - Single translation only';
-                                            ?>
-                                        </span>
-                                        <span class="arrow">&#9662;</span>
-                                    </button>
-                                    <div class="searchable-select-dropdown">
-                                        <div class="searchable-select-search">
-                                            <input type="text" placeholder="Search translations..." autocomplete="off">
-                                        </div>
-                                        <div class="searchable-select-options">
-                                            <div class="searchable-select-option <?php echo empty($user['secondary_translation']) ? 'selected' : ''; ?>"
-                                                 data-value=""
-                                                 data-label="None - Single translation only"
-                                                 data-search="none single">
-                                                None - Single translation only
-                                            </div>
-                                            <?php foreach ($translationsByLanguage as $language => $langTranslations): ?>
-                                                <div class="searchable-select-group"><?php echo e($language); ?></div>
-                                                <?php foreach ($langTranslations as $trans): ?>
-                                                    <div class="searchable-select-option <?php echo $trans['id'] === ($user['secondary_translation'] ?? '') ? 'selected' : ''; ?>"
-                                                         data-value="<?php echo e($trans['id']); ?>"
-                                                         data-label="<?php echo e($language . ' (' . $trans['name'] . ')'); ?>"
-                                                         data-search="<?php echo e(strtolower($language . ' ' . $trans['name'])); ?>">
-                                                        <?php echo e($language); ?> (<?php echo e($trans['name']); ?>)
-                                                    </div>
-                                                <?php endforeach; ?>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <select id="secondaryLangSelect" class="form-control" style="flex: 1; min-width: 140px;">
+                                        <option value="">None</option>
+                                        <?php foreach ($translationsByLanguage as $language => $langTranslations): ?>
+                                            <option value="<?php echo e($language); ?>" <?php echo $language === $secondaryLang ? 'selected' : ''; ?>>
+                                                <?php echo e($language); ?> (<?php echo count($langTranslations); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <select id="secondaryTransSelect" class="form-control" style="flex: 2; min-width: 180px;" <?php echo empty($secondaryTrans) ? 'disabled' : ''; ?>>
+                                        <?php if (empty($secondaryTrans)): ?>
+                                            <option value="">Select a language first</option>
+                                        <?php else: ?>
+                                            <?php foreach ($translationsByLanguage[$secondaryLang] ?? [] as $trans): ?>
+                                                <option value="<?php echo e($trans['id']); ?>" <?php echo $trans['id'] === $secondaryTrans ? 'selected' : ''; ?>>
+                                                    <?php echo e($trans['name']); ?>
+                                                </option>
                                             <?php endforeach; ?>
-                                        </div>
-                                    </div>
+                                        <?php endif; ?>
+                                    </select>
                                 </div>
                                 <small class="form-hint">Compare with a second translation while reading</small>
                             </div>
@@ -266,127 +248,71 @@ document.getElementById('deleteAccountForm')?.addEventListener('submit', functio
     }
 });
 
-// Searchable Select Component
-function initSearchableSelect(container, hiddenInput) {
-    const trigger = container.querySelector('.searchable-select-trigger');
-    const dropdown = container.querySelector('.searchable-select-dropdown');
-    const searchInput = container.querySelector('.searchable-select-search input');
-    const options = container.querySelectorAll('.searchable-select-option');
-    const selectedText = trigger.querySelector('.selected-text');
+// Translation data grouped by language
+const translationsByLanguage = <?php echo json_encode($translationsByLanguage); ?>;
 
-    // Toggle dropdown
-    trigger.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const isOpen = container.classList.contains('open');
-
-        // Close all other dropdowns
-        document.querySelectorAll('.searchable-select.open').forEach(el => {
-            if (el !== container) el.classList.remove('open');
-        });
-
-        container.classList.toggle('open');
-        if (!isOpen) {
-            searchInput.value = '';
-            filterOptions('');
-            searchInput.focus();
-        }
-    });
-
-    // Search functionality
-    searchInput.addEventListener('input', function() {
-        filterOptions(this.value.toLowerCase());
-    });
-
-    searchInput.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-
-    function filterOptions(query) {
-        let hasVisible = false;
-        let lastVisibleGroup = null;
-
-        options.forEach(option => {
-            const searchText = option.dataset.search || option.textContent.toLowerCase();
-            if (query === '' || searchText.includes(query)) {
-                option.classList.remove('hidden');
-                hasVisible = true;
-            } else {
-                option.classList.add('hidden');
-            }
-        });
-
-        // Hide/show group headers based on visible options
-        const groups = container.querySelectorAll('.searchable-select-group');
-        groups.forEach(group => {
-            let nextSibling = group.nextElementSibling;
-            let hasVisibleOption = false;
-            while (nextSibling && !nextSibling.classList.contains('searchable-select-group')) {
-                if (nextSibling.classList.contains('searchable-select-option') &&
-                    !nextSibling.classList.contains('hidden')) {
-                    hasVisibleOption = true;
-                    break;
-                }
-                nextSibling = nextSibling.nextElementSibling;
-            }
-            group.style.display = hasVisibleOption ? '' : 'none';
-        });
-    }
-
-    // Select option
-    options.forEach(option => {
-        option.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const value = this.dataset.value;
-            const label = this.dataset.label;
-
-            // Update selected state
-            options.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-
-            // Update display and hidden input
-            selectedText.textContent = label;
-            hiddenInput.value = value;
-
-            // Close dropdown
-            container.classList.remove('open');
-        });
-    });
-
-    // Close on click outside
-    document.addEventListener('click', function(e) {
-        if (!container.contains(e.target)) {
-            container.classList.remove('open');
-        }
-    });
-
-    // Keyboard navigation
-    searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            container.classList.remove('open');
-            trigger.focus();
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            const visibleOptions = Array.from(options).filter(o => !o.classList.contains('hidden'));
-            if (visibleOptions.length > 0) {
-                visibleOptions[0].click();
-            }
-        }
-    });
-}
-
-// Initialize searchable selects
+// Two-dropdown translation selector
 document.addEventListener('DOMContentLoaded', function() {
-    const primarySelect = document.getElementById('primaryTransSelect');
+    // Primary translation dropdowns
+    const primaryLangSelect = document.getElementById('primaryLangSelect');
+    const primaryTransSelect = document.getElementById('primaryTransSelect');
     const primaryInput = document.getElementById('preferred_translation');
-    if (primarySelect && primaryInput) {
-        initSearchableSelect(primarySelect, primaryInput);
+
+    if (primaryLangSelect && primaryTransSelect && primaryInput) {
+        primaryLangSelect.addEventListener('change', function() {
+            const selectedLang = this.value;
+            const translations = translationsByLanguage[selectedLang] || [];
+            primaryTransSelect.innerHTML = '';
+            translations.forEach(trans => {
+                const option = document.createElement('option');
+                option.value = trans.id;
+                option.textContent = trans.name;
+                primaryTransSelect.appendChild(option);
+            });
+            if (translations.length > 0) {
+                primaryInput.value = translations[0].id;
+            }
+        });
+
+        primaryTransSelect.addEventListener('change', function() {
+            primaryInput.value = this.value;
+        });
     }
 
-    const secondarySelect = document.getElementById('secondaryTransSelect');
+    // Secondary translation dropdowns
+    const secondaryLangSelect = document.getElementById('secondaryLangSelect');
+    const secondaryTransSelect = document.getElementById('secondaryTransSelect');
     const secondaryInput = document.getElementById('secondary_translation');
-    if (secondarySelect && secondaryInput) {
-        initSearchableSelect(secondarySelect, secondaryInput);
+
+    if (secondaryLangSelect && secondaryTransSelect && secondaryInput) {
+        secondaryLangSelect.addEventListener('change', function() {
+            const selectedLang = this.value;
+
+            if (!selectedLang) {
+                // None selected - disable translation dropdown
+                secondaryTransSelect.disabled = true;
+                secondaryTransSelect.innerHTML = '<option value="">Select a language first</option>';
+                secondaryInput.value = '';
+            } else {
+                // Language selected - populate translation dropdown
+                secondaryTransSelect.disabled = false;
+                const translations = translationsByLanguage[selectedLang] || [];
+                secondaryTransSelect.innerHTML = '';
+                translations.forEach(trans => {
+                    const option = document.createElement('option');
+                    option.value = trans.id;
+                    option.textContent = trans.name;
+                    secondaryTransSelect.appendChild(option);
+                });
+                if (translations.length > 0) {
+                    secondaryInput.value = translations[0].id;
+                }
+            }
+        });
+
+        secondaryTransSelect.addEventListener('change', function() {
+            secondaryInput.value = this.value;
+        });
     }
 });
 </script>
