@@ -2825,25 +2825,25 @@ h1, h2, h3, h4, h5, h6 {
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    background-color: var(--surface);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    background-color: var(--surface, #ffffff);
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: var(--radius-md, 8px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     z-index: 1000;
     max-height: 320px;
     overflow: hidden;
+    flex-direction: column;
 }
 
 .searchable-select.open .searchable-select-dropdown {
-    display: block;
+    display: flex;
 }
 
 .searchable-select-search {
     padding: 0.75rem;
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    background-color: var(--surface);
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    background-color: var(--surface, #ffffff);
+    flex-shrink: 0;
 }
 
 .searchable-select-search input {
@@ -2863,6 +2863,8 @@ h1, h2, h3, h4, h5, h6 {
 .searchable-select-options {
     max-height: 250px;
     overflow-y: auto;
+    flex: 1;
+    background-color: var(--surface, #ffffff);
 }
 
 .searchable-select-option {
@@ -2890,12 +2892,13 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.5rem 1rem 0.25rem;
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text-secondary);
+    color: var(--text-secondary, #757575);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    background-color: var(--background);
+    background-color: var(--background, #fafafa);
     position: sticky;
     top: 0;
+    z-index: 1;
 }
 
 .searchable-select-no-results {
