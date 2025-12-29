@@ -229,6 +229,12 @@ class Database
             $pdo->exec("ALTER TABLE users ADD COLUMN custom_logo VARCHAR(255) DEFAULT NULL AFTER theme");
         }
 
+        // Fix category sort_order (poetry=0, history=1, prophecy=2, gospels=3)
+        $pdo->exec("UPDATE reading_categories SET sort_order = 0 WHERE id = 'poetry'");
+        $pdo->exec("UPDATE reading_categories SET sort_order = 1 WHERE id = 'history'");
+        $pdo->exec("UPDATE reading_categories SET sort_order = 2 WHERE id = 'prophecy'");
+        $pdo->exec("UPDATE reading_categories SET sort_order = 3 WHERE id = 'gospels'");
+
         // Create reading_categories table if not exists
         $stmt = $pdo->query("SHOW TABLES LIKE 'reading_categories'");
         if ($stmt->fetch() === false) {

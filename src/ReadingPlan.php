@@ -94,9 +94,10 @@ class ReadingPlan
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->query("
-            SELECT week_number, category_id, reference, passages
-            FROM reading_plan
-            ORDER BY week_number, category_id
+            SELECT rp.week_number, rp.category_id, rp.reference, rp.passages
+            FROM reading_plan rp
+            LEFT JOIN reading_categories rc ON rp.category_id = rc.id
+            ORDER BY rp.week_number, rc.sort_order
         ");
         $rows = $stmt->fetchAll();
 
@@ -123,10 +124,11 @@ class ReadingPlan
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->prepare("
-            SELECT category_id, reference, passages
-            FROM reading_plan
-            WHERE week_number = ?
-            ORDER BY category_id
+            SELECT rp.category_id, rp.reference, rp.passages
+            FROM reading_plan rp
+            LEFT JOIN reading_categories rc ON rp.category_id = rc.id
+            WHERE rp.week_number = ?
+            ORDER BY rc.sort_order
         ");
         $stmt->execute([$weekNumber]);
         $rows = $stmt->fetchAll();
