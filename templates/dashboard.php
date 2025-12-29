@@ -284,7 +284,7 @@ ob_start();
         }
 
         // Re-render with cached data
-        if (cachedPrimaryData && (mode === 'primary' || mode === 'both')) {
+        if (cachedPrimaryData) {
             renderContent(cachedPrimaryData, cachedSecondaryData, mode);
         }
     }
@@ -292,35 +292,58 @@ ob_start();
     function renderContent(primaryData, secondaryData, mode) {
         const content = document.getElementById('readerContent');
 
-        if (mode === 'both' && secondaryData) {
-            // Side-by-side view
-            let html = '<div class="dual-scripture" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">';
+        if (mode === 'both') {
+            if (secondaryData && secondaryData.verses && secondaryData.verses.length > 0) {
+                // Side-by-side view
+                let html = '<div class="dual-scripture" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">';
 
-            // Primary column
-            html += '<div class="scripture-column" style="border-right: 1px solid var(--border-color, #e0e0e0); padding-right: 1rem;">';
-            html += '<h4 style="margin: 0 0 1rem; color: var(--primary, #5D4037); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px;">' + (primaryData.translationName || 'Primary') + '</h4>';
-            html += '<div class="scripture-text">';
-            primaryData.verses.forEach(verse => {
-                html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
-            });
-            html += '</div></div>';
+                // Primary column
+                html += '<div class="scripture-column" style="border-right: 1px solid var(--border-color, #e0e0e0); padding-right: 1rem;">';
+                html += '<h4 style="margin: 0 0 1rem; color: var(--primary, #5D4037); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px;">' + (primaryData.translationName || 'Primary') + '</h4>';
+                html += '<div class="scripture-text">';
+                primaryData.verses.forEach(verse => {
+                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
+                });
+                html += '</div></div>';
 
-            // Secondary column
-            html += '<div class="scripture-column" style="padding-left: 1rem;">';
-            html += '<h4 style="margin: 0 0 1rem; color: var(--primary, #5D4037); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px;">' + (secondaryData.translationName || 'Secondary') + '</h4>';
-            html += '<div class="scripture-text">';
-            secondaryData.verses.forEach(verse => {
-                html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
-            });
-            html += '</div></div>';
+                // Secondary column
+                html += '<div class="scripture-column" style="padding-left: 1rem;">';
+                html += '<h4 style="margin: 0 0 1rem; color: var(--primary, #5D4037); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px;">' + (secondaryData.translationName || 'Secondary') + '</h4>';
+                html += '<div class="scripture-text">';
+                secondaryData.verses.forEach(verse => {
+                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
+                });
+                html += '</div></div>';
 
-            html += '</div>';
-            content.innerHTML = html;
+                html += '</div>';
+                content.innerHTML = html;
+            } else {
+                // Secondary not available - show message with primary
+                let html = '<div class="alert alert-warning" style="margin-bottom: 1rem; padding: 0.75rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">Secondary translation could not be loaded. Showing primary translation only.</div>';
+                html += '<div class="scripture-text">';
+                primaryData.verses.forEach(verse => {
+                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
+                });
+                html += '</div>';
+                content.innerHTML = html;
+            }
+        } else if (mode === 'secondary') {
+            if (secondaryData && secondaryData.verses && secondaryData.verses.length > 0) {
+                let html = '<div class="scripture-text">';
+                secondaryData.verses.forEach(verse => {
+                    html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
+                });
+                html += '</div>';
+                content.innerHTML = html;
+            } else {
+                // Secondary not available
+                let html = '<div class="alert alert-warning" style="padding: 0.75rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">Secondary translation could not be loaded.</div>';
+                content.innerHTML = html;
+            }
         } else {
-            // Single translation view
-            const data = mode === 'secondary' && secondaryData ? secondaryData : primaryData;
+            // Primary translation view
             let html = '<div class="scripture-text">';
-            data.verses.forEach(verse => {
+            primaryData.verses.forEach(verse => {
                 html += '<span class="verse"><sup class="verse-num">' + verse.verse + '</sup>' + verse.text + '</span> ';
             });
             html += '</div>';
