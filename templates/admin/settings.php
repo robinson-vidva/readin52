@@ -54,7 +54,7 @@ ob_start();
                                 </span>
                                 <span class="arrow">&#9662;</span>
                             </button>
-                            <div class="searchable-select-dropdown" style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000; max-height: 320px; overflow: hidden;">
+                            <div class="searchable-select-dropdown" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000; max-height: 320px; overflow: hidden;">
                                 <div class="searchable-select-search" style="padding: 0.75rem; border-bottom: 1px solid #eee; background: #fff;">
                                     <input type="text" placeholder="Search translations..." autocomplete="off" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                                 </div>
@@ -214,19 +214,33 @@ document.querySelector('.toggle-label')?.addEventListener('click', function(e) {
 // Searchable Select Component
 function initSearchableSelect(container, hiddenInput) {
     const trigger = container.querySelector('.searchable-select-trigger');
+    const dropdown = container.querySelector('.searchable-select-dropdown');
     const searchInput = container.querySelector('.searchable-select-search input');
     const options = container.querySelectorAll('.searchable-select-option');
     const selectedText = trigger.querySelector('.selected-text');
 
+    // Ensure dropdown is hidden initially
+    dropdown.style.display = 'none';
+
     trigger.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        const isOpen = container.classList.contains('open');
-        document.querySelectorAll('.searchable-select.open').forEach(el => {
+        const isOpen = dropdown.style.display !== 'none';
+
+        // Close all other dropdowns
+        document.querySelectorAll('.searchable-select-dropdown').forEach(el => {
+            if (el !== dropdown) el.style.display = 'none';
+        });
+        document.querySelectorAll('.searchable-select').forEach(el => {
             if (el !== container) el.classList.remove('open');
         });
-        container.classList.toggle('open');
-        if (!isOpen) {
+
+        if (isOpen) {
+            dropdown.style.display = 'none';
+            container.classList.remove('open');
+        } else {
+            dropdown.style.display = 'flex';
+            container.classList.add('open');
             searchInput.value = '';
             filterOptions('');
             searchInput.focus();
@@ -271,18 +285,21 @@ function initSearchableSelect(container, hiddenInput) {
             this.classList.add('selected');
             selectedText.textContent = label;
             hiddenInput.value = value;
+            dropdown.style.display = 'none';
             container.classList.remove('open');
         });
     });
 
     document.addEventListener('click', function(e) {
         if (!container.contains(e.target)) {
+            dropdown.style.display = 'none';
             container.classList.remove('open');
         }
     });
 
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            dropdown.style.display = 'none';
             container.classList.remove('open');
             trigger.focus();
         } else if (e.key === 'Enter') {
