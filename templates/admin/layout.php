@@ -16,12 +16,17 @@
     <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo APP_VERSION; ?>">
 </head>
 <body class="admin-page">
+    <?php $adminAppLogo = Database::getSetting('app_logo', ''); ?>
     <div class="admin-layout">
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <a href="/?route=admin" class="admin-logo">
-                    <span class="logo-icon">&#x1F4D6;</span>
+                    <?php if (!empty($adminAppLogo) && file_exists(ROOT_PATH . '/uploads/logos/' . $adminAppLogo)): ?>
+                        <img src="/uploads/logos/<?php echo e($adminAppLogo); ?>" alt="Logo" style="max-height: 28px; max-width: 100px; vertical-align: middle;">
+                    <?php else: ?>
+                        <span class="logo-icon">&#x1F4D6;</span>
+                    <?php endif; ?>
                     <span class="logo-text"><?php echo e(ReadingPlan::getAppName()); ?></span>
                 </a>
                 <span class="admin-badge">Admin</span>

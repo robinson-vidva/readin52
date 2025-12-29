@@ -21,12 +21,17 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="home-page">
+    <?php $appLogo = Database::getSetting('app_logo', ''); ?>
     <div class="home-hero">
         <div class="home-overlay"></div>
         <div class="container">
             <div class="home-content">
                 <div class="home-logo">
-                    <span class="logo-icon">&#x1F4D6;</span>
+                    <?php if (!empty($appLogo) && file_exists(ROOT_PATH . '/uploads/logos/' . $appLogo)): ?>
+                        <img src="/uploads/logos/<?php echo e($appLogo); ?>" alt="Logo" style="max-height: 80px; max-width: 200px;">
+                    <?php else: ?>
+                        <span class="logo-icon">&#x1F4D6;</span>
+                    <?php endif; ?>
                 </div>
                 <h1 class="home-title"><?php echo e(ReadingPlan::getAppName()); ?></h1>
                 <p class="home-tagline"><?php echo e(ReadingPlan::getAppTagline()); ?></p>
