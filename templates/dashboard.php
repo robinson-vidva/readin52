@@ -171,10 +171,9 @@ ob_start();
 <!-- Bible Reader Modal -->
 <div id="readerModal" class="modal">
     <div class="modal-content reader-modal <?php echo !empty($user['secondary_translation']) ? 'dual-translation' : ''; ?>">
-        <div class="reader-header">
-            <h2 id="readerTitle">Loading...</h2>
-            <button class="reader-close" onclick="closeReader()" aria-label="Close">&times;</button>
-            <div class="reader-controls">
+        <div class="reader-header" style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color, #eee); gap: 0.75rem;">
+            <h2 id="readerTitle" style="flex: 1; font-size: 1.1rem; margin: 0; font-weight: 600;">Loading...</h2>
+            <div class="reader-controls" style="display: flex; align-items: center; gap: 0.5rem;">
                 <?php if (!empty($user['secondary_translation'])): ?>
                     <?php
                     $primaryTrans = array_filter(ReadingPlan::getTranslations(), fn($t) => $t['id'] === $user['preferred_translation']);
@@ -182,12 +181,12 @@ ob_start();
                     $primaryName = reset($primaryTrans)['name'] ?? 'Primary';
                     $secondaryName = reset($secondaryTrans)['name'] ?? 'Secondary';
                     ?>
-                    <div class="translation-selector" style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem;">
-                        <div class="segmented-control" style="display: inline-flex; background: #e8e8e8; border-radius: 6px; padding: 2px;">
-                            <button type="button" id="btn1st" onclick="toggleTranslation(false)" style="padding: 4px 12px; font-size: 0.7rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; background: #fff; color: var(--primary, #5D4037); box-shadow: 0 1px 2px rgba(0,0,0,0.1);">1st</button>
-                            <button type="button" id="btn2nd" onclick="toggleTranslation(true)" style="padding: 4px 12px; font-size: 0.7rem; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; background: transparent; color: #666;">2nd</button>
+                    <div class="translation-selector" style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem;">
+                        <div class="segmented-control" style="display: inline-flex; background: var(--background, #f0f0f0); border-radius: 8px; padding: 3px; border: 1px solid var(--border-color, #ddd);">
+                            <button type="button" id="btn1st" onclick="toggleTranslation(false)" style="padding: 6px 14px; font-size: 0.75rem; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; background: #fff; color: var(--primary, #5D4037); box-shadow: 0 1px 3px rgba(0,0,0,0.12);">1st</button>
+                            <button type="button" id="btn2nd" onclick="toggleTranslation(true)" style="padding: 6px 14px; font-size: 0.75rem; font-weight: 500; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; background: transparent; color: #666;">2nd</button>
                         </div>
-                        <span id="currentTransName" style="font-size: 0.65rem; color: var(--text-secondary, #888); text-align: center; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo e($primaryName); ?></span>
+                        <span id="currentTransName" style="font-size: 0.7rem; color: var(--text-secondary, #888); text-align: center; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo e($primaryName); ?></span>
                     </div>
                     <script>
                         const primaryTransName = '<?php echo e($primaryName); ?>';
@@ -224,6 +223,7 @@ ob_start();
                     </div>
                 <?php endif; ?>
             </div>
+            <button class="reader-close" onclick="closeReader()" aria-label="Close" style="width: 36px; height: 36px; border: none; background: var(--background, #f5f5f5); font-size: 1.25rem; cursor: pointer; color: var(--text-secondary, #666); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;">&times;</button>
         </div>
         <div class="reader-meta" id="readerMeta">
             <span class="verse-count" id="verseCount"></span>
