@@ -90,15 +90,15 @@ if (Auth::isLoggedIn()) {
                 <?php if (Auth::isAdmin()): ?>
                     <a href="/?route=admin" class="nav-link <?php echo strpos(currentRoute(), 'admin') === 0 ? 'active' : ''; ?>">Admin</a>
                 <?php endif; ?>
-                <div class="nav-user-menu" style="position: relative; display: inline-block;">
-                    <a href="/?route=profile" class="nav-avatar-link <?php echo activeClass('profile') || activeClass('settings') ? 'active' : ''; ?>" style="display: flex; padding: 4px; border-radius: 50%; cursor: pointer;">
-                        <span class="avatar-small" style="background-color: <?php echo e($navAvatarColor); ?>; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.75rem; text-transform: uppercase;"><?php echo e($navInitials); ?></span>
+                <div class="nav-user-menu">
+                    <a href="/?route=profile" class="nav-avatar-link <?php echo activeClass('profile') || activeClass('settings') ? 'active' : ''; ?>">
+                        <span class="avatar-small" style="background-color: <?php echo e($navAvatarColor); ?>;"><?php echo e($navInitials); ?></span>
                     </a>
-                    <div class="nav-user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; min-width: 160px; background: var(--card-bg, #fff); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 0.5rem 0; z-index: 1000; margin-top: 4px;">
-                        <a href="/?route=profile" class="dropdown-item" style="display: block; padding: 0.75rem 1rem; color: var(--text-color, #333); text-decoration: none;">Profile</a>
-                        <a href="/?route=settings" class="dropdown-item" style="display: block; padding: 0.75rem 1rem; color: var(--text-color, #333); text-decoration: none;">Settings</a>
-                        <div class="dropdown-divider" style="height: 1px; background: var(--border-color, #e0e0e0); margin: 0.5rem 0;"></div>
-                        <a href="/?route=logout" class="dropdown-item" style="display: block; padding: 0.75rem 1rem; color: var(--text-color, #333); text-decoration: none;">Logout</a>
+                    <div class="nav-user-dropdown">
+                        <a href="/?route=profile" class="dropdown-item">Profile</a>
+                        <a href="/?route=settings" class="dropdown-item">Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/?route=logout" class="dropdown-item">Logout</a>
                     </div>
                 </div>
             </div>

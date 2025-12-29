@@ -420,7 +420,17 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     min-width: 160px;
     z-index: 9999;
-    overflow: hidden;
+    overflow: visible;
+}
+
+/* Bridge the gap between avatar and dropdown to prevent hover loss */
+.nav-user-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 12px;
 }
 
 .nav-user-menu:hover .nav-user-dropdown {
