@@ -208,4 +208,213 @@ class User
         }
         return password_verify($password, $user['password_hash']);
     }
+
+    // ==========================================
+    // PASSWORD RESET METHODS
+    // ==========================================
+
+    /**
+     * Create a password reset token
+     */
+    public static function createPasswordResetToken(string $email): ?array
+    {
+        $user = self::findByEmail($email);
+        if (!$user) {
+            return null;
+        }
+
+        $pdo = Database::getInstance();
+
+        // Invalidate any existing tokens for this user
+        $stmt = $pdo->prepare("UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0");
+        $stmt->execute([$user['id']]);
+
+        // Create new token
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        $stmt = $pdo->prepare("
+            INSERT INTO password_resets (user_id, token, expires_at)
+            VALUES (?, ?, ?)
+        ");
+        $stmt->execute([$user['id'], $token, $expiresAt]);
+
+        return [
+            'token' => $token,
+            'user' => $user,
+            'expires_at' => $expiresAt
+        ];
+    }
+
+    /**
+     * Validate a password reset token
+     */
+    public static function validatePasswordResetToken(string $token): ?array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT pr.*, u.id as user_id, u.name, u.email
+            FROM password_resets pr
+            JOIN users u ON pr.user_id = u.id
+            WHERE pr.token = ? AND pr.used = 0 AND pr.expires_at > NOW()
+        ");
+        $stmt->execute([$token]);
+        return $stmt->fetch() ?: null;
+    }
+
+    /**
+     * Use a password reset token and update password
+     */
+    public static function resetPasswordWithToken(string $token, string $newPassword): bool
+    {
+        $resetData = self::validatePasswordResetToken($token);
+        if (!$resetData) {
+            return false;
+        }
+
+        $pdo = Database::getInstance();
+
+        try {
+            $pdo->beginTransaction();
+
+            // Update password
+            $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $stmt->execute([$passwordHash, $resetData['user_id']]);
+
+            // Mark token as used
+            $stmt = $pdo->prepare("UPDATE password_resets SET used = 1 WHERE token = ?");
+            $stmt->execute([$token]);
+
+            $pdo->commit();
+            return true;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return false;
+        }
+    }
+
+    /**
+     * Clean up expired password reset tokens
+     */
+    public static function cleanupExpiredPasswordResets(): int
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("DELETE FROM password_resets WHERE expires_at < NOW() OR used = 1");
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    // ==========================================
+    // EMAIL CHANGE METHODS
+    // ==========================================
+
+    /**
+     * Create an email verification token for email change
+     */
+    public static function createEmailVerificationToken(int $userId, string $newEmail): ?array
+    {
+        // Check if new email is already in use
+        $existingUser = self::findByEmail($newEmail);
+        if ($existingUser) {
+            return null;
+        }
+
+        $user = self::findById($userId);
+        if (!$user) {
+            return null;
+        }
+
+        $pdo = Database::getInstance();
+
+        // Invalidate any existing tokens for this user
+        $stmt = $pdo->prepare("UPDATE email_verifications SET used = 1 WHERE user_id = ? AND used = 0");
+        $stmt->execute([$userId]);
+
+        // Create new token
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+        $stmt = $pdo->prepare("
+            INSERT INTO email_verifications (user_id, new_email, token, expires_at)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt->execute([$userId, $newEmail, $token, $expiresAt]);
+
+        return [
+            'token' => $token,
+            'user' => $user,
+            'new_email' => $newEmail,
+            'expires_at' => $expiresAt
+        ];
+    }
+
+    /**
+     * Validate an email verification token
+     */
+    public static function validateEmailVerificationToken(string $token): ?array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT ev.*, u.id as user_id, u.name, u.email as old_email
+            FROM email_verifications ev
+            JOIN users u ON ev.user_id = u.id
+            WHERE ev.token = ? AND ev.used = 0 AND ev.expires_at > NOW()
+        ");
+        $stmt->execute([$token]);
+        return $stmt->fetch() ?: null;
+    }
+
+    /**
+     * Complete email change with verification token
+     */
+    public static function completeEmailChange(string $token): ?array
+    {
+        $verifyData = self::validateEmailVerificationToken($token);
+        if (!$verifyData) {
+            return null;
+        }
+
+        // Check again that new email isn't taken
+        $existingUser = self::findByEmail($verifyData['new_email']);
+        if ($existingUser) {
+            return null;
+        }
+
+        $pdo = Database::getInstance();
+
+        try {
+            $pdo->beginTransaction();
+
+            // Update email
+            $stmt = $pdo->prepare("UPDATE users SET email = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+            $stmt->execute([$verifyData['new_email'], $verifyData['user_id']]);
+
+            // Mark token as used
+            $stmt = $pdo->prepare("UPDATE email_verifications SET used = 1 WHERE token = ?");
+            $stmt->execute([$token]);
+
+            $pdo->commit();
+
+            return [
+                'user_id' => $verifyData['user_id'],
+                'old_email' => $verifyData['old_email'],
+                'new_email' => $verifyData['new_email']
+            ];
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return null;
+        }
+    }
+
+    /**
+     * Clean up expired email verification tokens
+     */
+    public static function cleanupExpiredEmailVerifications(): int
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("DELETE FROM email_verifications WHERE expires_at < NOW() OR used = 1");
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
 }

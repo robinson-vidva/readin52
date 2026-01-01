@@ -33,14 +33,46 @@ ob_start();
                         <input type="text" id="name" name="name" value="<?php echo e($user['name']); ?>" required>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label>Email Address</label>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Update Name</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Email Section -->
+        <div class="settings-section">
+            <h2 class="section-title">Email Address</h2>
+            <div class="settings-card">
+                <?php if (isset($emailSuccess)): ?>
+                    <div class="alert alert-success"><?php echo e($emailSuccess); ?></div>
+                <?php endif; ?>
+                <?php if (isset($emailError)): ?>
+                    <div class="alert alert-error"><?php echo e($emailError); ?></div>
+                <?php endif; ?>
+
+                <form method="POST" action="/?route=settings">
+                    <?php echo csrfField(); ?>
+                    <input type="hidden" name="action" value="change_email">
+
+                    <div class="form-group">
+                        <label>Current Email</label>
                         <input type="email" value="<?php echo e($user['email']); ?>" disabled style="background: var(--background, #f5f5f5); cursor: not-allowed;">
-                        <small class="form-hint">Email cannot be changed</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_email">New Email Address</label>
+                        <input type="email" id="new_email" name="new_email" required placeholder="Enter new email address">
+                        <small class="form-hint">A verification link will be sent to the new email</small>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="email_password">Confirm Password</label>
+                        <input type="password" id="email_password" name="password" required placeholder="Enter your password to confirm">
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Update Name</button>
+                        <button type="submit" class="btn btn-primary">Change Email</button>
                     </div>
                 </form>
             </div>

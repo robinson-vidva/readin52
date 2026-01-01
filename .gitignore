@@ -28,6 +28,13 @@ logs/
 # Database credentials (not tracked)
 config/db.php
 
+# Email credentials (not tracked)
+config/email.php
+
+# Uploaded files
+uploads/logos/*
+!uploads/logos/.gitkeep
+
 # Vendor (if using Composer later)
 /vendor/
 

@@ -124,6 +124,98 @@ try {
             redirect('/?route=login');
             break;
 
+        case 'forgot-password':
+            if (Auth::isLoggedIn()) {
+                redirect('/?route=dashboard');
+            }
+
+            if ($method === 'POST') {
+                if (!validateCsrf()) {
+                    render('forgot-password', ['error' => 'Invalid request. Please try again.']);
+                    break;
+                }
+
+                $email = trim(post('email', ''));
+
+                // Always show success message to prevent email enumeration
+                $successMessage = 'If an account exists with this email, you will receive a password reset link shortly.';
+
+                if (!empty($email)) {
+                    $resetData = User::createPasswordResetToken($email);
+                    if ($resetData && Email::isConfigured()) {
+                        Email::sendPasswordReset(
+                            $resetData['user']['email'],
+                            $resetData['user']['name'],
+                            $resetData['token']
+                        );
+                    }
+                }
+
+                render('forgot-password', ['success' => $successMessage]);
+            } else {
+                render('forgot-password');
+            }
+            break;
+
+        case 'reset-password':
+            if (Auth::isLoggedIn()) {
+                redirect('/?route=dashboard');
+            }
+
+            $token = $_GET['token'] ?? post('token', '');
+
+            if ($method === 'POST') {
+                if (!validateCsrf()) {
+                    render('reset-password', ['error' => 'Invalid request. Please try again.', 'validToken' => false]);
+                    break;
+                }
+
+                $password = post('password', '');
+                $passwordConfirm = post('password_confirm', '');
+
+                if (strlen($password) < 6) {
+                    render('reset-password', [
+                        'error' => 'Password must be at least 6 characters.',
+                        'validToken' => true,
+                        'token' => $token
+                    ]);
+                } elseif ($password !== $passwordConfirm) {
+                    render('reset-password', [
+                        'error' => 'Passwords do not match.',
+                        'validToken' => true,
+                        'token' => $token
+                    ]);
+                } elseif (User::resetPasswordWithToken($token, $password)) {
+                    render('reset-password', ['success' => 'Your password has been reset successfully. You can now sign in.']);
+                } else {
+                    render('reset-password', ['error' => 'This reset link is invalid or has expired.', 'validToken' => false]);
+                }
+            } else {
+                $resetData = User::validatePasswordResetToken($token);
+                render('reset-password', [
+                    'validToken' => $resetData !== null,
+                    'token' => $token
+                ]);
+            }
+            break;
+
+        case 'verify-email':
+            $token = $_GET['token'] ?? '';
+            $result = User::completeEmailChange($token);
+
+            if ($result) {
+                setFlash('success', 'Your email has been changed to ' . $result['new_email']);
+                // If logged in, refresh session
+                if (Auth::isLoggedIn() && Auth::getUserId() === $result['user_id']) {
+                    // User session will pick up new email on next page load
+                }
+            } else {
+                setFlash('error', 'This verification link is invalid or has expired.');
+            }
+
+            redirect(Auth::isLoggedIn() ? '/?route=settings' : '/?route=login');
+            break;
+
         // ============ Authenticated Routes ============
 
         case 'dashboard':
@@ -171,6 +263,32 @@ try {
                             $data['passwordSuccess'] = 'Password changed successfully.';
                         } else {
                             $data['passwordError'] = 'Failed to change password.';
+                        }
+                    } elseif ($action === 'change_email') {
+                        $newEmail = trim(post('new_email', ''));
+                        $password = post('password', '');
+                        $currentUser = Auth::getUser();
+
+                        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                            $data['emailError'] = 'Please enter a valid email address.';
+                        } elseif ($newEmail === $currentUser['email']) {
+                            $data['emailError'] = 'New email is the same as your current email.';
+                        } elseif (!User::verifyPassword($userId, $password)) {
+                            $data['emailError'] = 'Incorrect password.';
+                        } else {
+                            $verifyData = User::createEmailVerificationToken($userId, $newEmail);
+                            if (!$verifyData) {
+                                $data['emailError'] = 'This email address is already in use.';
+                            } elseif (!Email::isConfigured()) {
+                                $data['emailError'] = 'Email service is not configured. Please contact support.';
+                            } else {
+                                $result = Email::sendEmailVerification($newEmail, $currentUser['name'], $verifyData['token']);
+                                if ($result['success']) {
+                                    $data['emailSuccess'] = 'Verification email sent to ' . e($newEmail) . '. Please check your inbox.';
+                                } else {
+                                    $data['emailError'] = 'Failed to send verification email. Please try again.';
+                                }
+                            }
                         }
                     } else {
                         // Default: save preferences (theme, translations)

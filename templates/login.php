@@ -60,7 +60,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label for="password">Password</label>
+                        <a href="/?route=forgot-password" style="font-size: 0.85rem;">Forgot password?</a>
+                    </div>
                     <input
                         type="password"
                         id="password"

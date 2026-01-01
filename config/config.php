@@ -56,7 +56,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Application settings
 define('APP_NAME', 'ReadIn52');
 define('APP_TAGLINE', 'Journey Through Scripture in 52 Weeks');
-define('APP_VERSION', '1.7.4');
+define('APP_VERSION', '1.8.0');
 
 // Paths - All relative to document root (public_html)
 define('ROOT_PATH', __DIR__ . '/..');
@@ -88,6 +88,17 @@ if (!defined('DB_USER')) define('DB_USER', 'your_database_user');
 if (!defined('DB_PASS')) define('DB_PASS', 'your_database_password');
 if (!defined('DB_PORT')) define('DB_PORT', '3306');
 if (!defined('DB_CHARSET')) define('DB_CHARSET', 'utf8mb4');
+
+// ============================================================
+// LOAD EMAIL CREDENTIALS (Brevo)
+// ============================================================
+// If email.php exists, load it (contains your Brevo API key)
+// This file is gitignored so it won't be overwritten on deploy
+// ============================================================
+$emailConfigPath = __DIR__ . '/email.php';
+if (file_exists($emailConfigPath)) {
+    require_once $emailConfigPath;
+}
 
 // Bible API
 define('BIBLE_API_BASE', 'https://bible.helloao.org/api');
