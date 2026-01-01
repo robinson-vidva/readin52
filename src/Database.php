@@ -211,6 +211,33 @@ class Database
                 INDEX idx_email_verify_expires (expires_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
+
+        // Badges definition table
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS badges (
+                id VARCHAR(50) PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                description VARCHAR(255) NOT NULL,
+                icon VARCHAR(10) NOT NULL,
+                category ENUM('book', 'engagement', 'streak', 'milestone') NOT NULL,
+                criteria JSON NOT NULL,
+                sort_order TINYINT NOT NULL DEFAULT 0
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        // User badges (earned badges)
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS user_badges (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                badge_id VARCHAR(50) NOT NULL,
+                earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (badge_id) REFERENCES badges(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_user_badge (user_id, badge_id),
+                INDEX idx_user_badges_user (user_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
     }
 
     /**
@@ -346,8 +373,44 @@ class Database
             ");
         }
 
+        // Create badges table if not exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'badges'");
+        if ($stmt->fetch() === false) {
+            $pdo->exec("
+                CREATE TABLE badges (
+                    id VARCHAR(50) PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    description VARCHAR(255) NOT NULL,
+                    icon VARCHAR(10) NOT NULL,
+                    category ENUM('book', 'engagement', 'streak', 'milestone') NOT NULL,
+                    criteria JSON NOT NULL,
+                    sort_order TINYINT NOT NULL DEFAULT 0
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        }
+
+        // Create user_badges table if not exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'user_badges'");
+        if ($stmt->fetch() === false) {
+            $pdo->exec("
+                CREATE TABLE user_badges (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    badge_id VARCHAR(50) NOT NULL,
+                    earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (badge_id) REFERENCES badges(id) ON DELETE CASCADE,
+                    UNIQUE KEY unique_user_badge (user_id, badge_id),
+                    INDEX idx_user_badges_user (user_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        }
+
         // Import reading plan from JSON if tables are empty
         self::importReadingPlanFromJson();
+
+        // Seed badges
+        self::seedBadges();
 
         // Seed additional Bible translations
         self::seedBibleTranslations();
@@ -534,5 +597,66 @@ class Database
         $pdo = self::getInstance();
         $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)");
         $stmt->execute([$key, $value]);
+    }
+
+    /**
+     * Seed badges into the database
+     */
+    public static function seedBadges(): void
+    {
+        $pdo = self::getInstance();
+
+        // Check if badges already seeded
+        $stmt = $pdo->query("SELECT COUNT(*) as count FROM badges");
+        $count = (int) $stmt->fetch()['count'];
+        if ($count > 0) {
+            return;
+        }
+
+        $badges = [
+            // Book Completion Badges
+            ['genesis_journey', 'Genesis Journey', 'Complete all Genesis chapters', '📖', 'book', json_encode(['type' => 'book', 'book' => 'GEN']), 1],
+            ['exodus_explorer', 'Exodus Explorer', 'Complete all Exodus chapters', '🏔️', 'book', json_encode(['type' => 'book', 'book' => 'EXO']), 2],
+            ['psalms_singer', 'Psalms Singer', 'Complete all Psalms chapters', '🎵', 'book', json_encode(['type' => 'book', 'book' => 'PSA']), 3],
+            ['proverbs_wise', 'Wisdom Seeker', 'Complete all Proverbs chapters', '🦉', 'book', json_encode(['type' => 'book', 'book' => 'PRO']), 4],
+            ['isaiah_prophet', 'Prophet\'s Voice', 'Complete all Isaiah chapters', '📜', 'book', json_encode(['type' => 'book', 'book' => 'ISA']), 5],
+            ['matthew_disciple', 'Matthew\'s Path', 'Complete all Matthew chapters', '✝️', 'book', json_encode(['type' => 'book', 'book' => 'MAT']), 6],
+            ['john_beloved', 'Beloved Disciple', 'Complete all John chapters', '❤️', 'book', json_encode(['type' => 'book', 'book' => 'JHN']), 7],
+            ['romans_theologian', 'Romans Scholar', 'Complete all Romans chapters', '⚖️', 'book', json_encode(['type' => 'book', 'book' => 'ROM']), 8],
+            ['revelation_seer', 'Revelation Seer', 'Complete all Revelation chapters', '👁️', 'book', json_encode(['type' => 'book', 'book' => 'REV']), 9],
+
+            // Category Completion Badges
+            ['poetry_master', 'Poetry Master', 'Complete all Psalms & Wisdom readings', '📚', 'book', json_encode(['type' => 'category', 'category' => 'poetry']), 10],
+            ['history_scholar', 'History Scholar', 'Complete all Law & History readings', '🏛️', 'book', json_encode(['type' => 'category', 'category' => 'history']), 11],
+            ['prophecy_student', 'Prophecy Student', 'Complete all Prophetic readings', '🔮', 'book', json_encode(['type' => 'category', 'category' => 'prophecy']), 12],
+            ['gospel_bearer', 'Gospel Bearer', 'Complete all Gospel & Letters readings', '✨', 'book', json_encode(['type' => 'category', 'category' => 'gospels']), 13],
+
+            // Engagement Badges
+            ['first_steps', 'First Steps', 'Complete your first reading', '👣', 'engagement', json_encode(['type' => 'readings', 'count' => 1]), 20],
+            ['getting_started', 'Getting Started', 'Complete 10 readings', '🌱', 'engagement', json_encode(['type' => 'readings', 'count' => 10]), 21],
+            ['dedicated_reader', 'Dedicated Reader', 'Complete 50 readings', '📖', 'engagement', json_encode(['type' => 'readings', 'count' => 50]), 22],
+            ['faithful_student', 'Faithful Student', 'Complete 100 readings', '🎓', 'engagement', json_encode(['type' => 'readings', 'count' => 100]), 23],
+            ['bible_scholar', 'Bible Scholar', 'Complete all 208 readings', '🏆', 'engagement', json_encode(['type' => 'readings', 'count' => 208]), 24],
+
+            // Weekly Badges
+            ['week_warrior', 'Week Warrior', 'Complete all 4 readings in one week', '⚔️', 'engagement', json_encode(['type' => 'week_complete', 'count' => 1]), 30],
+            ['month_of_faith', 'Month of Faith', 'Complete 4 consecutive weeks', '📅', 'engagement', json_encode(['type' => 'consecutive_weeks', 'count' => 4]), 31],
+            ['quarter_champion', 'Quarter Champion', 'Complete 13 consecutive weeks', '🏅', 'engagement', json_encode(['type' => 'consecutive_weeks', 'count' => 13]), 32],
+
+            // Milestone Badges
+            ['halfway_there', 'Halfway There', 'Reach 50% completion', '🎯', 'milestone', json_encode(['type' => 'percentage', 'value' => 50]), 40],
+            ['almost_done', 'Almost Done', 'Reach 90% completion', '🚀', 'milestone', json_encode(['type' => 'percentage', 'value' => 90]), 41],
+            ['finisher', 'Finisher', 'Complete the entire Bible in 52 weeks', '👑', 'milestone', json_encode(['type' => 'percentage', 'value' => 100]), 42],
+
+            // Streak Badges
+            ['on_fire', 'On Fire', '7-day reading streak', '🔥', 'streak', json_encode(['type' => 'streak_days', 'count' => 7]), 50],
+            ['consistent', 'Consistent', '30-day reading streak', '💪', 'streak', json_encode(['type' => 'streak_days', 'count' => 30]), 51],
+            ['devoted', 'Devoted', '100-day reading streak', '🌟', 'streak', json_encode(['type' => 'streak_days', 'count' => 100]), 52],
+        ];
+
+        $stmt = $pdo->prepare("INSERT IGNORE INTO badges (id, name, description, icon, category, criteria, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        foreach ($badges as $badge) {
+            $stmt->execute($badge);
+        }
     }
 }

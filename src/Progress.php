@@ -93,10 +93,14 @@ class Progress
         // Check if all chapters in category are complete
         $categoryComplete = self::isCategoryComplete($userId, $weekNumber, $category);
 
+        // Check and award badges
+        $newBadges = Badge::checkAndAwardBadges($userId);
+
         return [
             'success' => true,
             'completed' => true,
-            'categoryComplete' => $categoryComplete
+            'categoryComplete' => $categoryComplete,
+            'newBadges' => $newBadges
         ];
     }
 
@@ -143,10 +147,14 @@ class Progress
         // Check if all chapters in category are complete
         $categoryComplete = self::isCategoryComplete($userId, $weekNumber, $category);
 
+        // Check and award badges if progress was made
+        $newBadges = $newStatus ? Badge::checkAndAwardBadges($userId) : [];
+
         return [
             'success' => true,
             'completed' => $newStatus,
-            'categoryComplete' => $categoryComplete
+            'categoryComplete' => $categoryComplete,
+            'newBadges' => $newBadges
         ];
     }
 
