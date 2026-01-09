@@ -228,6 +228,11 @@ try {
             render('profile');
             break;
 
+        case 'books':
+            Auth::requireAuth();
+            render('books');
+            break;
+
         case 'settings':
             Auth::requireAuth();
             $data = [];

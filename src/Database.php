@@ -606,30 +606,23 @@ class Database
     {
         $pdo = self::getInstance();
 
-        // Check if badges already seeded
-        $stmt = $pdo->query("SELECT COUNT(*) as count FROM badges");
+        // Remove old book-level badges if they exist (migration)
+        $pdo->exec("DELETE FROM badges WHERE category = 'book' AND JSON_EXTRACT(criteria, '$.type') = 'book'");
+
+        // Check if badges already seeded (check for engagement badges)
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM badges WHERE category = 'engagement'");
+        $stmt->execute();
         $count = (int) $stmt->fetch()['count'];
-        if ($count > 0) {
-            return;
+        if ($count >= 8) {
+            return; // Already has the new badges
         }
 
         $badges = [
-            // Book Completion Badges
-            ['genesis_journey', 'Genesis Journey', 'Complete all Genesis chapters', '📖', 'book', json_encode(['type' => 'book', 'book' => 'GEN']), 1],
-            ['exodus_explorer', 'Exodus Explorer', 'Complete all Exodus chapters', '🏔️', 'book', json_encode(['type' => 'book', 'book' => 'EXO']), 2],
-            ['psalms_singer', 'Psalms Singer', 'Complete all Psalms chapters', '🎵', 'book', json_encode(['type' => 'book', 'book' => 'PSA']), 3],
-            ['proverbs_wise', 'Wisdom Seeker', 'Complete all Proverbs chapters', '🦉', 'book', json_encode(['type' => 'book', 'book' => 'PRO']), 4],
-            ['isaiah_prophet', 'Prophet\'s Voice', 'Complete all Isaiah chapters', '📜', 'book', json_encode(['type' => 'book', 'book' => 'ISA']), 5],
-            ['matthew_disciple', 'Matthew\'s Path', 'Complete all Matthew chapters', '✝️', 'book', json_encode(['type' => 'book', 'book' => 'MAT']), 6],
-            ['john_beloved', 'Beloved Disciple', 'Complete all John chapters', '❤️', 'book', json_encode(['type' => 'book', 'book' => 'JHN']), 7],
-            ['romans_theologian', 'Romans Scholar', 'Complete all Romans chapters', '⚖️', 'book', json_encode(['type' => 'book', 'book' => 'ROM']), 8],
-            ['revelation_seer', 'Revelation Seer', 'Complete all Revelation chapters', '👁️', 'book', json_encode(['type' => 'book', 'book' => 'REV']), 9],
-
-            // Category Completion Badges
-            ['poetry_master', 'Poetry Master', 'Complete all Psalms & Wisdom readings', '📚', 'book', json_encode(['type' => 'category', 'category' => 'poetry']), 10],
-            ['history_scholar', 'History Scholar', 'Complete all Law & History readings', '🏛️', 'book', json_encode(['type' => 'category', 'category' => 'history']), 11],
-            ['prophecy_student', 'Prophecy Student', 'Complete all Prophetic readings', '🔮', 'book', json_encode(['type' => 'category', 'category' => 'prophecy']), 12],
-            ['gospel_bearer', 'Gospel Bearer', 'Complete all Gospel & Letters readings', '✨', 'book', json_encode(['type' => 'category', 'category' => 'gospels']), 13],
+            // Category Completion Badges (reading plan categories)
+            ['poetry_master', 'Poetry Master', 'Complete all Psalms & Wisdom readings', '📚', 'engagement', json_encode(['type' => 'category', 'category' => 'poetry']), 10],
+            ['history_scholar', 'History Scholar', 'Complete all Law & History readings', '🏛️', 'engagement', json_encode(['type' => 'category', 'category' => 'history']), 11],
+            ['prophecy_student', 'Prophecy Student', 'Complete all Prophetic readings', '🔮', 'engagement', json_encode(['type' => 'category', 'category' => 'prophecy']), 12],
+            ['gospel_bearer', 'Gospel Bearer', 'Complete all Gospel & Letters readings', '✨', 'engagement', json_encode(['type' => 'category', 'category' => 'gospels']), 13],
 
             // Engagement Badges
             ['first_steps', 'First Steps', 'Complete your first reading', '👣', 'engagement', json_encode(['type' => 'readings', 'count' => 1]), 20],
