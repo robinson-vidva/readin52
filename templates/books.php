@@ -39,7 +39,7 @@ ob_start();
                 <div style="font-size: 0.75rem; color: var(--text-muted, #888); margin-top: 0.25rem;"><?php echo $overallProgress['oldTestament']['completed']; ?>/<?php echo $overallProgress['oldTestament']['total']; ?> chapters</div>
             </div>
             <div style="background: var(--card-bg, #fff); padding: 1.25rem; border-radius: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                <div style="font-size: 2rem; font-weight: 700; color: #5D8B55;"><?php echo $overallProgress['newTestament']['percentage']; ?>%</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #5B7DB1;"><?php echo $overallProgress['newTestament']['percentage']; ?>%</div>
                 <div style="font-size: 0.85rem; color: var(--text-secondary, #666);">New Testament</div>
                 <div style="font-size: 0.75rem; color: var(--text-muted, #888); margin-top: 0.25rem;"><?php echo $overallProgress['newTestament']['completed']; ?>/<?php echo $overallProgress['newTestament']['total']; ?> chapters</div>
             </div>
@@ -112,26 +112,26 @@ ob_start();
         <!-- New Testament Section -->
         <div class="testament-section">
             <h2 style="font-size: 1.25rem; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
-                <span style="color: #5D8B55;">&#x2728;</span>
+                <span style="color: #5B7DB1;">&#x2728;</span>
                 New Testament
                 <span style="font-size: 0.85rem; font-weight: 400; color: var(--text-muted, #888); margin-left: auto;"><?php echo $overallProgress['newTestament']['percentage']; ?>%</span>
             </h2>
 
             <?php foreach ($newTestament as $catId => $category): ?>
             <div class="category-section" style="background: var(--card-bg, #fff); border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
-                <div class="category-header" style="padding: 1rem 1.25rem; background: linear-gradient(135deg, rgba(93, 139, 85, 0.1), rgba(93, 139, 85, 0.05)); border-bottom: 1px solid var(--border-color, #e0e0e0);">
+                <div class="category-header" style="padding: 1rem 1.25rem; background: linear-gradient(135deg, rgba(91, 125, 177, 0.1), rgba(91, 125, 177, 0.05)); border-bottom: 1px solid var(--border-color, #e0e0e0);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <div>
                             <h3 style="margin: 0; font-size: 1rem;"><?php echo e($category['name']); ?></h3>
                             <span style="font-size: 0.8rem; color: var(--text-muted, #888);"><?php echo e($category['description']); ?></span>
                         </div>
                         <div style="text-align: right;">
-                            <span style="font-size: 1.25rem; font-weight: 600; color: #5D8B55;"><?php echo $category['percentage']; ?>%</span>
+                            <span style="font-size: 1.25rem; font-weight: 600; color: #5B7DB1;"><?php echo $category['percentage']; ?>%</span>
                             <span style="display: block; font-size: 0.75rem; color: var(--text-muted, #888);"><?php echo $category['booksComplete']; ?>/<?php echo $category['totalBooks']; ?> books</span>
                         </div>
                     </div>
                     <div style="background: var(--background, #f8f8f8); height: 6px; border-radius: 3px; overflow: hidden;">
-                        <div style="width: <?php echo $category['percentage']; ?>%; height: 100%; background: #5D8B55; border-radius: 3px;"></div>
+                        <div style="width: <?php echo $category['percentage']; ?>%; height: 100%; background: #5B7DB1; border-radius: 3px;"></div>
                     </div>
                 </div>
                 <div class="books-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; padding: 1rem 1.25rem;">
@@ -140,7 +140,7 @@ ob_start();
                         <?php if ($book['isComplete']): ?>
                             <div style="font-size: 1.25rem; color: #4CAF50; margin-bottom: 0.25rem;">&#x2714;</div>
                         <?php else: ?>
-                            <div style="font-size: 1.25rem; color: #5D8B55; margin-bottom: 0.25rem;"><?php echo $book['percentage']; ?>%</div>
+                            <div style="font-size: 1.25rem; color: #5B7DB1; margin-bottom: 0.25rem;"><?php echo $book['percentage']; ?>%</div>
                         <?php endif; ?>
                         <div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?php echo e($book['name']); ?>"><?php echo e($book['name']); ?></div>
                         <div style="font-size: 0.7rem; color: var(--text-muted, #888);">
@@ -152,7 +152,7 @@ ob_start();
                         </div>
                         <?php if (!$book['isComplete'] && $book['total'] > 0): ?>
                         <div style="background: var(--border-color, #e0e0e0); height: 4px; border-radius: 2px; margin-top: 0.5rem; overflow: hidden;">
-                            <div style="width: <?php echo $book['percentage']; ?>%; height: 100%; background: #5D8B55; border-radius: 2px;"></div>
+                            <div style="width: <?php echo $book['percentage']; ?>%; height: 100%; background: #5B7DB1; border-radius: 2px;"></div>
                         </div>
                         <?php endif; ?>
                     </div>
