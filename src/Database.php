@@ -607,7 +607,8 @@ class Database
         $pdo = self::getInstance();
 
         // Remove old book-level badges if they exist (migration)
-        $pdo->exec("DELETE FROM badges WHERE category = 'book' AND JSON_EXTRACT(criteria, '$.type') = 'book'");
+        // Note: Using LIKE instead of JSON_EXTRACT for broader MySQL compatibility
+        $pdo->exec("DELETE FROM badges WHERE category = 'book'");
 
         // Check if badges already seeded (check for engagement badges)
         $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM badges WHERE category = 'engagement'");

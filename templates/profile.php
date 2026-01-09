@@ -79,7 +79,6 @@ ob_start();
                     <div style="margin-top: 1rem;">
                         <?php
                         $badgeCategories = [
-                            'book' => 'Book Completion',
                             'engagement' => 'Engagement',
                             'milestone' => 'Milestones',
                             'streak' => 'Streaks'
