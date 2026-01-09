@@ -47,14 +47,53 @@ if (Auth::isLoggedIn()) {
     <!-- Styles -->
     <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo APP_VERSION; ?>">
 
-    <!-- Responsive overrides for inline styles -->
+    <!-- Critical inline styles (fallback if CSS fails to load) -->
     <style>
+        /* Essential resets and layout */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #FAFAFA; color: #212121; line-height: 1.6; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+        /* Navbar */
+        .navbar { background: #5D4037; padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+        .navbar-brand { color: white; font-size: 1.25rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+        .navbar-menu { display: flex; gap: 1rem; align-items: center; }
+        .nav-link { color: rgba(255,255,255,0.8); text-decoration: none; padding: 0.5rem 1rem; }
+        .nav-link:hover, .nav-link.active { color: white; }
+        .navbar-toggle { display: none; }
+
+        /* Modal - MUST BE HIDDEN BY DEFAULT */
+        .modal { display: none !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex !important; }
+        .modal-content { background: white; border-radius: 12px; max-width: 600px; width: 95%; max-height: 90vh; overflow: hidden; }
+
+        /* Buttons */
+        .btn { display: inline-flex; padding: 0.625rem 1.25rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; }
+        .btn-primary { background: #5D4037; color: white; }
+        .btn-secondary { background: #E0E0E0; color: #212121; }
+
+        /* Dashboard basics */
+        .dashboard { padding: 2rem 0; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+
+        /* Avatar */
+        .avatar-small { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.75rem; }
+
+        /* Footer */
+        .footer { background: #5D4037; color: rgba(255,255,255,0.9); padding: 1.5rem 0; text-align: center; }
+
+        /* Mobile responsive */
         @media (max-width: 768px) {
             .stats-banner { grid-template-columns: repeat(2, 1fr) !important; }
             .profile-content { grid-template-columns: 1fr !important; }
             .settings-content { grid-template-columns: 1fr !important; }
             .danger-zone-cards { grid-template-columns: 1fr !important; }
             .profile-header { flex-direction: column !important; text-align: center !important; }
+            .navbar-toggle { display: flex; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 0.5rem; }
+            .navbar-toggle span { display: block; width: 24px; height: 2px; background: white; }
+            .navbar-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #3E2723; flex-direction: column; padding: 1rem; }
+            .navbar-menu.show { display: flex; }
         }
         @media (max-width: 480px) {
             .stats-banner { grid-template-columns: repeat(2, 1fr) !important; padding: 1rem !important; }
