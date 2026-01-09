@@ -233,6 +233,57 @@ try {
             render('books');
             break;
 
+        case 'notes':
+            Auth::requireAuth();
+            render('notes');
+            break;
+
+        case 'notes/save':
+            Auth::requireAuth();
+            if ($method === 'POST') {
+                if (!validateCsrf()) {
+                    setFlash('error', 'Invalid request.');
+                    redirect('/?route=notes');
+                }
+
+                $noteId = post('note_id', '');
+                $data = [
+                    'title' => post('title', ''),
+                    'content' => post('content', ''),
+                    'color' => post('color', 'default'),
+                    'week_number' => post('week_number', ''),
+                    'category' => post('category', ''),
+                    'book' => post('book', ''),
+                    'chapter' => post('chapter', ''),
+                ];
+
+                if ($noteId) {
+                    Note::update((int) $noteId, Auth::getUserId(), $data);
+                    setFlash('success', 'Note updated.');
+                } else {
+                    Note::create(Auth::getUserId(), $data);
+                    setFlash('success', 'Note created.');
+                }
+            }
+            redirect('/?route=notes');
+            break;
+
+        case 'notes/delete':
+            Auth::requireAuth();
+            header('Content-Type: application/json');
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                $noteId = (int) ($input['note_id'] ?? 0);
+                if ($noteId && Note::delete($noteId, Auth::getUserId())) {
+                    echo json_encode(['success' => true]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Failed to delete']);
+                }
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Invalid method']);
+            }
+            exit;
+
         case 'settings':
             Auth::requireAuth();
             $data = [];
@@ -434,6 +485,9 @@ try {
                 }
             }
             exit;
+
+        // ============ Notes API ============
+        // Handled in default section for dynamic route matching
 
         // ============ Admin Routes ============
 
@@ -704,6 +758,20 @@ try {
                     'week' => $week,
                     'progress' => $progress
                 ]);
+                exit;
+            }
+
+            // Check for API notes route: api/notes/{id}
+            if (preg_match('#^api/notes/(\d+)$#', $route, $matches)) {
+                Auth::requireAuth();
+                header('Content-Type: application/json');
+                $noteId = intval($matches[1]);
+                $note = Note::get($noteId, Auth::getUserId());
+                if ($note) {
+                    echo json_encode(['success' => true, 'note' => $note]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Note not found']);
+                }
                 exit;
             }
 

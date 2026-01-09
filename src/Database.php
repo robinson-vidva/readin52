@@ -406,6 +406,30 @@ class Database
             ");
         }
 
+        // Create notes table if not exists
+        $stmt = $pdo->query("SHOW TABLES LIKE 'notes'");
+        if ($stmt->fetch() === false) {
+            $pdo->exec("
+                CREATE TABLE notes (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    title VARCHAR(255) NOT NULL,
+                    content TEXT NOT NULL,
+                    week_number TINYINT NULL,
+                    category VARCHAR(20) NULL,
+                    book VARCHAR(10) NULL,
+                    chapter SMALLINT NULL,
+                    color VARCHAR(20) DEFAULT 'default',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    INDEX idx_notes_user (user_id),
+                    INDEX idx_notes_reference (week_number, category),
+                    INDEX idx_notes_book (book, chapter)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        }
+
         // Import reading plan from JSON if tables are empty
         self::importReadingPlanFromJson();
 
