@@ -38,22 +38,24 @@ ob_start();
             </div>
 
             <div class="progress-overview">
-                <div class="progress-circle" data-progress="<?php echo $chapterStats['percentage']; ?>">
-                    <svg viewBox="0 0 36 36">
+                <div class="progress-circle" data-progress="<?php echo $chapterStats['percentage']; ?>" style="width: 80px; height: 80px; position: relative;">
+                    <svg viewBox="0 0 36 36" width="80" height="80" style="width: 100%; height: 100%; transform: rotate(-90deg);">
                         <path class="circle-bg"
+                            style="fill: none; stroke: #E0E0E0; stroke-width: 3;"
                             d="M18 2.0845
                                a 15.9155 15.9155 0 0 1 0 31.831
                                a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
                         <path class="circle-progress"
+                            style="fill: none; stroke: #43A047; stroke-width: 3; stroke-linecap: round;"
                             stroke-dasharray="<?php echo $chapterStats['percentage']; ?>, 100"
                             d="M18 2.0845
                                a 15.9155 15.9155 0 0 1 0 31.831
                                a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
                     </svg>
-                    <div class="progress-text">
-                        <span class="progress-value"><?php echo $chapterStats['percentage']; ?>%</span>
+                    <div class="progress-text" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                        <span class="progress-value" style="font-size: 1.25rem; font-weight: 700; color: #5D4037;"><?php echo $chapterStats['percentage']; ?>%</span>
                     </div>
                 </div>
                 <div class="progress-details">
