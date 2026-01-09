@@ -233,17 +233,12 @@ try {
             render('books');
             break;
 
-        case 'notes':
-            Auth::requireAuth();
-            render('notes');
-            break;
-
         case 'notes/save':
             Auth::requireAuth();
             if ($method === 'POST') {
                 if (!validateCsrf()) {
                     setFlash('error', 'Invalid request.');
-                    redirect('/?route=notes');
+                    redirect('/?route=dashboard');
                 }
 
                 $noteId = post('note_id', '');
@@ -265,7 +260,8 @@ try {
                     setFlash('success', 'Note created.');
                 }
             }
-            redirect('/?route=notes');
+            // Redirect back - form submission reloads page in reader
+            redirect('/?route=dashboard');
             break;
 
         case 'notes/delete':
