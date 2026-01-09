@@ -222,6 +222,10 @@ ob_start();
                         </select>
                     </div>
                 <?php endif; ?>
+                <button onclick="toggleNotesPanel()" id="notesToggleBtn" style="padding: 0.4rem 0.6rem; font-size: 0.9rem; border: 1px solid #ddd; border-radius: 6px; background: var(--background, #f5f5f5); cursor: pointer; display: flex; align-items: center; gap: 0.25rem;" title="Notes">
+                    <span>&#x1F4DD;</span>
+                    <span id="notesCount" style="font-size: 0.75rem;">0</span>
+                </button>
             </div>
             <button class="reader-close" onclick="closeReader()" aria-label="Close" style="width: 36px; height: 36px; border: none; background: var(--background, #f5f5f5); font-size: 1.25rem; cursor: pointer; color: var(--text-secondary, #666); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;">&times;</button>
         </div>
@@ -229,8 +233,28 @@ ob_start();
             <span class="verse-count" id="verseCount"></span>
             <span class="reading-time" id="readingTime"></span>
         </div>
-        <div class="reader-body" id="readerContent">
-            <div class="loading-spinner"></div>
+        <div style="display: flex; flex: 1; overflow: hidden;">
+            <div class="reader-body" id="readerContent" style="flex: 1; overflow-y: auto;">
+                <div class="loading-spinner"></div>
+            </div>
+            <!-- Notes Panel -->
+            <div id="notesPanel" style="width: 280px; border-left: 1px solid var(--border-color, #e0e0e0); background: var(--card-bg, #fff); display: none; flex-direction: column; overflow: hidden;">
+                <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color, #e0e0e0); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">Notes</span>
+                    <button onclick="openNewNoteForm()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">+ Add</button>
+                </div>
+                <div id="newNoteForm" style="display: none; padding: 0.75rem; border-bottom: 1px solid var(--border-color, #e0e0e0); background: var(--background, #f8f8f8);">
+                    <input type="text" id="noteTitle" placeholder="Title (optional)" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem;">
+                    <textarea id="noteContent" placeholder="Write your note..." rows="3" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem; resize: none; font-family: inherit;"></textarea>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <button onclick="saveNote()" style="flex: 1; background: var(--primary, #5D4037); color: white; border: none; padding: 0.4rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Save</button>
+                        <button onclick="cancelNote()" style="background: transparent; border: 1px solid var(--border-color, #e0e0e0); padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Cancel</button>
+                    </div>
+                </div>
+                <div id="notesList" style="flex: 1; overflow-y: auto; padding: 0.5rem;">
+                    <p id="noNotesMsg" style="text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 1rem;">No notes yet</p>
+                </div>
+            </div>
         </div>
         <div class="reader-footer">
             <div class="reader-actions">
@@ -262,10 +286,127 @@ ob_start();
     const secondaryTranslation = '<?php echo e($user['secondary_translation'] ?? ''); ?>';
     const hasDualTranslation = <?php echo !empty($user['secondary_translation']) ? 'true' : 'false'; ?>;
     const weekChapters = <?php echo json_encode($weekChapters); ?>;
+    const csrfToken = '<?php echo getCsrfToken(); ?>';
     // Use var to make these global (accessible from app.js)
     var currentViewMode = 'primary'; // 'primary' or 'secondary'
     var cachedPrimaryData = null;
     var cachedSecondaryData = null;
+    var notesPanelOpen = false;
+    var currentNotesBook = '';
+    var currentNotesChapter = 0;
+    var chapterNotes = [];
+
+    // Notes Functions
+    function toggleNotesPanel() {
+        const panel = document.getElementById('notesPanel');
+        notesPanelOpen = !notesPanelOpen;
+        panel.style.display = notesPanelOpen ? 'flex' : 'none';
+    }
+
+    function openNewNoteForm() {
+        document.getElementById('newNoteForm').style.display = 'block';
+        document.getElementById('noteTitle').value = '';
+        document.getElementById('noteContent').value = '';
+        document.getElementById('noteContent').focus();
+    }
+
+    function cancelNote() {
+        document.getElementById('newNoteForm').style.display = 'none';
+    }
+
+    async function loadNotesForChapter(book, chapter) {
+        currentNotesBook = book;
+        currentNotesChapter = chapter;
+        try {
+            const response = await fetch(`/?route=api/notes/chapter&book=${book}&chapter=${chapter}`);
+            const data = await response.json();
+            if (data.success) {
+                chapterNotes = data.notes || [];
+                renderNotesList();
+            }
+        } catch (e) {
+            chapterNotes = [];
+            renderNotesList();
+        }
+    }
+
+    function renderNotesList() {
+        const list = document.getElementById('notesList');
+        const count = document.getElementById('notesCount');
+        count.textContent = chapterNotes.length;
+
+        if (chapterNotes.length === 0) {
+            list.innerHTML = '<p id="noNotesMsg" style="text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 1rem;">No notes for this chapter</p>';
+            return;
+        }
+
+        let html = '';
+        chapterNotes.forEach(note => {
+            html += `<div class="note-item" onclick="editNote(${note.id})" style="background: var(--background, #f8f8f8); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.4rem; cursor: pointer;">
+                <div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 0.2rem;">${escapeHtml(note.title)}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary, #666); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${escapeHtml(note.content.substring(0, 100))}</div>
+            </div>`;
+        });
+        list.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function saveNote() {
+        const title = document.getElementById('noteTitle').value.trim() || 'Untitled Note';
+        const content = document.getElementById('noteContent').value.trim();
+        if (!content) {
+            alert('Please write something');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('book', currentNotesBook);
+        formData.append('chapter', currentNotesChapter);
+        formData.append('color', 'default');
+
+        try {
+            await fetch('/?route=notes/save', { method: 'POST', body: formData });
+            cancelNote();
+            loadNotesForChapter(currentNotesBook, currentNotesChapter);
+        } catch (e) {
+            alert('Failed to save note');
+        }
+    }
+
+    async function editNote(noteId) {
+        const note = chapterNotes.find(n => n.id == noteId);
+        if (!note) return;
+
+        const newContent = prompt('Edit note:', note.content);
+        if (newContent === null) return;
+
+        if (newContent.trim() === '') {
+            if (confirm('Delete this note?')) {
+                await fetch('/?route=notes/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ note_id: noteId, csrf_token: csrfToken })
+                });
+            }
+        } else {
+            const formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('note_id', noteId);
+            formData.append('title', note.title);
+            formData.append('content', newContent);
+            formData.append('color', note.color || 'default');
+            await fetch('/?route=notes/save', { method: 'POST', body: formData });
+        }
+        loadNotesForChapter(currentNotesBook, currentNotesChapter);
+    }
 
     function toggleTranslation(isSecondary) {
         currentViewMode = isSecondary ? 'secondary' : 'primary';

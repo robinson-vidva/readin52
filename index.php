@@ -771,6 +771,21 @@ try {
                 exit;
             }
 
+            // Check for API notes/chapter route
+            if ($route === 'api/notes/chapter') {
+                Auth::requireAuth();
+                header('Content-Type: application/json');
+                $book = $_GET['book'] ?? '';
+                $chapter = intval($_GET['chapter'] ?? 0);
+                if ($book && $chapter) {
+                    $notes = Note::getForChapter(Auth::getUserId(), $book, $chapter);
+                    echo json_encode(['success' => true, 'notes' => $notes]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Book and chapter required']);
+                }
+                exit;
+            }
+
             // 404 Not Found
             http_response_code(404);
             echo '<!DOCTYPE html>

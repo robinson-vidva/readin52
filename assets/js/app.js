@@ -243,6 +243,11 @@ async function loadChapter(book, chapter) {
         currentBook = book;
         currentChapter = chapter;
 
+        // Load notes for this chapter (if function exists)
+        if (typeof loadNotesForChapter === 'function') {
+            loadNotesForChapter(book, chapter);
+        }
+
     } catch (error) {
         console.error('Error loading chapter:', error);
         content.innerHTML = '<p class="error">Failed to load chapter. Please try again.</p>';
