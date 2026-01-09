@@ -233,7 +233,7 @@ ob_start();
             <span class="verse-count" id="verseCount"></span>
             <span class="reading-time" id="readingTime"></span>
         </div>
-        <div style="display: flex; flex: 1; overflow: hidden;">
+        <div style="display: flex; flex: 1; overflow: hidden; min-height: 0;">
             <div class="reader-body" id="readerContent" style="flex: 1; overflow-y: auto;">
                 <div class="loading-spinner"></div>
             </div>
