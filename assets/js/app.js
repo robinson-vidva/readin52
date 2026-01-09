@@ -110,6 +110,7 @@ function openChapter(category, book, chapter) {
     }
 
     modal.classList.add('show');
+    modal.style.display = 'flex'; // Fallback if CSS not loaded
     document.body.style.overflow = 'hidden';
     loadChapter(book, chapter);
     updateFooterButtons();
@@ -122,6 +123,7 @@ function closeReader() {
     const modal = document.getElementById('readerModal');
     if (modal) {
         modal.classList.remove('show');
+        modal.style.display = 'none'; // Fallback if CSS not loaded
         document.body.style.overflow = '';
     }
     hideConfirmModal();
@@ -305,6 +307,7 @@ function showConfirmModal() {
     const modal = document.getElementById('confirmModal');
     if (modal) {
         modal.classList.add('show');
+        modal.style.display = 'flex'; // Fallback if CSS not loaded
     }
 }
 
@@ -315,6 +318,7 @@ function hideConfirmModal() {
     const modal = document.getElementById('confirmModal');
     if (modal) {
         modal.classList.remove('show');
+        modal.style.display = 'none'; // Fallback if CSS not loaded
     }
 }
 

@@ -171,7 +171,7 @@ ob_start();
 </div>
 
 <!-- Bible Reader Modal -->
-<div id="readerModal" class="modal">
+<div id="readerModal" class="modal" style="display:none;">
     <div class="modal-content reader-modal <?php echo !empty($user['secondary_translation']) ? 'dual-translation' : ''; ?>">
         <div class="reader-header" style="display: flex; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color, #eee); gap: 0.75rem;">
             <h2 id="readerTitle" style="flex: 1; font-size: 1.1rem; margin: 0; font-weight: 600;">Loading...</h2>
@@ -271,7 +271,7 @@ ob_start();
 </div>
 
 <!-- Confirmation Modal -->
-<div id="confirmModal" class="modal confirm-modal">
+<div id="confirmModal" class="modal confirm-modal" style="display:none;">
     <div class="modal-content confirm-content">
         <h3>Mark as Complete?</h3>
         <p>Would you like to mark this chapter as complete before moving on?</p>
