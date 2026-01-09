@@ -606,16 +606,23 @@ class Database
     {
         $pdo = self::getInstance();
 
-        // Remove old book-level badges if they exist (migration)
-        // Note: Using LIKE instead of JSON_EXTRACT for broader MySQL compatibility
-        $pdo->exec("DELETE FROM badges WHERE category = 'book'");
-
-        // Check if badges already seeded (check for engagement badges)
+        // Check if we have the current badge structure (12+ engagement badges)
         $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM badges WHERE category = 'engagement'");
         $stmt->execute();
-        $count = (int) $stmt->fetch()['count'];
-        if ($count >= 8) {
-            return; // Already has the new badges
+        $engagementCount = (int) $stmt->fetch()['count'];
+
+        // If we already have the full set, nothing to do
+        if ($engagementCount >= 12) {
+            return;
+        }
+
+        // Remove old book-level badges if they exist (migration from v1.9.0)
+        // First delete any user_badges that reference book badges to avoid FK issues
+        try {
+            $pdo->exec("DELETE ub FROM user_badges ub INNER JOIN badges b ON ub.badge_id = b.id WHERE b.category = 'book'");
+            $pdo->exec("DELETE FROM badges WHERE category = 'book'");
+        } catch (PDOException $e) {
+            // Ignore errors if tables don't exist or no book badges
         }
 
         $badges = [
