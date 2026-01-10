@@ -240,7 +240,10 @@ ob_start();
             <div id="notesPanel" style="height: 0; min-height: 0; border-top: 2px solid var(--primary, #5D4037); background: var(--card-bg, #fff); display: none; flex-direction: column; overflow: hidden; transition: all 0.3s ease;">
                 <div style="padding: 0.75rem 1rem; background: var(--background, #f5f5f5); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
                     <span style="font-weight: 600; font-size: 1rem; color: var(--primary, #5D4037);">&#x1F4DD; Notes for this chapter</span>
-                    <button onclick="openNoteModal()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">+ Add Note</button>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <button onclick="openNoteModal()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">+ Add Note</button>
+                        <button onclick="toggleNotesPanel()" style="background: none; border: 1px solid var(--border-color, #ddd); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 1.1rem; color: var(--text-secondary, #666); display: flex; align-items: center; justify-content: center;" title="Close Notes">&times;</button>
+                    </div>
                 </div>
                 <!-- Notes List - Grid layout -->
                 <div id="notesList" style="flex: 1; overflow-y: auto; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; align-content: start;">
