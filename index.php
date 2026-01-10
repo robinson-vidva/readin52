@@ -768,9 +768,16 @@ try {
                             $data['error'] = $result['error'];
                         }
                     } elseif ($action === 'clear_progress') {
-                        $pdo = Database::getInstance();
-                        $pdo->exec('DELETE FROM reading_progress');
-                        $data['success'] = 'All reading progress has been cleared.';
+                        // Require password confirmation for dangerous actions
+                        $password = post('confirm_password', '');
+                        if (!User::verifyPassword(Auth::getUserId(), $password)) {
+                            $data['error'] = 'Incorrect password. Action cancelled for security.';
+                        } else {
+                            $pdo = Database::getInstance();
+                            $pdo->exec('DELETE FROM reading_progress');
+                            $pdo->exec('DELETE FROM chapter_progress');
+                            $data['success'] = 'All reading progress has been cleared.';
+                        }
                     } elseif ($action === 'reset_settings') {
                         Database::insertDefaultSettings();
                         $data['success'] = 'Settings have been reset to defaults.';
