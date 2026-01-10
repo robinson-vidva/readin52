@@ -545,6 +545,11 @@ try {
             render('admin/dashboard');
             break;
 
+        case 'admin/user-progress':
+            Auth::requireAdmin();
+            render('admin/user-progress');
+            break;
+
         case 'admin/users':
             Auth::requireAdmin();
             $data = [];
