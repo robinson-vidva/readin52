@@ -4,6 +4,9 @@ $users = $search ? User::searchWithProgress($search) : User::getAllWithProgress(
 $translations = ReadingPlan::getTranslations();
 $totalReadings = 208; // 52 weeks × 4 categories
 
+// Debug: check user IDs
+// error_log("Users IDs: " . implode(', ', array_column($users, 'id')));
+
 ob_start();
 ?>
 
