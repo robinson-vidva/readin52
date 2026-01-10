@@ -2,14 +2,6 @@
 // Get user ID from URL parameter
 $userId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// TEMPORARY DEBUG - remove after testing
-echo "<div style='background:yellow;padding:10px;margin:10px;'>";
-echo "<strong>DEBUG:</strong> ";
-echo "URL id param = " . htmlspecialchars($_GET['id'] ?? 'NOT SET') . " | ";
-echo "userId = " . $userId . " | ";
-echo "Full GET: " . htmlspecialchars(print_r($_GET, true));
-echo "</div>";
-
 if (!$userId) {
     redirect('/?route=admin/users');
 }
@@ -38,7 +30,6 @@ ob_start();
 ?>
 
 <div class="user-progress-page">
-    <!-- DEBUG: User ID = <?php echo $userId; ?>, Name = <?php echo e($targetUser['name']); ?> -->
     <!-- Header with back button -->
     <div class="page-actions">
         <a href="/?route=admin/users" class="btn btn-outline">

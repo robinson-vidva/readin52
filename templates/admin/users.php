@@ -4,14 +4,6 @@ $users = $search ? User::searchWithProgress($search) : User::getAllWithProgress(
 $translations = ReadingPlan::getTranslations();
 $totalReadings = 208; // 52 weeks × 4 categories
 
-// TEMPORARY DEBUG - show user IDs from database
-echo "<div style='background:yellow;padding:10px;margin:10px;'>";
-echo "<strong>DEBUG Users from DB:</strong><br>";
-foreach ($users as $idx => $u) {
-    echo "[$idx] ID=" . $u['id'] . ", Name=" . htmlspecialchars($u['name']) . "<br>";
-}
-echo "</div>";
-
 ob_start();
 ?>
 
@@ -59,21 +51,20 @@ ob_start();
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($users as $userData):
-                            $progressPercent = $totalReadings > 0 ? round(($userData['completed_readings'] / $totalReadings) * 100, 1) : 0;
-                            $thisUserId = (int)$userData['id'];
+                        <?php for ($i = 0; $i < count($users); $i++):
+                            $progressPercent = $totalReadings > 0 ? round(($users[$i]['completed_readings'] / $totalReadings) * 100, 1) : 0;
                         ?>
-                            <tr class="clickable-row" data-user-id="<?php echo $thisUserId; ?>" style="cursor: pointer;">
-                                <td><?php echo $thisUserId; ?></td>
+                            <tr class="clickable-row" data-user-id="<?php echo $users[$i]['id']; ?>" style="cursor: pointer;">
+                                <td><?php echo $users[$i]['id']; ?></td>
                                 <td>
-                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $thisUserId; ?>" class="user-link">
-                                        <?php echo e($userData['name']); ?>
+                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $users[$i]['id']; ?>" class="user-link">
+                                        <?php echo e($users[$i]['name']); ?>
                                     </a>
                                 </td>
-                                <td><?php echo e($userData['email']); ?></td>
+                                <td><?php echo e($users[$i]['email']); ?></td>
                                 <td>
-                                    <span class="badge badge-<?php echo $userData['role']; ?>">
-                                        <?php echo ucfirst($userData['role']); ?>
+                                    <span class="badge badge-<?php echo $users[$i]['role']; ?>">
+                                        <?php echo ucfirst($users[$i]['role']); ?>
                                     </span>
                                 </td>
                                 <td>
@@ -85,33 +76,33 @@ ob_start();
                                     </div>
                                 </td>
                                 <td>
-                                    <?php if ($userData['badge_count'] > 0): ?>
-                                        <span class="badge-count" title="<?php echo $userData['badge_count']; ?> badges earned">
-                                            &#x1F3C6; <?php echo $userData['badge_count']; ?>
+                                    <?php if ($users[$i]['badge_count'] > 0): ?>
+                                        <span class="badge-count" title="<?php echo $users[$i]['badge_count']; ?> badges earned">
+                                            &#x1F3C6; <?php echo $users[$i]['badge_count']; ?>
                                         </span>
                                     <?php else: ?>
                                         <span class="badge-count-none">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo $userData['last_login'] ? timeAgo($userData['last_login']) : 'Never'; ?></td>
-                                <td><?php echo formatDate($userData['created_at'], 'M j, Y'); ?></td>
+                                <td><?php echo $users[$i]['last_login'] ? timeAgo($users[$i]['last_login']) : 'Never'; ?></td>
+                                <td><?php echo formatDate($users[$i]['created_at'], 'M j, Y'); ?></td>
                                 <td class="actions">
-                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $thisUserId; ?>" class="btn btn-sm btn-primary" title="View Progress">
+                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $users[$i]['id']; ?>" class="btn btn-sm btn-primary" title="View Progress">
                                         &#x1F4CA;
                                     </a>
                                     <button class="btn btn-sm btn-secondary"
-                                            onclick="editUser(<?php echo htmlspecialchars(json_encode($userData)); ?>)">
+                                            onclick="editUser(<?php echo htmlspecialchars(json_encode($users[$i])); ?>)">
                                         Edit
                                     </button>
-                                    <?php if ($thisUserId !== Auth::getUserId()): ?>
+                                    <?php if ($users[$i]['id'] !== Auth::getUserId()): ?>
                                         <button class="btn btn-sm btn-danger"
-                                                onclick="deleteUser(<?php echo $thisUserId; ?>, '<?php echo e($userData['name']); ?>')">
+                                                onclick="deleteUser(<?php echo $users[$i]['id']; ?>, '<?php echo e($users[$i]['name']); ?>')">
                                             Delete
                                         </button>
                                     <?php endif; ?>
                                 </td>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php endfor; ?>
                     </tbody>
                 </table>
             </div>
