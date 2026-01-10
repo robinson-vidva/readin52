@@ -237,25 +237,14 @@ ob_start();
                 <div class="loading-spinner"></div>
             </div>
             <!-- Notes Panel - Horizontal at bottom (20%) -->
-            <div id="notesPanel" style="height: 0; min-height: 0; border-top: 1px solid var(--border-color, #e0e0e0); background: var(--card-bg, #fff); display: none; flex-direction: column; overflow: hidden; transition: all 0.3s ease;">
-                <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color, #e0e0e0); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
-                    <span style="font-weight: 600; font-size: 0.9rem;">Notes for this chapter</span>
-                    <button onclick="openNewNoteForm()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">+ Add Note</button>
+            <div id="notesPanel" style="height: 0; min-height: 0; border-top: 2px solid var(--primary, #5D4037); background: var(--card-bg, #fff); display: none; flex-direction: column; overflow: hidden; transition: all 0.3s ease;">
+                <div style="padding: 0.75rem 1rem; background: var(--background, #f5f5f5); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                    <span style="font-weight: 600; font-size: 1rem; color: var(--primary, #5D4037);">&#x1F4DD; Notes for this chapter</span>
+                    <button onclick="openNoteModal()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">+ Add Note</button>
                 </div>
-                <div style="display: flex; flex: 1; overflow: hidden; min-height: 0;">
-                    <!-- New Note Form -->
-                    <div id="newNoteForm" style="display: none; width: 300px; padding: 0.75rem; border-right: 1px solid var(--border-color, #e0e0e0); background: var(--background, #f8f8f8); flex-shrink: 0; overflow-y: auto;">
-                        <input type="text" id="noteTitle" placeholder="Title (optional)" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem; box-sizing: border-box;">
-                        <textarea id="noteContent" placeholder="Write your note..." rows="3" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem; resize: none; font-family: inherit; box-sizing: border-box;"></textarea>
-                        <div style="display: flex; gap: 0.4rem;">
-                            <button onclick="saveNote()" style="flex: 1; background: var(--primary, #5D4037); color: white; border: none; padding: 0.4rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Save</button>
-                            <button onclick="cancelNote()" style="background: transparent; border: 1px solid var(--border-color, #e0e0e0); padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Cancel</button>
-                        </div>
-                    </div>
-                    <!-- Notes List - Scrollable horizontal -->
-                    <div id="notesList" style="flex: 1; overflow-y: auto; overflow-x: auto; padding: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start;">
-                        <p id="noNotesMsg" style="width: 100%; text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 0.5rem;">No notes for this chapter yet. Click "+ Add Note" to create one.</p>
-                    </div>
+                <!-- Notes List - Grid layout -->
+                <div id="notesList" style="flex: 1; overflow-y: auto; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; align-content: start;">
+                    <p id="noNotesMsg" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted, #888); font-size: 0.9rem; padding: 1rem;">No notes for this chapter yet. Click "+ Add Note" to create one.</p>
                 </div>
             </div>
         </div>
@@ -288,6 +277,34 @@ ob_start();
     </div>
 </div>
 
+<!-- Notes Modal -->
+<div id="noteModal" class="modal" style="display:none; z-index: 1100;">
+    <div class="modal-content" style="max-width: 500px; padding: 0;">
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color, #e0e0e0); display: flex; justify-content: space-between; align-items: center; background: var(--background, #f5f5f5);">
+            <h3 id="noteModalTitle" style="margin: 0; font-size: 1.1rem; color: var(--primary, #5D4037);">Add Note</h3>
+            <button onclick="closeNoteModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary, #666); line-height: 1;">&times;</button>
+        </div>
+        <div style="padding: 1.25rem;">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.4rem; font-size: 0.9rem;">Title</label>
+                <input type="text" id="noteTitle" placeholder="Enter a title for your note..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 8px; font-size: 1rem; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.4rem; font-size: 0.9rem;">Note</label>
+                <textarea id="noteContent" placeholder="Write your thoughts, reflections, or insights..." rows="6" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 8px; font-size: 1rem; resize: vertical; font-family: inherit; box-sizing: border-box; min-height: 150px;"></textarea>
+            </div>
+            <input type="hidden" id="editingNoteId" value="">
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button onclick="closeNoteModal()" style="padding: 0.75rem 1.5rem; border: 1px solid var(--border-color, #ddd); background: white; border-radius: 8px; cursor: pointer; font-size: 0.95rem;">Cancel</button>
+                <button onclick="saveNoteFromModal()" style="padding: 0.75rem 1.5rem; background: var(--primary, #5D4037); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 500;">Save Note</button>
+            </div>
+        </div>
+        <div id="deleteNoteSection" style="display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border-color, #e0e0e0); margin-top: -0.5rem; padding-top: 1rem;">
+            <button onclick="deleteCurrentNote()" style="width: 100%; padding: 0.6rem; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Delete This Note</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const currentWeek = <?php echo $currentWeek; ?>;
     const userTranslation = '<?php echo e($user['preferred_translation']); ?>';
@@ -312,9 +329,9 @@ ob_start();
 
         if (notesPanelOpen) {
             panel.style.display = 'flex';
-            panel.style.height = '20%';
-            panel.style.minHeight = '150px';
-            readerContent.style.flex = '0 0 80%';
+            panel.style.height = '25%';
+            panel.style.minHeight = '180px';
+            readerContent.style.flex = '0 0 75%';
         } else {
             panel.style.display = 'none';
             panel.style.height = '0';
@@ -323,15 +340,105 @@ ob_start();
         }
     }
 
-    function openNewNoteForm() {
-        document.getElementById('newNoteForm').style.display = 'block';
-        document.getElementById('noteTitle').value = '';
-        document.getElementById('noteContent').value = '';
-        document.getElementById('noteContent').focus();
+    // Note Modal Functions
+    function openNoteModal(noteId = null) {
+        const modal = document.getElementById('noteModal');
+        const titleInput = document.getElementById('noteTitle');
+        const contentInput = document.getElementById('noteContent');
+        const modalTitle = document.getElementById('noteModalTitle');
+        const editingIdInput = document.getElementById('editingNoteId');
+        const deleteSection = document.getElementById('deleteNoteSection');
+
+        if (noteId) {
+            // Edit mode
+            const note = chapterNotes.find(n => n.id == noteId);
+            if (note) {
+                titleInput.value = note.title || '';
+                contentInput.value = note.content || '';
+                editingIdInput.value = noteId;
+                modalTitle.textContent = 'Edit Note';
+                deleteSection.style.display = 'block';
+            }
+        } else {
+            // New note mode
+            titleInput.value = '';
+            contentInput.value = '';
+            editingIdInput.value = '';
+            modalTitle.textContent = 'Add Note';
+            deleteSection.style.display = 'none';
+        }
+
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        setTimeout(() => contentInput.focus(), 100);
     }
 
-    function cancelNote() {
-        document.getElementById('newNoteForm').style.display = 'none';
+    function closeNoteModal() {
+        const modal = document.getElementById('noteModal');
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+
+    async function saveNoteFromModal() {
+        const title = document.getElementById('noteTitle').value.trim() || 'Untitled Note';
+        const content = document.getElementById('noteContent').value.trim();
+        const editingId = document.getElementById('editingNoteId').value;
+
+        if (!content) {
+            alert('Please write something in your note');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('book', currentNotesBook);
+        formData.append('chapter', currentNotesChapter);
+        formData.append('color', 'default');
+
+        if (editingId) {
+            formData.append('note_id', editingId);
+        }
+
+        try {
+            const response = await fetch('/?route=notes/save', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.success) {
+                closeNoteModal();
+                await loadNotesForChapter(currentNotesBook, currentNotesChapter);
+            } else {
+                alert('Failed to save note: ' + (result.error || 'Unknown error'));
+            }
+        } catch (e) {
+            console.error('Save note error:', e);
+            alert('Failed to save note. Please try again.');
+        }
+    }
+
+    async function deleteCurrentNote() {
+        const noteId = document.getElementById('editingNoteId').value;
+        if (!noteId) return;
+
+        if (!confirm('Are you sure you want to delete this note?')) return;
+
+        try {
+            const response = await fetch('/?route=notes/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ note_id: noteId, csrf_token: csrfToken })
+            });
+            const result = await response.json();
+            if (result.success) {
+                closeNoteModal();
+                await loadNotesForChapter(currentNotesBook, currentNotesChapter);
+            } else {
+                alert('Failed to delete note');
+            }
+        } catch (e) {
+            console.error('Delete note error:', e);
+            alert('Failed to delete note');
+        }
     }
 
     async function loadNotesForChapter(book, chapter) {
@@ -345,6 +452,7 @@ ob_start();
                 renderNotesList();
             }
         } catch (e) {
+            console.error('Load notes error:', e);
             chapterNotes = [];
             renderNotesList();
         }
@@ -356,15 +464,16 @@ ob_start();
         count.textContent = chapterNotes.length;
 
         if (chapterNotes.length === 0) {
-            list.innerHTML = '<p id="noNotesMsg" style="width: 100%; text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 0.5rem;">No notes for this chapter yet. Click "+ Add Note" to create one.</p>';
+            list.innerHTML = '<p id="noNotesMsg" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted, #888); font-size: 0.9rem; padding: 1rem;">No notes for this chapter yet. Click "+ Add Note" to create one.</p>';
             return;
         }
 
         let html = '';
         chapterNotes.forEach(note => {
-            html += `<div class="note-item" onclick="editNote(${note.id})" style="background: var(--background, #f8f8f8); border-radius: 8px; padding: 0.75rem; cursor: pointer; width: 220px; flex-shrink: 0; border: 1px solid var(--border-color, #e0e0e0); transition: box-shadow 0.2s;">
-                <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(note.title)}</div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary, #666); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;">${escapeHtml(note.content.substring(0, 100))}</div>
+            html += `<div class="note-card" onclick="openNoteModal(${note.id})" style="background: var(--surface, #fff); border-radius: 10px; padding: 1rem; cursor: pointer; border: 1px solid var(--border-color, #e0e0e0); transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--primary, #5D4037);">${escapeHtml(note.title || 'Untitled')}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary, #666); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.5;">${escapeHtml(note.content.substring(0, 150))}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted, #999); margin-top: 0.5rem;">${note.created_at ? new Date(note.created_at).toLocaleDateString() : ''}</div>
             </div>`;
         });
         list.innerHTML = html;
@@ -376,56 +485,9 @@ ob_start();
         return div.innerHTML;
     }
 
-    async function saveNote() {
-        const title = document.getElementById('noteTitle').value.trim() || 'Untitled Note';
-        const content = document.getElementById('noteContent').value.trim();
-        if (!content) {
-            alert('Please write something');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('csrf_token', csrfToken);
-        formData.append('title', title);
-        formData.append('content', content);
-        formData.append('book', currentNotesBook);
-        formData.append('chapter', currentNotesChapter);
-        formData.append('color', 'default');
-
-        try {
-            await fetch('/?route=notes/save', { method: 'POST', body: formData });
-            cancelNote();
-            loadNotesForChapter(currentNotesBook, currentNotesChapter);
-        } catch (e) {
-            alert('Failed to save note');
-        }
-    }
-
-    async function editNote(noteId) {
-        const note = chapterNotes.find(n => n.id == noteId);
-        if (!note) return;
-
-        const newContent = prompt('Edit note:', note.content);
-        if (newContent === null) return;
-
-        if (newContent.trim() === '') {
-            if (confirm('Delete this note?')) {
-                await fetch('/?route=notes/delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ note_id: noteId, csrf_token: csrfToken })
-                });
-            }
-        } else {
-            const formData = new FormData();
-            formData.append('csrf_token', csrfToken);
-            formData.append('note_id', noteId);
-            formData.append('title', note.title);
-            formData.append('content', newContent);
-            formData.append('color', note.color || 'default');
-            await fetch('/?route=notes/save', { method: 'POST', body: formData });
-        }
-        loadNotesForChapter(currentNotesBook, currentNotesChapter);
+    // Legacy function for compatibility
+    function editNote(noteId) {
+        openNoteModal(noteId);
     }
 
     function toggleTranslation(isSecondary) {

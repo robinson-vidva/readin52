@@ -236,7 +236,13 @@ try {
         case 'notes/save':
             Auth::requireAuth();
             if ($method === 'POST') {
+                // Check if AJAX request
+                $isAjax = isAjax() || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
                 if (!validateCsrf()) {
+                    if ($isAjax) {
+                        jsonResponse(['success' => false, 'error' => 'Invalid CSRF token'], 403);
+                    }
                     setFlash('error', 'Invalid request.');
                     redirect('/?route=dashboard');
                 }
@@ -252,12 +258,24 @@ try {
                     'chapter' => post('chapter', ''),
                 ];
 
-                if ($noteId) {
-                    Note::update((int) $noteId, Auth::getUserId(), $data);
-                    setFlash('success', 'Note updated.');
-                } else {
-                    Note::create(Auth::getUserId(), $data);
-                    setFlash('success', 'Note created.');
+                try {
+                    if ($noteId) {
+                        Note::update((int) $noteId, Auth::getUserId(), $data);
+                        $message = 'Note updated.';
+                    } else {
+                        Note::create(Auth::getUserId(), $data);
+                        $message = 'Note created.';
+                    }
+
+                    if ($isAjax) {
+                        jsonResponse(['success' => true, 'message' => $message]);
+                    }
+                    setFlash('success', $message);
+                } catch (Exception $e) {
+                    if ($isAjax) {
+                        jsonResponse(['success' => false, 'error' => $e->getMessage()], 500);
+                    }
+                    setFlash('error', 'Failed to save note.');
                 }
             }
             // Redirect back - form submission reloads page in reader
