@@ -3,9 +3,9 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'readin52-v4';
-const STATIC_CACHE = 'readin52-static-v4';
-const API_CACHE = 'readin52-api-v4';
+const CACHE_NAME = 'readin52-v5';
+const STATIC_CACHE = 'readin52-static-v5';
+const API_CACHE = 'readin52-api-v5';
 
 // Static assets to cache
 const STATIC_ASSETS = [

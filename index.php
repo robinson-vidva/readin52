@@ -121,7 +121,7 @@ try {
         case 'logout':
             Auth::logout();
             setFlash('success', 'You have been logged out.');
-            redirect('/?route=login');
+            redirect('/');
             break;
 
         case 'privacy':

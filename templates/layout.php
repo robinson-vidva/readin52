@@ -19,6 +19,18 @@ if (Auth::isLoggedIn()) {
     <meta name="description" content="<?php echo e(ReadingPlan::getAppTagline()); ?>">
     <meta name="theme-color" content="#5D4037">
 
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="brown">
+    <meta name="apple-mobile-web-app-title" content="<?php echo e(ReadingPlan::getAppName()); ?>">
+    <link rel="apple-touch-icon" href="/assets/images/icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/images/icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icon-180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/assets/images/icon-167.png">
+
+    <!-- Android/Chrome PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
+
     <title><?php echo isset($pageTitle) ? e($pageTitle) . ' - ' : ''; ?><?php echo e(ReadingPlan::getAppName()); ?></title>
 
     <!-- Theme initialization (runs early to prevent flash) -->
@@ -42,7 +54,6 @@ if (Auth::isLoggedIn()) {
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/assets/images/icon.svg">
 
     <!-- Styles -->
     <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo APP_VERSION; ?>">
