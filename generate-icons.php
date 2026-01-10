@@ -1,152 +1,117 @@
 <?php
 /**
- * Generate PNG icons for PWA from the app branding
- * Run this script once to create the necessary icon files
+ * Generate PNG icons for PWA
+ * Creates simple, solid icons with "52" text
  */
 
-// Icon sizes needed for PWA/iOS
-$sizes = [
-    72, 96, 128, 144, 152, 167, 180, 192, 384, 512
-];
-
+$sizes = [72, 96, 128, 144, 152, 167, 180, 192, 384, 512];
 $outputDir = __DIR__ . '/assets/images/';
 
-// Ensure GD is available
-if (!function_exists('imagecreatetruecolor')) {
-    die("GD library is not installed. Cannot generate PNG icons.\n");
-}
+// Colors
+$bgColor = [93, 64, 55];      // #5D4037 brown
+$textColor = [255, 255, 255]; // white
+$accentColor = [255, 179, 0]; // #FFB300 gold
 
 foreach ($sizes as $size) {
+    // Create true color image
     $image = imagecreatetruecolor($size, $size);
 
-    // Enable alpha blending
-    imagealphablending($image, false);
-    imagesavealpha($image, true);
+    // Allocate colors
+    $brown = imagecolorallocate($image, $bgColor[0], $bgColor[1], $bgColor[2]);
+    $white = imagecolorallocate($image, $textColor[0], $textColor[1], $textColor[2]);
+    $gold = imagecolorallocate($image, $accentColor[0], $accentColor[1], $accentColor[2]);
 
-    // Colors
-    $brown = imagecolorallocate($image, 93, 64, 55);     // #5D4037
-    $white = imagecolorallocate($image, 255, 255, 255);  // white
-    $gold = imagecolorallocate($image, 255, 179, 0);     // #FFB300
+    // Fill background
+    imagefilledrectangle($image, 0, 0, $size - 1, $size - 1, $brown);
 
-    // Fill background with brown
-    imagefilledrectangle($image, 0, 0, $size, $size, $brown);
+    // Draw "52" text centered
+    $text = "52";
 
-    // Draw rounded corners (approximate with filled arcs)
-    $radius = (int)($size * 0.1); // 10% corner radius
+    // Calculate font size and position based on image size
+    // Using built-in font (1-5, where 5 is largest)
+    $font = 5;
+    $charWidth = imagefontwidth($font);
+    $charHeight = imagefontheight($font);
 
-    // Calculate font sizes relative to icon size
-    $mainFontSize = (int)($size * 0.35);  // "52" text
-    $subFontSize = (int)($size * 0.10);   // "READ IN" text
+    // Scale factor for drawing large text
+    $scale = $size / 64;
 
-    // Draw "52" text in center
-    $mainText = "52";
-    $mainBox = imagettfbbox($mainFontSize, 0, __DIR__ . '/assets/fonts/arial.ttf', $mainText);
+    // Draw "52" using rectangles (7-segment style)
+    $digitWidth = (int)($size * 0.25);
+    $digitHeight = (int)($size * 0.4);
+    $thickness = max(2, (int)($size * 0.05));
+    $gap = (int)($size * 0.05);
 
-    // Use built-in font if custom font not available
-    // Calculate center positions
-    $centerX = $size / 2;
-    $centerY = $size / 2;
-
-    // Draw "52" using built-in fonts (scaled by icon size)
-    if ($size >= 128) {
-        // Use imagestring for basic text
-        $font = 5; // Largest built-in font
-        $textWidth = imagefontwidth($font) * strlen($mainText);
-        $textHeight = imagefontheight($font);
-
-        // Draw "52" multiple times to make it bigger/bolder
-        $scale = $size / 64;
-        $tx = (int)(($size - 40 * $scale) / 2);
-        $ty = (int)(($size - 30 * $scale) / 2);
-
-        // Draw large "52" by drawing rectangles
-        drawLargeText($image, $mainText, $white, $size);
-
-        // Draw "READ IN" at bottom
-        drawSmallText($image, "READ IN", $gold, $size);
-    } else {
-        // For smaller icons, just draw "52"
-        $font = 5;
-        $textWidth = imagefontwidth($font) * 2;
-        $x = (int)(($size - $textWidth) / 2);
-        $y = (int)(($size - imagefontheight($font)) / 2);
-        imagestring($image, $font, $x, $y, "52", $white);
-    }
-
-    // Save the image
-    $filename = $outputDir . "icon-{$size}.png";
-    imagepng($image, $filename);
-    imagedestroy($image);
-
-    echo "Created: icon-{$size}.png\n";
-}
-
-echo "\nAll icons generated successfully!\n";
-
-/**
- * Draw large "52" text
- */
-function drawLargeText($image, $text, $color, $size) {
-    $centerX = $size / 2;
-    $centerY = $size / 2 - $size * 0.05;
-
-    // Scale based on size
-    $charWidth = $size * 0.22;
-    $charHeight = $size * 0.45;
-    $thickness = max(2, (int)($size * 0.06));
-
-    $startX = $centerX - $charWidth;
-    $startY = $centerY - $charHeight / 2;
+    $totalWidth = $digitWidth * 2 + $gap;
+    $startX = (int)(($size - $totalWidth) / 2);
+    $startY = (int)(($size - $digitHeight) / 2) - (int)($size * 0.05);
 
     // Draw "5"
-    draw5($image, $startX, $startY, $charWidth, $charHeight, $thickness, $color);
+    draw5($image, $startX, $startY, $digitWidth, $digitHeight, $thickness, $white);
 
     // Draw "2"
-    draw2($image, $startX + $charWidth + $thickness, $startY, $charWidth, $charHeight, $thickness, $color);
+    draw2($image, $startX + $digitWidth + $gap, $startY, $digitWidth, $digitHeight, $thickness, $white);
+
+    // Draw "READ IN" text below for larger icons
+    if ($size >= 128) {
+        $subText = "READ IN";
+        $subY = $startY + $digitHeight + (int)($size * 0.08);
+        $subFont = ($size >= 192) ? 3 : 2;
+        $subWidth = imagefontwidth($subFont) * strlen($subText);
+        $subX = (int)(($size - $subWidth) / 2);
+        imagestring($image, $subFont, $subX, $subY, $subText, $gold);
+    }
+
+    // Save PNG
+    $filename = $outputDir . "icon-{$size}.png";
+    imagepng($image, $filename, 9); // Maximum compression
+    imagedestroy($image);
+
+    echo "Generated: icon-{$size}.png (" . filesize($filename) . " bytes)\n";
 }
 
+echo "\nDone! All icons generated.\n";
+
 /**
- * Draw "5" digit
+ * Draw digit "5" using filled rectangles
  */
 function draw5($image, $x, $y, $w, $h, $t, $color) {
-    // Top horizontal
+    $halfH = (int)($h / 2);
+
+    // Top horizontal bar
     imagefilledrectangle($image, (int)$x, (int)$y, (int)($x + $w), (int)($y + $t), $color);
-    // Left vertical (top half)
-    imagefilledrectangle($image, (int)$x, (int)$y, (int)($x + $t), (int)($y + $h/2), $color);
-    // Middle horizontal
-    imagefilledrectangle($image, (int)$x, (int)($y + $h/2 - $t/2), (int)($x + $w), (int)($y + $h/2 + $t/2), $color);
-    // Right vertical (bottom half)
-    imagefilledrectangle($image, (int)($x + $w - $t), (int)($y + $h/2), (int)($x + $w), (int)($y + $h), $color);
-    // Bottom horizontal
+
+    // Upper left vertical
+    imagefilledrectangle($image, (int)$x, (int)$y, (int)($x + $t), (int)($y + $halfH), $color);
+
+    // Middle horizontal bar
+    imagefilledrectangle($image, (int)$x, (int)($y + $halfH - $t/2), (int)($x + $w), (int)($y + $halfH + $t/2), $color);
+
+    // Lower right vertical
+    imagefilledrectangle($image, (int)($x + $w - $t), (int)($y + $halfH), (int)($x + $w), (int)($y + $h), $color);
+
+    // Bottom horizontal bar
     imagefilledrectangle($image, (int)$x, (int)($y + $h - $t), (int)($x + $w), (int)($y + $h), $color);
 }
 
 /**
- * Draw "2" digit
+ * Draw digit "2" using filled rectangles
  */
 function draw2($image, $x, $y, $w, $h, $t, $color) {
-    // Top horizontal
+    $halfH = (int)($h / 2);
+
+    // Top horizontal bar
     imagefilledrectangle($image, (int)$x, (int)$y, (int)($x + $w), (int)($y + $t), $color);
-    // Right vertical (top half)
-    imagefilledrectangle($image, (int)($x + $w - $t), (int)$y, (int)($x + $w), (int)($y + $h/2), $color);
-    // Middle horizontal
-    imagefilledrectangle($image, (int)$x, (int)($y + $h/2 - $t/2), (int)($x + $w), (int)($y + $h/2 + $t/2), $color);
-    // Left vertical (bottom half)
-    imagefilledrectangle($image, (int)$x, (int)($y + $h/2), (int)($x + $t), (int)($y + $h), $color);
-    // Bottom horizontal
+
+    // Upper right vertical
+    imagefilledrectangle($image, (int)($x + $w - $t), (int)$y, (int)($x + $w), (int)($y + $halfH), $color);
+
+    // Middle horizontal bar
+    imagefilledrectangle($image, (int)$x, (int)($y + $halfH - $t/2), (int)($x + $w), (int)($y + $halfH + $t/2), $color);
+
+    // Lower left vertical
+    imagefilledrectangle($image, (int)$x, (int)($y + $halfH), (int)($x + $t), (int)($y + $h), $color);
+
+    // Bottom horizontal bar
     imagefilledrectangle($image, (int)$x, (int)($y + $h - $t), (int)($x + $w), (int)($y + $h), $color);
-}
-
-/**
- * Draw small "READ IN" text at bottom
- */
-function drawSmallText($image, $text, $color, $size) {
-    if ($size < 128) return;
-
-    $font = ($size >= 256) ? 3 : 2;
-    $textWidth = imagefontwidth($font) * strlen($text);
-    $x = (int)(($size - $textWidth) / 2);
-    $y = (int)($size * 0.75);
-
-    imagestring($image, $font, $x, $y, $text, $color);
 }
