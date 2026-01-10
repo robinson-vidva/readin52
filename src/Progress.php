@@ -368,32 +368,29 @@ class Progress
     }
 
     /**
-     * Get user statistics
+     * Get user statistics (based on chapter-level progress)
      */
     public static function getStats(int $userId): array
     {
         $pdo = Database::getInstance();
 
-        // Total completed
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*) as count
-            FROM reading_progress
-            WHERE user_id = ? AND completed = 1
-        ");
-        $stmt->execute([$userId]);
-        $totalCompleted = (int) $stmt->fetch()['count'];
-
-        // Completed by category
-        $stmt = $pdo->prepare("
-            SELECT category, COUNT(*) as count
-            FROM reading_progress
-            WHERE user_id = ? AND completed = 1
-            GROUP BY category
-        ");
-        $stmt->execute([$userId]);
+        // Count completed readings based on chapter progress
+        // A reading is complete when all its chapters are marked complete
+        $totalCompleted = 0;
         $byCategory = [];
-        foreach ($stmt->fetchAll() as $row) {
-            $byCategory[$row['category']] = (int) $row['count'];
+
+        foreach (self::CATEGORIES as $cat) {
+            $byCategory[$cat] = 0;
+        }
+
+        // Check each week/category combination
+        for ($week = 1; $week <= 52; $week++) {
+            foreach (self::CATEGORIES as $category) {
+                if (self::isCategoryComplete($userId, $week, $category)) {
+                    $totalCompleted++;
+                    $byCategory[$category]++;
+                }
+            }
         }
 
         // Calculate streak
@@ -413,35 +410,36 @@ class Progress
     }
 
     /**
-     * Calculate reading streak (consecutive weeks with all 4 completed)
+     * Calculate reading streak (consecutive weeks with all 4 categories completed)
      */
     private static function calculateStreak(int $userId): int
     {
-        $pdo = Database::getInstance();
-        $stmt = $pdo->prepare("
-            SELECT week_number, COUNT(*) as count
-            FROM reading_progress
-            WHERE user_id = ? AND completed = 1
-            GROUP BY week_number
-            HAVING count = 4
-            ORDER BY week_number DESC
-        ");
-        $stmt->execute([$userId]);
-        $completedWeeks = $stmt->fetchAll();
+        // Find all fully completed weeks based on chapter progress
+        $completedWeeks = [];
+        for ($week = 1; $week <= 52; $week++) {
+            $allComplete = true;
+            foreach (self::CATEGORIES as $category) {
+                if (!self::isCategoryComplete($userId, $week, $category)) {
+                    $allComplete = false;
+                    break;
+                }
+            }
+            if ($allComplete) {
+                $completedWeeks[] = $week;
+            }
+        }
 
         if (empty($completedWeeks)) {
             return 0;
         }
 
+        // Sort descending and count consecutive streak
+        rsort($completedWeeks);
+
         $streak = 0;
-        $expectedWeek = null;
+        $expectedWeek = $completedWeeks[0];
 
-        foreach ($completedWeeks as $row) {
-            $weekNum = (int) $row['week_number'];
-            if ($expectedWeek === null) {
-                $expectedWeek = $weekNum;
-            }
-
+        foreach ($completedWeeks as $weekNum) {
             if ($weekNum === $expectedWeek) {
                 $streak++;
                 $expectedWeek--;
@@ -531,22 +529,19 @@ class Progress
     }
 
     /**
-     * Get weekly completion counts for a user
+     * Get weekly completion counts for a user (based on chapter progress)
      */
     public static function getWeeklyCompletionCounts(int $userId): array
     {
-        $pdo = Database::getInstance();
-        $stmt = $pdo->prepare("
-            SELECT week_number, COUNT(*) as completed_count
-            FROM reading_progress
-            WHERE user_id = ? AND completed = 1
-            GROUP BY week_number
-        ");
-        $stmt->execute([$userId]);
-
         $counts = array_fill(1, 52, 0);
-        foreach ($stmt->fetchAll() as $row) {
-            $counts[(int) $row['week_number']] = (int) $row['completed_count'];
+
+        // Count completed categories for each week based on chapter progress
+        for ($week = 1; $week <= 52; $week++) {
+            foreach (self::CATEGORIES as $category) {
+                if (self::isCategoryComplete($userId, $week, $category)) {
+                    $counts[$week]++;
+                }
+            }
         }
 
         return $counts;
