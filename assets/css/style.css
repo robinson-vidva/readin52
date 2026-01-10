@@ -592,17 +592,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer p {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    flex-wrap: wrap;
-}
-
-.footer p::before {
-    content: '📖';
-    font-size: 1.25rem;
+    margin: 0.25rem 0;
 }
 
 @media (max-width: 600px) {
