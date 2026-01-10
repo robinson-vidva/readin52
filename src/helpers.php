@@ -205,6 +205,14 @@ function csrfField(): string
 }
 
 /**
+ * Get CSRF token value
+ */
+function getCsrfToken(): string
+{
+    return Auth::generateCsrfToken();
+}
+
+/**
  * Validate CSRF token from POST
  */
 function validateCsrf(): bool
