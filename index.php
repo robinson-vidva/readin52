@@ -124,6 +124,14 @@ try {
             redirect('/?route=login');
             break;
 
+        case 'privacy':
+            render('privacy');
+            break;
+
+        case 'terms':
+            render('terms');
+            break;
+
         case 'forgot-password':
             if (Auth::isLoggedIn()) {
                 redirect('/?route=dashboard');

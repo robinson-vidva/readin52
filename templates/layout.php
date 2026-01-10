@@ -175,6 +175,7 @@ if (Auth::isLoggedIn()) {
         <div class="container">
             <p>&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. <span class="footer-tagline">Journey Through Scripture in 52 Weeks.</span></p>
             <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">HelloAO Bible API</a></p>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;"><a href="/?route=privacy" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &middot; <a href="/?route=terms" style="color: inherit; text-decoration: underline;">Terms & Conditions</a></p>
         </div>
     </footer>
     <?php endif; ?>
