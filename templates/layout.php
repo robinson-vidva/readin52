@@ -173,11 +173,23 @@ if (Auth::isLoggedIn()) {
     <?php if (Auth::isLoggedIn()): ?>
     <footer class="footer">
         <div class="container">
-            <p>&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. <span class="footer-tagline">Journey Through Scripture in 52 Weeks.</span></p>
-            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">HelloAO Bible API</a></p>
-            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;"><a href="/?route=privacy" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &middot; <a href="/?route=terms" style="color: inherit; text-decoration: underline;">Terms & Conditions</a></p>
+            <div class="footer-content">
+                <p class="footer-copyright">&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. <span class="footer-tagline">Journey Through Scripture in 52 Weeks.</span></p>
+                <p class="footer-credit">Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener">HelloAO Bible API</a></p>
+                <p class="footer-links"><a href="/?route=privacy">Privacy Policy</a> · <a href="/?route=terms">Terms & Conditions</a></p>
+            </div>
         </div>
     </footer>
+    <style>
+        .footer-content { text-align: center; }
+        .footer-copyright { font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .footer-tagline { opacity: 0.85; }
+        .footer-credit { font-size: 0.8rem; opacity: 0.75; margin-bottom: 0.5rem; }
+        .footer-credit a { color: inherit; text-decoration: underline; }
+        .footer-links { font-size: 0.8rem; opacity: 0.75; }
+        .footer-links a { color: inherit; text-decoration: underline; margin: 0 0.25rem; }
+        .footer-links a:hover, .footer-credit a:hover { opacity: 1; color: white; }
+    </style>
     <?php endif; ?>
 
     <!-- Scripts -->

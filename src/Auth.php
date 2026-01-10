@@ -58,8 +58,11 @@ class Auth
     public static function login(string $email, string $password): array
     {
         // Check rate limiting
-        if (self::isRateLimited($email)) {
-            return ['success' => false, 'error' => 'Too many login attempts. Please try again later.'];
+        $rateInfo = self::getRateLimitInfo($email);
+        if ($rateInfo['limited']) {
+            $minutes = ceil($rateInfo['remaining_seconds'] / 60);
+            $timeText = $minutes == 1 ? '1 minute' : $minutes . ' minutes';
+            return ['success' => false, 'error' => "Too many login attempts. Please try again in $timeText, or use 'Forgot Password' to reset."];
         }
 
         $user = User::findByEmail($email);
@@ -178,20 +181,42 @@ class Auth
     }
 
     /**
-     * Check if login attempts are rate limited
+     * Check if login attempts are rate limited and get remaining wait time
      */
-    private static function isRateLimited(string $email): bool
+    private static function getRateLimitInfo(string $email): array
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->prepare("
-            SELECT COUNT(*) as attempts
+            SELECT COUNT(*) as attempts, MIN(attempted_at) as oldest_attempt
             FROM login_attempts
             WHERE email = ? AND attempted_at > DATE_SUB(NOW(), INTERVAL ? SECOND)
         ");
         $stmt->execute([$email, LOGIN_RATE_WINDOW]);
         $result = $stmt->fetch();
 
-        return $result['attempts'] >= LOGIN_RATE_LIMIT;
+        $isLimited = $result['attempts'] >= LOGIN_RATE_LIMIT;
+        $remainingSeconds = 0;
+
+        if ($isLimited && $result['oldest_attempt']) {
+            // Calculate when the oldest attempt expires
+            $oldestTime = strtotime($result['oldest_attempt']);
+            $expiresAt = $oldestTime + LOGIN_RATE_WINDOW;
+            $remainingSeconds = max(0, $expiresAt - time());
+        }
+
+        return [
+            'limited' => $isLimited,
+            'attempts' => (int) $result['attempts'],
+            'remaining_seconds' => $remainingSeconds
+        ];
+    }
+
+    /**
+     * Check if login attempts are rate limited
+     */
+    private static function isRateLimited(string $email): bool
+    {
+        return self::getRateLimitInfo($email)['limited'];
     }
 
     /**
@@ -206,9 +231,9 @@ class Auth
     }
 
     /**
-     * Clear login attempts for email
+     * Clear login attempts for email (public for password reset flow)
      */
-    private static function clearLoginAttempts(string $email): void
+    public static function clearLoginAttempts(string $email): void
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = ?");

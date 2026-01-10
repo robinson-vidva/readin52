@@ -350,6 +350,10 @@ class User
             $stmt = $pdo->prepare("UPDATE password_resets SET used = 1 WHERE token = ?");
             $stmt->execute([$token]);
 
+            // Clear login attempts so user can login immediately
+            $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = ?");
+            $stmt->execute([$resetData['email']]);
+
             $pdo->commit();
             return true;
         } catch (PDOException $e) {
