@@ -233,6 +233,11 @@ try {
             render('books');
             break;
 
+        case 'notes':
+            Auth::requireAuth();
+            render('notes');
+            break;
+
         case 'notes/save':
             Auth::requireAuth();
             if ($method === 'POST') {
