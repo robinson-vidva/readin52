@@ -29,7 +29,7 @@
 
     <?php if ($parentSiteUrl && $parentSiteName): ?>
     <nav class="home-topbar">
-        <a href="<?php echo e($parentSiteUrl); ?>" class="topbar-brand" target="_blank" rel="noopener">
+        <a href="<?php echo e($parentSiteUrl); ?>" class="topbar-brand">
             <span class="topbar-arrow">&larr;</span>
             <span class="topbar-text"><?php echo e($parentSiteName); ?></span>
         </a>
