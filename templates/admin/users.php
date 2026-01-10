@@ -61,11 +61,12 @@ ob_start();
                     <tbody>
                         <?php foreach ($users as $userData):
                             $progressPercent = $totalReadings > 0 ? round(($userData['completed_readings'] / $totalReadings) * 100, 1) : 0;
+                            $thisUserId = (int)$userData['id'];
                         ?>
-                            <tr class="clickable-row" onclick="viewUserProgress(<?php echo $userData['id']; ?>)" style="cursor: pointer;">
-                                <td><?php echo $userData['id']; ?></td>
+                            <tr class="clickable-row" data-user-id="<?php echo $thisUserId; ?>" style="cursor: pointer;">
+                                <td><?php echo $thisUserId; ?></td>
                                 <td>
-                                    <a href="/?route=admin/user-progress&id=<?php echo $userData['id']; ?>" class="user-link" onclick="event.stopPropagation();">
+                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $thisUserId; ?>" class="user-link">
                                         <?php echo e($userData['name']); ?>
                                     </a>
                                 </td>
@@ -94,17 +95,17 @@ ob_start();
                                 </td>
                                 <td><?php echo $userData['last_login'] ? timeAgo($userData['last_login']) : 'Never'; ?></td>
                                 <td><?php echo formatDate($userData['created_at'], 'M j, Y'); ?></td>
-                                <td class="actions" onclick="event.stopPropagation();">
-                                    <a href="/?route=admin/user-progress&id=<?php echo $userData['id']; ?>" class="btn btn-sm btn-primary" title="View Progress">
+                                <td class="actions">
+                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $thisUserId; ?>" class="btn btn-sm btn-primary" title="View Progress">
                                         &#x1F4CA;
                                     </a>
                                     <button class="btn btn-sm btn-secondary"
                                             onclick="editUser(<?php echo htmlspecialchars(json_encode($userData)); ?>)">
                                         Edit
                                     </button>
-                                    <?php if ($userData['id'] !== Auth::getUserId()): ?>
+                                    <?php if ($thisUserId !== Auth::getUserId()): ?>
                                         <button class="btn btn-sm btn-danger"
-                                                onclick="deleteUser(<?php echo $userData['id']; ?>, '<?php echo e($userData['name']); ?>')">
+                                                onclick="deleteUser(<?php echo $thisUserId; ?>, '<?php echo e($userData['name']); ?>')">
                                             Delete
                                         </button>
                                     <?php endif; ?>
@@ -254,9 +255,18 @@ ob_start();
 </style>
 
 <script>
-    function viewUserProgress(userId) {
-        window.location.href = '/?route=admin/user-progress&id=' + userId;
-    }
+    // Add click handler for rows
+    document.querySelectorAll('.clickable-row').forEach(function(row) {
+        row.addEventListener('click', function(e) {
+            if (e.target.closest('.actions') || e.target.closest('a') || e.target.closest('button')) {
+                return; // Don't navigate if clicking actions
+            }
+            var userId = this.getAttribute('data-user-id');
+            if (userId) {
+                window.location.href = '/?route=admin/user-progress&id=' + userId;
+            }
+        });
+    });
 
     function editUser(user) {
         document.getElementById('editUserId').value = user.id;
