@@ -42,7 +42,7 @@ if (Auth::isLoggedIn()) {
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+    <link rel="apple-touch-icon" href="/assets/images/icon.svg">
 
     <!-- Styles -->
     <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo APP_VERSION; ?>">
@@ -94,6 +94,8 @@ if (Auth::isLoggedIn()) {
             .navbar-toggle span { display: block; width: 24px; height: 2px; background: white; }
             .navbar-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #3E2723; flex-direction: column; padding: 1rem; }
             .navbar-menu.show { display: flex; }
+            /* Mobile avatar - ensure perfect circle */
+            .navbar-menu .avatar-small { width: 48px !important; height: 48px !important; min-width: 48px !important; min-height: 48px !important; max-width: 48px !important; max-height: 48px !important; font-size: 1rem; }
         }
         @media (max-width: 480px) {
             .stats-banner { grid-template-columns: repeat(2, 1fr) !important; padding: 1rem !important; }
