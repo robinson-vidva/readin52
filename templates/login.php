@@ -88,8 +88,30 @@
                     <p>Don't have an account? <a href="/?route=register">Create one</a></p>
                 </div>
             <?php endif; ?>
+
+            <div class="auth-home-link">
+                <a href="/">&larr; Back to Home</a>
+            </div>
         </div>
     </div>
+
+    <style>
+        .auth-home-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        .auth-home-link a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .auth-home-link a:hover {
+            color: #5D4037;
+        }
+    </style>
 
     <!-- PWA Service Worker -->
     <script>
