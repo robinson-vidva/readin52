@@ -62,11 +62,12 @@ ob_start();
                         <?php foreach ($users as $userData):
                             $progressPercent = $totalReadings > 0 ? round(($userData['completed_readings'] / $totalReadings) * 100, 1) : 0;
                             $thisUserId = (int)$userData['id'];
+                            $linkUrl = "/?route=admin/user-progress&id=" . $thisUserId;
                         ?>
                             <tr class="clickable-row" data-user-id="<?php echo $thisUserId; ?>" style="cursor: pointer;">
-                                <td><?php echo $thisUserId; ?></td>
+                                <td><?php echo $thisUserId; ?> <small style="color:red;">[href: <?php echo htmlspecialchars($linkUrl); ?>]</small></td>
                                 <td>
-                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $thisUserId; ?>" class="user-link">
+                                    <a href="<?php echo htmlspecialchars($linkUrl); ?>" class="user-link">
                                         <?php echo e($userData['name']); ?>
                                     </a>
                                 </td>
@@ -96,7 +97,7 @@ ob_start();
                                 <td><?php echo $userData['last_login'] ? timeAgo($userData['last_login']) : 'Never'; ?></td>
                                 <td><?php echo formatDate($userData['created_at'], 'M j, Y'); ?></td>
                                 <td class="actions">
-                                    <a href="/?route=admin/user-progress&amp;id=<?php echo $thisUserId; ?>" class="btn btn-sm btn-primary" title="View Progress">
+                                    <a href="<?php echo htmlspecialchars($linkUrl); ?>" class="btn btn-sm btn-primary" title="View Progress">
                                         &#x1F4CA;
                                     </a>
                                     <button class="btn btn-sm btn-secondary"
