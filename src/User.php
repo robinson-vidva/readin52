@@ -198,6 +198,70 @@ class User
     }
 
     /**
+     * Get all users with their progress and badge counts
+     */
+    public static function getAllWithProgress(int $limit = 100, int $offset = 0): array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("
+            SELECT
+                u.id, u.name, u.email, u.role, u.preferred_translation,
+                u.created_at, u.last_login,
+                COALESCE(rp.completed_count, 0) as completed_readings,
+                COALESCE(ub.badge_count, 0) as badge_count
+            FROM users u
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) as completed_count
+                FROM reading_progress
+                WHERE completed = 1
+                GROUP BY user_id
+            ) rp ON u.id = rp.user_id
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) as badge_count
+                FROM user_badges
+                GROUP BY user_id
+            ) ub ON u.id = ub.user_id
+            ORDER BY u.created_at DESC
+            LIMIT ? OFFSET ?
+        ");
+        $stmt->execute([$limit, $offset]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Search users with progress and badge counts
+     */
+    public static function searchWithProgress(string $query): array
+    {
+        $pdo = Database::getInstance();
+        $searchTerm = '%' . $query . '%';
+        $stmt = $pdo->prepare("
+            SELECT
+                u.id, u.name, u.email, u.role, u.preferred_translation,
+                u.created_at, u.last_login,
+                COALESCE(rp.completed_count, 0) as completed_readings,
+                COALESCE(ub.badge_count, 0) as badge_count
+            FROM users u
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) as completed_count
+                FROM reading_progress
+                WHERE completed = 1
+                GROUP BY user_id
+            ) rp ON u.id = rp.user_id
+            LEFT JOIN (
+                SELECT user_id, COUNT(*) as badge_count
+                FROM user_badges
+                GROUP BY user_id
+            ) ub ON u.id = ub.user_id
+            WHERE u.name LIKE ? OR u.email LIKE ?
+            ORDER BY u.name ASC
+            LIMIT 50
+        ");
+        $stmt->execute([$searchTerm, $searchTerm]);
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Verify current password
      */
     public static function verifyPassword(int $id, string $password): bool

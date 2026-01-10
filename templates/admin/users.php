@@ -1,7 +1,8 @@
 <?php
 $search = get('search', '');
-$users = $search ? User::search($search) : User::getAll(100);
+$users = $search ? User::searchWithProgress($search) : User::getAllWithProgress(100);
 $translations = ReadingPlan::getTranslations();
+$totalReadings = 208; // 52 weeks × 4 categories
 
 ob_start();
 ?>
@@ -42,27 +43,53 @@ ob_start();
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
-                            <th>Translation</th>
+                            <th>Progress</th>
+                            <th>Badges</th>
                             <th>Last Login</th>
                             <th>Joined</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($users as $user): ?>
-                            <tr>
+                        <?php foreach ($users as $user):
+                            $progressPercent = $totalReadings > 0 ? round(($user['completed_readings'] / $totalReadings) * 100, 1) : 0;
+                        ?>
+                            <tr class="clickable-row" onclick="viewUserProgress(<?php echo $user['id']; ?>)" style="cursor: pointer;">
                                 <td><?php echo $user['id']; ?></td>
-                                <td><?php echo e($user['name']); ?></td>
+                                <td>
+                                    <a href="/?route=admin/user-progress&id=<?php echo $user['id']; ?>" class="user-link" onclick="event.stopPropagation();">
+                                        <?php echo e($user['name']); ?>
+                                    </a>
+                                </td>
                                 <td><?php echo e($user['email']); ?></td>
                                 <td>
                                     <span class="badge badge-<?php echo $user['role']; ?>">
                                         <?php echo ucfirst($user['role']); ?>
                                     </span>
                                 </td>
-                                <td><?php echo e($user['preferred_translation']); ?></td>
+                                <td>
+                                    <div class="progress-cell">
+                                        <div class="progress-bar-mini">
+                                            <div class="progress-fill" style="width: <?php echo $progressPercent; ?>%;"></div>
+                                        </div>
+                                        <span class="progress-text"><?php echo $progressPercent; ?>%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php if ($user['badge_count'] > 0): ?>
+                                        <span class="badge-count" title="<?php echo $user['badge_count']; ?> badges earned">
+                                            &#x1F3C6; <?php echo $user['badge_count']; ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge-count-none">-</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo $user['last_login'] ? timeAgo($user['last_login']) : 'Never'; ?></td>
                                 <td><?php echo formatDate($user['created_at'], 'M j, Y'); ?></td>
-                                <td class="actions">
+                                <td class="actions" onclick="event.stopPropagation();">
+                                    <a href="/?route=admin/user-progress&id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary" title="View Progress">
+                                        &#x1F4CA;
+                                    </a>
                                     <button class="btn btn-sm btn-secondary"
                                             onclick="editUser(<?php echo htmlspecialchars(json_encode($user)); ?>)">
                                         Edit
@@ -160,7 +187,54 @@ ob_start();
     </div>
 </div>
 
+<style>
+    .user-link {
+        color: var(--primary, #5D4037);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .user-link:hover {
+        text-decoration: underline;
+    }
+    .progress-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .progress-bar-mini {
+        width: 60px;
+        height: 6px;
+        background: var(--bg-secondary, #f5f5f5);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    .progress-bar-mini .progress-fill {
+        height: 100%;
+        background: var(--success, #43A047);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+    .progress-text {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #666);
+        min-width: 40px;
+    }
+    .badge-count {
+        font-size: 0.85rem;
+    }
+    .badge-count-none {
+        color: var(--text-secondary, #999);
+    }
+    .clickable-row:hover {
+        background-color: var(--bg-hover, #f8f9fa);
+    }
+</style>
+
 <script>
+    function viewUserProgress(userId) {
+        window.location.href = '/?route=admin/user-progress&id=' + userId;
+    }
+
     function editUser(user) {
         document.getElementById('editUserId').value = user.id;
         document.getElementById('editName').value = user.name;
