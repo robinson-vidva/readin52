@@ -851,13 +851,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ============ Dashboard ============ */
 .dashboard {
-    padding: var(--spacing-xl) 0;
+    padding: 2.5rem 0;
 }
 
 /* Notes and Books pages */
 .notes-page,
 .books-page {
-    padding: var(--spacing-xl) 0;
+    padding: 2.5rem 0;
 }
 
 .dashboard-header {
@@ -1688,7 +1688,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ============ Profile Page ============ */
 .profile-page {
-    padding: var(--spacing-xl) 0;
+    padding: 2.5rem 0;
 }
 
 .page-header {
