@@ -136,6 +136,7 @@
         <div class="container">
             <p>&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. All rights reserved.</p>
             <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.7;">Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">HelloAO Bible API</a></p>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.7;"><a href="/?route=privacy" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &middot; <a href="/?route=terms" style="color: inherit; text-decoration: underline;">Terms & Conditions</a></p>
         </div>
     </footer>
 
