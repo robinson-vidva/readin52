@@ -4,8 +4,13 @@ $users = $search ? User::searchWithProgress($search) : User::getAllWithProgress(
 $translations = ReadingPlan::getTranslations();
 $totalReadings = 208; // 52 weeks × 4 categories
 
-// Debug: check user IDs
-// error_log("Users IDs: " . implode(', ', array_column($users, 'id')));
+// TEMPORARY DEBUG - show user IDs from database
+echo "<div style='background:yellow;padding:10px;margin:10px;'>";
+echo "<strong>DEBUG Users from DB:</strong><br>";
+foreach ($users as $idx => $u) {
+    echo "[$idx] ID=" . $u['id'] . ", Name=" . htmlspecialchars($u['name']) . "<br>";
+}
+echo "</div>";
 
 ob_start();
 ?>
