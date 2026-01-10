@@ -69,12 +69,12 @@ ob_start();
             <?php foreach ($oldTestament as $catId => $category): ?>
             <div class="category-section" style="background: var(--card-bg, #fff); border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
                 <div class="category-header" style="padding: 1rem 1.25rem; background: linear-gradient(135deg, rgba(139, 115, 85, 0.1), rgba(139, 115, 85, 0.05)); border-bottom: 1px solid var(--border-color, #e0e0e0);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div style="flex: 1;">
                             <h3 style="margin: 0; font-size: 1rem;"><?php echo e($category['name']); ?></h3>
-                            <span style="font-size: 0.8rem; color: var(--text-muted, #888);"><?php echo e($category['description']); ?></span>
+                            <span style="display: block; font-size: 0.8rem; color: var(--text-muted, #888);"><?php echo e($category['description']); ?></span>
                         </div>
-                        <div style="text-align: right;">
+                        <div style="text-align: right; flex-shrink: 0; margin-left: 1rem;">
                             <span style="font-size: 1.25rem; font-weight: 600; color: #8B7355;"><?php echo $category['percentage']; ?>%</span>
                             <span style="display: block; font-size: 0.75rem; color: var(--text-muted, #888);"><?php echo $category['booksComplete']; ?>/<?php echo $category['totalBooks']; ?> books</span>
                         </div>
@@ -122,12 +122,12 @@ ob_start();
             <?php foreach ($newTestament as $catId => $category): ?>
             <div class="category-section" style="background: var(--card-bg, #fff); border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
                 <div class="category-header" style="padding: 1rem 1.25rem; background: linear-gradient(135deg, rgba(91, 125, 177, 0.1), rgba(91, 125, 177, 0.05)); border-bottom: 1px solid var(--border-color, #e0e0e0);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div style="flex: 1;">
                             <h3 style="margin: 0; font-size: 1rem;"><?php echo e($category['name']); ?></h3>
-                            <span style="font-size: 0.8rem; color: var(--text-muted, #888);"><?php echo e($category['description']); ?></span>
+                            <span style="display: block; font-size: 0.8rem; color: var(--text-muted, #888);"><?php echo e($category['description']); ?></span>
                         </div>
-                        <div style="text-align: right;">
+                        <div style="text-align: right; flex-shrink: 0; margin-left: 1rem;">
                             <span style="font-size: 1.25rem; font-weight: 600; color: #5B7DB1;"><?php echo $category['percentage']; ?>%</span>
                             <span style="display: block; font-size: 0.75rem; color: var(--text-muted, #888);"><?php echo $category['booksComplete']; ?>/<?php echo $category['totalBooks']; ?> books</span>
                         </div>
