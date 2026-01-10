@@ -132,6 +132,10 @@ try {
             render('terms');
             break;
 
+        case 'about':
+            render('about');
+            break;
+
         case 'forgot-password':
             if (Auth::isLoggedIn()) {
                 redirect('/?route=dashboard');
@@ -794,6 +798,10 @@ try {
                         Database::setSetting('app_name', trim(post('app_name', 'ReadIn52')));
                         Database::setSetting('default_translation', post('default_translation', 'eng_kjv'));
                         Database::setSetting('registration_enabled', post('registration_enabled', '0') ? '1' : '0');
+                        Database::setSetting('parent_site_name', trim(post('parent_site_name', '')));
+                        Database::setSetting('parent_site_url', trim(post('parent_site_url', '')));
+                        Database::setSetting('admin_email', trim(post('admin_email', '')));
+                        Database::setSetting('github_repo_url', trim(post('github_repo_url', '')));
                         $data['success'] = 'Settings saved successfully.';
                     }
                 }

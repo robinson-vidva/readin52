@@ -3,6 +3,10 @@ $appName = Database::getSetting('app_name', 'ReadIn52');
 $defaultTranslation = Database::getSetting('default_translation', 'eng_kjv');
 $registrationEnabled = Database::getSetting('registration_enabled', '1');
 $appLogo = Database::getSetting('app_logo', '');
+$parentSiteUrl = Database::getSetting('parent_site_url', '');
+$parentSiteName = Database::getSetting('parent_site_name', '');
+$githubRepoUrl = Database::getSetting('github_repo_url', 'https://github.com/askdevotions/readin52');
+$adminEmail = Database::getSetting('admin_email', '');
 $translations = ReadingPlan::getTranslations();
 $translationsByLanguage = ReadingPlan::getTranslationsGroupedByLanguage();
 
@@ -140,6 +144,38 @@ ob_start();
                             <span class="toggle-text">Enable User Registration</span>
                         </label>
                         <small class="form-hint">When disabled, only admins can create new accounts</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Organization & Links</h3>
+
+                    <div class="form-group">
+                        <label for="parent_site_name">Parent Organization Name</label>
+                        <input type="text" id="parent_site_name" name="parent_site_name"
+                               value="<?php echo e($parentSiteName); ?>" placeholder="e.g., ASK Devotions">
+                        <small class="form-hint">Name of your church or organization (optional)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="parent_site_url">Parent Organization URL</label>
+                        <input type="url" id="parent_site_url" name="parent_site_url"
+                               value="<?php echo e($parentSiteUrl); ?>" placeholder="https://yourchurch.com">
+                        <small class="form-hint">Link to your main website. Shows a "Visit [Name]" button on home page</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin_email">Admin Contact Email</label>
+                        <input type="email" id="admin_email" name="admin_email"
+                               value="<?php echo e($adminEmail); ?>" placeholder="admin@example.com">
+                        <small class="form-hint">Contact email for users to reach administrators</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="github_repo_url">GitHub Repository URL</label>
+                        <input type="url" id="github_repo_url" name="github_repo_url"
+                               value="<?php echo e($githubRepoUrl); ?>" placeholder="https://github.com/user/repo">
+                        <small class="form-hint">Link to the source code repository for issues and contributions</small>
                     </div>
                 </div>
 

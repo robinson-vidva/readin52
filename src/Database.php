@@ -592,7 +592,11 @@ class Database
             ['app_name', 'ReadIn52'],
             ['default_translation', 'eng_kjv'],
             ['available_translations', '["eng_kjv","tam_irv"]'],
-            ['registration_enabled', '1']
+            ['registration_enabled', '1'],
+            ['parent_site_url', ''],
+            ['parent_site_name', ''],
+            ['github_repo_url', 'https://github.com/askdevotions/readin52'],
+            ['admin_email', 'seek@askdevotions.com']
         ];
 
         $stmt = $pdo->prepare("INSERT IGNORE INTO settings (`key`, `value`) VALUES (?, ?)");
