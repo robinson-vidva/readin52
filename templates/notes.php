@@ -2,7 +2,7 @@
 $user = Auth::getUser();
 $search = get('search', '');
 $page = max(1, (int) get('page', 1));
-$perPage = 10;
+$perPage = 9;
 
 $result = Note::getPaginated($user['id'], $page, $perPage, $search ?: null);
 $notes = $result['notes'];
