@@ -79,6 +79,46 @@ class Note
     }
 
     /**
+     * Get paginated notes for a user
+     */
+    public static function getPaginated(int $userId, int $page = 1, int $perPage = 10, ?string $search = null): array
+    {
+        $pdo = Database::getInstance();
+        $offset = ($page - 1) * $perPage;
+
+        // Build WHERE clause
+        $where = "WHERE user_id = ?";
+        $params = [$userId];
+
+        if ($search) {
+            $where .= " AND (title LIKE ? OR content LIKE ?)";
+            $searchTerm = '%' . $search . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        // Get total count
+        $countSql = "SELECT COUNT(*) as total FROM notes $where";
+        $stmt = $pdo->prepare($countSql);
+        $stmt->execute($params);
+        $total = (int) $stmt->fetch()['total'];
+
+        // Get paginated notes
+        $sql = "SELECT * FROM notes $where ORDER BY updated_at DESC LIMIT $perPage OFFSET $offset";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $notes = $stmt->fetchAll();
+
+        return [
+            'notes' => $notes,
+            'total' => $total,
+            'page' => $page,
+            'perPage' => $perPage,
+            'totalPages' => (int) ceil($total / $perPage)
+        ];
+    }
+
+    /**
      * Get notes for a specific week/category
      */
     public static function getForReading(int $userId, int $weekNumber, string $category): array

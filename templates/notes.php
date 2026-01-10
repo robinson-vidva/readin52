@@ -1,8 +1,13 @@
 <?php
 $user = Auth::getUser();
 $search = get('search', '');
-$notes = Note::getAllForUser($user['id'], $search ?: null);
-$noteCount = count($notes);
+$page = max(1, (int) get('page', 1));
+$perPage = 10;
+
+$result = Note::getPaginated($user['id'], $page, $perPage, $search ?: null);
+$notes = $result['notes'];
+$noteCount = $result['total'];
+$totalPages = $result['totalPages'];
 
 ob_start();
 ?>
@@ -73,6 +78,49 @@ ob_start();
                     </div>
                 <?php endforeach; ?>
             </div>
+
+            <?php if ($totalPages > 1): ?>
+            <!-- Pagination -->
+            <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem; flex-wrap: wrap;">
+                <?php
+                $baseUrl = '/?route=notes' . ($search ? '&search=' . urlencode($search) : '');
+                ?>
+
+                <?php if ($page > 1): ?>
+                    <a href="<?php echo $baseUrl; ?>&page=1" class="pagination-btn" title="First page">&laquo;</a>
+                    <a href="<?php echo $baseUrl; ?>&page=<?php echo $page - 1; ?>" class="pagination-btn">&lsaquo; Prev</a>
+                <?php endif; ?>
+
+                <?php
+                // Show page numbers
+                $startPage = max(1, $page - 2);
+                $endPage = min($totalPages, $page + 2);
+
+                if ($startPage > 1): ?>
+                    <span class="pagination-ellipsis">...</span>
+                <?php endif;
+
+                for ($i = $startPage; $i <= $endPage; $i++): ?>
+                    <?php if ($i == $page): ?>
+                        <span class="pagination-btn pagination-current"><?php echo $i; ?></span>
+                    <?php else: ?>
+                        <a href="<?php echo $baseUrl; ?>&page=<?php echo $i; ?>" class="pagination-btn"><?php echo $i; ?></a>
+                    <?php endif; ?>
+                <?php endfor;
+
+                if ($endPage < $totalPages): ?>
+                    <span class="pagination-ellipsis">...</span>
+                <?php endif; ?>
+
+                <?php if ($page < $totalPages): ?>
+                    <a href="<?php echo $baseUrl; ?>&page=<?php echo $page + 1; ?>" class="pagination-btn">Next &rsaquo;</a>
+                    <a href="<?php echo $baseUrl; ?>&page=<?php echo $totalPages; ?>" class="pagination-btn" title="Last page">&raquo;</a>
+                <?php endif; ?>
+            </div>
+            <div style="text-align: center; margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted, #999);">
+                Page <?php echo $page; ?> of <?php echo $totalPages; ?> (<?php echo $noteCount; ?> notes)
+            </div>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
@@ -111,6 +159,35 @@ ob_start();
 .note-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.75rem;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 8px;
+    color: var(--text-primary, #333);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.pagination-btn:hover {
+    background: var(--primary, #5D4037);
+    color: white;
+    border-color: var(--primary, #5D4037);
+}
+.pagination-current {
+    background: var(--primary, #5D4037);
+    color: white;
+    border-color: var(--primary, #5D4037);
+}
+.pagination-ellipsis {
+    padding: 0 0.5rem;
+    color: var(--text-muted, #999);
 }
 </style>
 
