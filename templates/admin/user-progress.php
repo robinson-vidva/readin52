@@ -6,8 +6,8 @@ if (!$userId) {
     redirect('/?route=admin/users');
 }
 
-$user = User::findById($userId);
-if (!$user) {
+$targetUser = User::findById($userId);
+if (!$targetUser) {
     setFlash('error', 'User not found.');
     redirect('/?route=admin/users');
 }
@@ -30,6 +30,7 @@ ob_start();
 ?>
 
 <div class="user-progress-page">
+    <!-- DEBUG: User ID = <?php echo $userId; ?>, Name = <?php echo e($targetUser['name']); ?> -->
     <!-- Header with back button -->
     <div class="page-actions">
         <a href="/?route=admin/users" class="btn btn-outline">
@@ -40,17 +41,17 @@ ob_start();
     <!-- User Profile Header -->
     <div class="profile-header">
         <div class="profile-avatar">
-            <?php echo strtoupper(substr($user['name'], 0, 1)); ?>
+            <?php echo strtoupper(substr($targetUser['name'], 0, 1)); ?>
         </div>
         <div class="profile-info">
-            <h1><?php echo e($user['name']); ?></h1>
-            <p class="profile-email"><?php echo e($user['email']); ?></p>
+            <h1><?php echo e($targetUser['name']); ?></h1>
+            <p class="profile-email"><?php echo e($targetUser['email']); ?></p>
             <div class="profile-meta">
-                <span class="role-badge role-<?php echo $user['role']; ?>"><?php echo ucfirst($user['role']); ?></span>
+                <span class="role-badge role-<?php echo $targetUser['role']; ?>"><?php echo ucfirst($targetUser['role']); ?></span>
                 <span class="meta-sep">|</span>
-                <span>Joined <?php echo formatDate($user['created_at'], 'M j, Y'); ?></span>
+                <span>Joined <?php echo formatDate($targetUser['created_at'], 'M j, Y'); ?></span>
                 <span class="meta-sep">|</span>
-                <span>Last active: <?php echo $user['last_login'] ? timeAgo($user['last_login']) : 'Never'; ?></span>
+                <span>Last active: <?php echo $targetUser['last_login'] ? timeAgo($targetUser['last_login']) : 'Never'; ?></span>
             </div>
         </div>
         <div class="profile-progress-ring">
@@ -616,5 +617,5 @@ ob_start();
 
 <?php
 $content = ob_get_clean();
-$pageTitle = 'User Progress - ' . e($user['name']);
+$pageTitle = 'User Progress - ' . e($targetUser['name']);
 require TEMPLATE_PATH . '/admin/layout.php';
