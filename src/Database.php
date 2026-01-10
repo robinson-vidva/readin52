@@ -87,6 +87,7 @@ class Database
                 name VARCHAR(100) NOT NULL,
                 role ENUM('admin', 'user') DEFAULT 'user',
                 preferred_translation VARCHAR(20) DEFAULT 'eng_kjv',
+                must_change_password TINYINT(1) DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 last_login TIMESTAMP NULL,
@@ -285,6 +286,12 @@ class Database
         $columns = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
         if (!in_array('custom_logo', $columns)) {
             $pdo->exec("ALTER TABLE users ADD COLUMN custom_logo VARCHAR(255) DEFAULT NULL AFTER theme");
+        }
+
+        // Add must_change_password column to users table if not exists
+        $columns = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('must_change_password', $columns)) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN must_change_password TINYINT(1) DEFAULT 0 AFTER preferred_translation");
         }
 
         // Fix category sort_order (poetry=0, history=1, prophecy=2, gospels=3)
