@@ -110,24 +110,6 @@
         </div>
     </div>
 
-    <style>
-        .auth-home-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-        .auth-home-link a {
-            color: #888;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-        .auth-home-link a:hover {
-            color: #5D4037;
-        }
-    </style>
-
     <!-- Terms Modal -->
     <div id="termsModal" class="terms-modal" style="display: none;">
         <div class="terms-modal-backdrop"></div>

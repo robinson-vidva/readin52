@@ -837,6 +837,24 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
 }
 
+.auth-home-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.auth-home-link a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color var(--transition-fast);
+}
+
+.auth-home-link a:hover {
+    color: var(--primary-brown);
+}
+
 /* ============ Dashboard ============ */
 .dashboard {
     padding: 2.5rem 0;

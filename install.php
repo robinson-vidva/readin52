@@ -146,7 +146,7 @@ try {
         $messages[] = 'Admin user already exists';
     }
 
-    // Step 7: Create .gitkeep in data folder
+    // Step 6: Create .gitkeep in data folder
     $gitkeepPath = DATA_PATH . '/.gitkeep';
     if (!file_exists($gitkeepPath)) {
         file_put_contents($gitkeepPath, '');
