@@ -26,6 +26,50 @@
     $parentSiteUrl = Database::getSetting('parent_site_url', '');
     $parentSiteName = Database::getSetting('parent_site_name', '');
     ?>
+
+    <?php if ($parentSiteUrl && $parentSiteName): ?>
+    <nav class="home-topbar">
+        <a href="<?php echo e($parentSiteUrl); ?>" class="topbar-brand" target="_blank" rel="noopener">
+            <span class="topbar-arrow">&larr;</span>
+            <span class="topbar-text"><?php echo e($parentSiteName); ?></span>
+        </a>
+    </nav>
+    <style>
+        .home-topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+        }
+        .topbar-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .topbar-brand:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-2px);
+        }
+        .topbar-arrow {
+            font-size: 1.1rem;
+        }
+    </style>
+    <?php endif; ?>
+
     <div class="home-hero">
         <div class="home-overlay"></div>
         <div class="container">
@@ -70,15 +114,6 @@
                         <a href="/?route=register" class="btn btn-outline btn-lg">Create Account</a>
                     <?php endif; ?>
                 </div>
-
-                <?php if ($parentSiteUrl && $parentSiteName): ?>
-                <div class="home-parent-link" style="margin-top: 1.5rem;">
-                    <a href="<?php echo e($parentSiteUrl); ?>" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.5rem; color: rgba(255,255,255,0.9); text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem; border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; transition: all 0.2s;">
-                        <span>Visit <?php echo e($parentSiteName); ?></span>
-                        <span style="font-size: 0.75rem;">&#x2197;</span>
-                    </a>
-                </div>
-                <?php endif; ?>
 
                 <div class="home-stats">
                     <div class="stat">

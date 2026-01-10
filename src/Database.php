@@ -595,7 +595,7 @@ class Database
             ['registration_enabled', '1'],
             ['parent_site_url', ''],
             ['parent_site_name', ''],
-            ['github_repo_url', 'https://github.com/askdevotions/readin52'],
+            ['github_repo_url', 'https://github.com/robinson-vidva/readin52'],
             ['admin_email', 'seek@askdevotions.com']
         ];
 
