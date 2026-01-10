@@ -170,13 +170,23 @@ if (Auth::isLoggedIn()) {
         <?php echo $content ?? ''; ?>
     </main>
 
-    <?php if (Auth::isLoggedIn()): ?>
+    <?php if (Auth::isLoggedIn()):
+        $footerParentUrl = Database::getSetting('parent_site_url', '');
+        $footerParentName = Database::getSetting('parent_site_name', '');
+    ?>
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <p class="footer-copyright">&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. <span class="footer-tagline">Journey Through Scripture in 52 Weeks.</span></p>
                 <p class="footer-credit">Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener">HelloAO Bible API</a></p>
-                <p class="footer-links"><a href="/?route=privacy">Privacy Policy</a> · <a href="/?route=terms">Terms & Conditions</a></p>
+                <p class="footer-links">
+                    <a href="/?route=about">About</a> ·
+                    <a href="/?route=privacy">Privacy Policy</a> ·
+                    <a href="/?route=terms">Terms & Conditions</a>
+                    <?php if ($footerParentUrl && $footerParentName): ?>
+                        · <a href="<?php echo e($footerParentUrl); ?>" target="_blank" rel="noopener"><?php echo e($footerParentName); ?></a>
+                    <?php endif; ?>
+                </p>
             </div>
         </div>
     </footer>

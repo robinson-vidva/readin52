@@ -26,6 +26,18 @@ ob_start();
             </section>
 
             <section>
+                <h2>Code of Conduct</h2>
+                <p>As a member of this community, you agree to:</p>
+                <ul>
+                    <li>Treat other users and administrators with respect</li>
+                    <li>Not post or share inappropriate, offensive, or harmful content</li>
+                    <li>Not use the service for spam, harassment, or illegal activities</li>
+                    <li>Not attempt to access other users' accounts or data</li>
+                    <li>Report any security vulnerabilities or issues responsibly</li>
+                </ul>
+            </section>
+
+            <section>
                 <h2>User Content</h2>
                 <p>You retain ownership of any notes or content you create. By using this service, you grant us permission to store and display your content to you.</p>
             </section>
@@ -37,7 +49,21 @@ ob_start();
 
             <section>
                 <h2>Account Termination</h2>
-                <p>You may delete your account at any time through the Settings page. We reserve the right to suspend or terminate accounts that violate these terms.</p>
+                <p>You may delete your account at any time through the Settings page.</p>
+                <p><strong>Administrator Rights:</strong> Site administrators reserve the right to suspend, restrict, or permanently remove any user account at their sole discretion, including but not limited to cases where:</p>
+                <ul>
+                    <li>The user violates the Code of Conduct or these Terms & Conditions</li>
+                    <li>The user engages in behavior that disrupts the community</li>
+                    <li>The user's account poses a security risk to the service</li>
+                    <li>The user provides false or misleading registration information</li>
+                </ul>
+                <p>Account termination may occur without prior notice. Upon termination, your data may be deleted permanently.</p>
+            </section>
+
+            <section>
+                <h2>Open Source Software</h2>
+                <p>This application is open source software. The source code is available on GitHub and may be used by churches, organizations, and communities to host their own instances under the terms of the applicable license.</p>
+                <p>This specific instance is operated independently by its administrators. For issues related to the software itself, please visit the project's GitHub repository.</p>
             </section>
 
             <section>

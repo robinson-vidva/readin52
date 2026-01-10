@@ -21,7 +21,11 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="home-page">
-    <?php $appLogo = Database::getSetting('app_logo', ''); ?>
+    <?php
+    $appLogo = Database::getSetting('app_logo', '');
+    $parentSiteUrl = Database::getSetting('parent_site_url', '');
+    $parentSiteName = Database::getSetting('parent_site_name', '');
+    ?>
     <div class="home-hero">
         <div class="home-overlay"></div>
         <div class="container">
@@ -66,6 +70,15 @@
                         <a href="/?route=register" class="btn btn-outline btn-lg">Create Account</a>
                     <?php endif; ?>
                 </div>
+
+                <?php if ($parentSiteUrl && $parentSiteName): ?>
+                <div class="home-parent-link" style="margin-top: 1.5rem;">
+                    <a href="<?php echo e($parentSiteUrl); ?>" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.5rem; color: rgba(255,255,255,0.9); text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem; border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; transition: all 0.2s;">
+                        <span>Visit <?php echo e($parentSiteName); ?></span>
+                        <span style="font-size: 0.75rem;">&#x2197;</span>
+                    </a>
+                </div>
+                <?php endif; ?>
 
                 <div class="home-stats">
                     <div class="stat">
@@ -136,7 +149,7 @@
         <div class="container">
             <p>&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. All rights reserved.</p>
             <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.7;">Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">HelloAO Bible API</a></p>
-            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.7;"><a href="/?route=privacy" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &middot; <a href="/?route=terms" style="color: inherit; text-decoration: underline;">Terms & Conditions</a></p>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.7;"><a href="/?route=about" style="color: inherit; text-decoration: underline;">About</a> &middot; <a href="/?route=privacy" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &middot; <a href="/?route=terms" style="color: inherit; text-decoration: underline;">Terms & Conditions</a></p>
         </div>
     </footer>
 
