@@ -391,6 +391,7 @@ ob_start();
 
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
+        formData.append('ajax', '1');
         formData.append('title', title);
         formData.append('content', content);
         formData.append('book', currentNotesBook);
