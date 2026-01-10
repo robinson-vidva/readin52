@@ -88,6 +88,14 @@
                 font-size: 1.2rem;
             }
         }
+
+        /* Desktop: Wider button */
+        @media (min-width: 601px) {
+            .topbar-brand {
+                padding: 0.6rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
     </style>
     <?php endif; ?>
 
