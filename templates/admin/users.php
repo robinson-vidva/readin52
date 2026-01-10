@@ -51,20 +51,20 @@ ob_start();
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($users as $user):
-                            $progressPercent = $totalReadings > 0 ? round(($user['completed_readings'] / $totalReadings) * 100, 1) : 0;
+                        <?php foreach ($users as $userData):
+                            $progressPercent = $totalReadings > 0 ? round(($userData['completed_readings'] / $totalReadings) * 100, 1) : 0;
                         ?>
-                            <tr class="clickable-row" onclick="viewUserProgress(<?php echo $user['id']; ?>)" style="cursor: pointer;">
-                                <td><?php echo $user['id']; ?></td>
+                            <tr class="clickable-row" onclick="viewUserProgress(<?php echo $userData['id']; ?>)" style="cursor: pointer;">
+                                <td><?php echo $userData['id']; ?></td>
                                 <td>
-                                    <a href="/?route=admin/user-progress&id=<?php echo $user['id']; ?>" class="user-link" onclick="event.stopPropagation();">
-                                        <?php echo e($user['name']); ?>
+                                    <a href="/?route=admin/user-progress&id=<?php echo $userData['id']; ?>" class="user-link" onclick="event.stopPropagation();">
+                                        <?php echo e($userData['name']); ?>
                                     </a>
                                 </td>
-                                <td><?php echo e($user['email']); ?></td>
+                                <td><?php echo e($userData['email']); ?></td>
                                 <td>
-                                    <span class="badge badge-<?php echo $user['role']; ?>">
-                                        <?php echo ucfirst($user['role']); ?>
+                                    <span class="badge badge-<?php echo $userData['role']; ?>">
+                                        <?php echo ucfirst($userData['role']); ?>
                                     </span>
                                 </td>
                                 <td>
@@ -76,27 +76,27 @@ ob_start();
                                     </div>
                                 </td>
                                 <td>
-                                    <?php if ($user['badge_count'] > 0): ?>
-                                        <span class="badge-count" title="<?php echo $user['badge_count']; ?> badges earned">
-                                            &#x1F3C6; <?php echo $user['badge_count']; ?>
+                                    <?php if ($userData['badge_count'] > 0): ?>
+                                        <span class="badge-count" title="<?php echo $userData['badge_count']; ?> badges earned">
+                                            &#x1F3C6; <?php echo $userData['badge_count']; ?>
                                         </span>
                                     <?php else: ?>
                                         <span class="badge-count-none">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo $user['last_login'] ? timeAgo($user['last_login']) : 'Never'; ?></td>
-                                <td><?php echo formatDate($user['created_at'], 'M j, Y'); ?></td>
+                                <td><?php echo $userData['last_login'] ? timeAgo($userData['last_login']) : 'Never'; ?></td>
+                                <td><?php echo formatDate($userData['created_at'], 'M j, Y'); ?></td>
                                 <td class="actions" onclick="event.stopPropagation();">
-                                    <a href="/?route=admin/user-progress&id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary" title="View Progress">
+                                    <a href="/?route=admin/user-progress&id=<?php echo $userData['id']; ?>" class="btn btn-sm btn-primary" title="View Progress">
                                         &#x1F4CA;
                                     </a>
                                     <button class="btn btn-sm btn-secondary"
-                                            onclick="editUser(<?php echo htmlspecialchars(json_encode($user)); ?>)">
+                                            onclick="editUser(<?php echo htmlspecialchars(json_encode($userData)); ?>)">
                                         Edit
                                     </button>
-                                    <?php if ($user['id'] !== Auth::getUserId()): ?>
+                                    <?php if ($userData['id'] !== Auth::getUserId()): ?>
                                         <button class="btn btn-sm btn-danger"
-                                                onclick="deleteUser(<?php echo $user['id']; ?>, '<?php echo e($user['name']); ?>')">
+                                                onclick="deleteUser(<?php echo $userData['id']; ?>, '<?php echo e($userData['name']); ?>')">
                                             Delete
                                         </button>
                                     <?php endif; ?>
