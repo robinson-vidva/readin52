@@ -1408,8 +1408,8 @@ h1, h2, h3, h4, h5, h6 {
 /* ============ Reader ============ */
 /* Reader Modal */
 .reader-modal {
-    max-width: 1400px;
-    width: 95%;
+    max-width: 1400px !important;
+    width: 95% !important;
     height: 90vh;
     max-height: 90vh;
 }
