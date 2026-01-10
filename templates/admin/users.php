@@ -104,66 +104,70 @@ for ($i = 0; $i < count($users); $i++):
 </div>
 
 <!-- Edit User Modal -->
-<div id="editUserModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
+<div id="editUserModal" class="admin-modal">
+    <div class="admin-modal-content">
+        <div class="admin-modal-header">
             <h2>Edit User</h2>
-            <button type="button" class="modal-close" onclick="closeEditModal()">&times;</button>
+            <button type="button" class="admin-modal-close" onclick="closeEditModal()">&times;</button>
         </div>
-        <form method="POST" action="/?route=admin/users" class="modal-body">
-            <?php echo csrfField(); ?>
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="user_id" id="editUserId">
+        <form method="POST" action="/?route=admin/users">
+            <div class="admin-modal-body">
+                <?php echo csrfField(); ?>
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="user_id" id="editUserId">
 
-            <div class="form-group">
-                <label for="editName">Name</label>
-                <input type="text" id="editName" name="name" required>
-            </div>
+                <div class="form-group">
+                    <label for="editName">Name</label>
+                    <input type="text" id="editName" name="name" required>
+                </div>
 
-            <div class="form-group">
-                <label for="editEmail">Email</label>
-                <input type="email" id="editEmail" name="email" required>
-            </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" name="email" required>
+                </div>
 
-            <div class="form-group">
-                <label for="editRole">Role</label>
-                <select id="editRole" name="role">
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="editRole">Role</label>
+                    <select id="editRole" name="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="editPassword">New Password (leave blank to keep current)</label>
-                <input type="password" id="editPassword" name="new_password" minlength="6">
-            </div>
+                <div class="form-group">
+                    <label for="editPassword">New Password (leave blank to keep current)</label>
+                    <input type="password" id="editPassword" name="new_password" minlength="6">
+                </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <div class="admin-modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteUserModal" class="modal">
-    <div class="modal-content modal-sm">
-        <div class="modal-header">
+<div id="deleteUserModal" class="admin-modal">
+    <div class="admin-modal-content" style="max-width:400px;">
+        <div class="admin-modal-header">
             <h2>Delete User</h2>
-            <button type="button" class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            <button type="button" class="admin-modal-close" onclick="closeDeleteModal()">&times;</button>
         </div>
-        <form method="POST" action="/?route=admin/users" class="modal-body">
-            <?php echo csrfField(); ?>
-            <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="user_id" id="deleteUserId">
+        <form method="POST" action="/?route=admin/users">
+            <div class="admin-modal-body">
+                <?php echo csrfField(); ?>
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="user_id" id="deleteUserId">
 
-            <p>Are you sure you want to delete <strong id="deleteUserName"></strong>?</p>
-            <p class="text-danger">This action cannot be undone. All reading progress will be lost.</p>
+                <p>Are you sure you want to delete <strong id="deleteUserName"></strong>?</p>
+                <p class="text-danger">This action cannot be undone. All reading progress will be lost.</p>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-                <button type="submit" class="btn btn-danger">Delete User</button>
+                <div class="admin-modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </div>
             </div>
         </form>
     </div>
@@ -187,7 +191,11 @@ for ($i = 0; $i < count($users); $i++):
     background: #43A047;
     border-radius: 4px;
 }
-.progress-text {
+/* Override global .progress-text styles for admin table */
+.progress-cell .progress-text {
+    position: static !important;
+    inset: unset !important;
+    display: inline !important;
     font-size: 0.85rem;
     color: #666;
     min-width: 40px;
@@ -209,6 +217,61 @@ for ($i = 0; $i < count($users); $i++):
 }
 .actions .btn:last-child {
     margin-right: 0;
+}
+/* Admin Modal overrides */
+.admin-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+.admin-modal.show {
+    display: flex;
+}
+.admin-modal-content {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: auto;
+}
+.admin-modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.admin-modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+.admin-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+.admin-modal-body {
+    padding: 1rem;
+}
+.admin-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
 }
 </style>
 
@@ -237,12 +300,11 @@ function closeDeleteModal() {
 }
 
 // Close modals on outside click
-document.querySelectorAll('.modal').forEach(function(modal) {
-    modal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.remove('show');
-        }
-    });
+document.getElementById('editUserModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+});
+document.getElementById('deleteUserModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
 });
 </script>
 
