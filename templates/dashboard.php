@@ -224,10 +224,6 @@ ob_start();
                         </select>
                     </div>
                 <?php endif; ?>
-                <button onclick="toggleNotesPanel()" id="notesToggleBtn" style="padding: 0.4rem 0.6rem; font-size: 0.9rem; border: 1px solid #ddd; border-radius: 6px; background: var(--background, #f5f5f5); cursor: pointer; display: flex; align-items: center; gap: 0.25rem;" title="Notes">
-                    <span>&#x1F4DD;</span>
-                    <span id="notesCount" style="font-size: 0.75rem;">0</span>
-                </button>
             </div>
             <button class="reader-close" onclick="closeReader()" aria-label="Close" style="width: 36px; height: 36px; border: none; background: var(--background, #f5f5f5); font-size: 1.25rem; cursor: pointer; color: var(--text-secondary, #666); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;">&times;</button>
         </div>
@@ -258,14 +254,19 @@ ob_start();
                 </div>
             </div>
         </div>
-        <div class="reader-footer">
-            <div class="reader-actions">
+        <div class="reader-footer" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-top: 1px solid var(--border-color, #eee); gap: 1rem;">
+            <div class="reader-actions" style="display: flex; gap: 0.5rem;">
                 <button class="btn btn-secondary" id="btnSkip" onclick="skipChapter()">Skip</button>
-                <button class="btn btn-primary" id="btnComplete" onclick="markCompleteAndNext()">Mark Complete & Next</button>
+                <button class="btn btn-primary" id="btnComplete" onclick="markCompleteAndNext()">Next Chapter</button>
             </div>
-            <div class="reader-progress">
+            <div class="reader-progress" style="flex: 1; text-align: center;">
                 <span id="readerProgress"></span>
             </div>
+            <button onclick="toggleNotesPanel()" id="notesToggleBtn" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; border: 1px solid var(--border-color, #ddd); border-radius: 6px; background: var(--background, #f5f5f5); cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s;" title="Toggle Notes">
+                <span>&#x1F4DD;</span>
+                <span>Notes</span>
+                <span id="notesCount" style="background: var(--primary, #5D4037); color: white; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 10px; min-width: 18px; text-align: center;">0</span>
+            </button>
         </div>
     </div>
 </div>
