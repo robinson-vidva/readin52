@@ -1,5 +1,6 @@
 <?php
-$userId = intval(get('id', 0));
+// Get user ID from URL parameter
+$userId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if (!$userId) {
     redirect('/?route=admin/users');
