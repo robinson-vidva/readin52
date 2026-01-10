@@ -91,6 +91,16 @@ try {
                 $email = trim(post('email', ''));
                 $password = post('password', '');
                 $passwordConfirm = post('password_confirm', '');
+                $acceptTerms = post('accept_terms', '');
+
+                if (!$acceptTerms) {
+                    render('register', [
+                        'error' => 'You must accept the Terms & Conditions to create an account.',
+                        'name' => $name,
+                        'email' => $email
+                    ]);
+                    break;
+                }
 
                 if ($password !== $passwordConfirm) {
                     render('register', [
