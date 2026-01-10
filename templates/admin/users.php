@@ -202,31 +202,46 @@ ob_start();
         gap: 0.5rem;
     }
     .progress-bar-mini {
-        width: 60px;
-        height: 6px;
-        background: var(--bg-secondary, #f5f5f5);
-        border-radius: 3px;
+        width: 80px;
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
         overflow: hidden;
     }
     .progress-bar-mini .progress-fill {
         height: 100%;
-        background: var(--success, #43A047);
-        border-radius: 3px;
+        background: #43A047;
+        border-radius: 4px;
         transition: width 0.3s ease;
+        min-width: 2px;
     }
     .progress-text {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         color: var(--text-secondary, #666);
-        min-width: 40px;
+        min-width: 45px;
+        font-weight: 500;
     }
     .badge-count {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
     }
     .badge-count-none {
         color: var(--text-secondary, #999);
     }
     .clickable-row:hover {
-        background-color: var(--bg-hover, #f8f9fa);
+        background-color: #f8f9fa;
+    }
+    .admin-table td {
+        vertical-align: middle;
+    }
+    .actions {
+        white-space: nowrap;
+    }
+    .actions .btn {
+        margin-right: 0.25rem;
+    }
+    .actions .btn:last-child {
+        margin-right: 0;
     }
 </style>
 
