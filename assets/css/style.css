@@ -555,19 +555,24 @@ h1, h2, h3, h4, h5, h6 {
         justify-content: center;
         align-items: center;
         width: 100%;
-        padding: 8px;
+        padding: 12px 8px;
+        border-radius: 8px;
     }
 
     /* Ensure avatar stays circular in mobile menu */
     .nav-avatar-link .avatar-small {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         width: 48px !important;
         min-width: 48px !important;
         max-width: 48px !important;
         height: 48px !important;
         min-height: 48px !important;
         max-height: 48px !important;
+        flex: 0 0 48px !important;
         font-size: 1rem;
-        aspect-ratio: 1 / 1;
+        border-radius: 50% !important;
     }
 
     .nav-user-dropdown {
