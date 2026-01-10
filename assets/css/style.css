@@ -854,6 +854,12 @@ h1, h2, h3, h4, h5, h6 {
     padding: var(--spacing-xl) 0;
 }
 
+/* Notes and Books pages */
+.notes-page,
+.books-page {
+    padding: var(--spacing-xl) 0;
+}
+
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -1686,6 +1692,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
     margin-bottom: var(--spacing-xl);
 }
 
