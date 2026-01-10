@@ -90,13 +90,15 @@ ob_start();
                 <textarea id="notePageContent" placeholder="Write your thoughts, reflections, or insights..." rows="8" style="width: 100%; padding: 0.875rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 8px; font-size: 1rem; resize: vertical; font-family: inherit; box-sizing: border-box; min-height: 200px;"></textarea>
             </div>
             <input type="hidden" id="notePageEditingId" value="">
-            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-                <button onclick="closeNotePageModal()" style="padding: 0.875rem 1.75rem; border: 1px solid var(--border-color, #ddd); background: white; border-radius: 8px; cursor: pointer; font-size: 1rem;">Cancel</button>
-                <button onclick="saveNoteFromPage()" style="padding: 0.875rem 1.75rem; background: var(--primary, #5D4037); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500;">Save Note</button>
+            <div style="display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;">
+                <button id="notePageDeleteBtn" onclick="deleteNoteFromPage()" style="display: none; padding: 0.75rem; background: none; border: 1px solid #dc3545; color: #dc3545; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;" title="Delete Note">
+                    &#x1F5D1;
+                </button>
+                <div style="display: flex; gap: 0.75rem; margin-left: auto;">
+                    <button onclick="closeNotePageModal()" style="padding: 0.875rem 1.75rem; border: 1px solid var(--border-color, #ddd); background: white; border-radius: 8px; cursor: pointer; font-size: 1rem;">Cancel</button>
+                    <button onclick="saveNoteFromPage()" style="padding: 0.875rem 1.75rem; background: var(--primary, #5D4037); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 500;">Save Note</button>
+                </div>
             </div>
-        </div>
-        <div id="notePageDeleteSection" style="display: none; padding: 0 1.5rem 1.5rem; border-top: 1px solid var(--border-color, #e0e0e0); margin-top: -0.5rem; padding-top: 1.25rem;">
-            <button onclick="deleteNoteFromPage()" style="width: 100%; padding: 0.75rem; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem;">Delete This Note</button>
         </div>
     </div>
 </div>
@@ -117,7 +119,7 @@ function openNewNoteModal() {
     document.getElementById('notePageTitle').value = '';
     document.getElementById('notePageContent').value = '';
     document.getElementById('notePageEditingId').value = '';
-    document.getElementById('notePageDeleteSection').style.display = 'none';
+    document.getElementById('notePageDeleteBtn').style.display = 'none';
     document.getElementById('notePageModal').style.display = 'flex';
     document.getElementById('notePageModal').classList.add('show');
     setTimeout(() => document.getElementById('notePageContent').focus(), 100);
@@ -131,7 +133,7 @@ function openEditNoteModal(noteId) {
     document.getElementById('notePageTitle').value = note.title || '';
     document.getElementById('notePageContent').value = note.content || '';
     document.getElementById('notePageEditingId').value = noteId;
-    document.getElementById('notePageDeleteSection').style.display = 'block';
+    document.getElementById('notePageDeleteBtn').style.display = 'block';
     document.getElementById('notePageModal').style.display = 'flex';
     document.getElementById('notePageModal').classList.add('show');
 }
