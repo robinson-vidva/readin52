@@ -354,7 +354,8 @@ async function markChapterComplete() {
                 week: currentWeek,
                 category: currentCategory,
                 book: currentBook,
-                chapter: currentChapter
+                chapter: currentChapter,
+                csrf_token: typeof csrfToken !== 'undefined' ? csrfToken : ''
             })
         });
 

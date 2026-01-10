@@ -8,11 +8,13 @@ ReadIn52 is a progressive web app that helps you read through the entire Bible i
 
 - **52-Week Reading Plan**: Four readings per week across different categories
 - **Four Categories**: Poetry & Wisdom, History & Law, Chronicles & Prophecy, Gospels & Epistles
-- **Progress Tracking**: Track your reading progress with visual indicators
-- **Bible Reader**: Built-in reader with HelloAO Bible API integration
-- **Multiple Translations**: Support for English (KJV) and Tamil (IRV)
+- **Progress Tracking**: Track your reading progress with chapter-level visual indicators
+- **Bible Reader**: Built-in reader with HelloAO Bible API integration (modal popup)
+- **Multiple Translations**: Support for 50+ translations across multiple languages
+- **Dual Translation Mode**: Compare two translations side-by-side in settings
+- **Personal Notes**: Take notes while reading, organized by book/chapter with search
 - **PWA Support**: Install on your device for offline access
-- **Admin Panel**: Manage users, reading plan, and settings
+- **Admin Panel**: Manage users, reading plan, translations, and settings
 
 ## Requirements
 
@@ -99,6 +101,8 @@ public_html/              # Document root (Cloudways)
 │   ├── User.php
 │   ├── Progress.php
 │   ├── ReadingPlan.php
+│   ├── Note.php
+│   ├── Email.php
 │   └── helpers.php
 ├── templates/            # Protected - no web access
 │   ├── .htaccess
@@ -109,6 +113,8 @@ public_html/              # Document root (Cloudways)
 │   ├── register.php
 │   ├── reader.php
 │   ├── profile.php
+│   ├── settings.php
+│   ├── notes.php
 │   └── admin/
 ├── .gitignore
 ├── README.md
@@ -119,10 +125,12 @@ public_html/              # Document root (Cloudways)
 
 - Sensitive directories (config, src, templates, data) are protected via .htaccess
 - HTTPS is enforced automatically in production
-- CSRF protection on all forms
+- CSRF protection on all forms and API endpoints
 - Password hashing with bcrypt
 - SQL injection prevention via PDO prepared statements
 - XSS prevention via output escaping
+- Host header validation to prevent injection attacks
+- Secure variable extraction in template rendering
 
 ## License
 
