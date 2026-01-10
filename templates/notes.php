@@ -15,11 +15,14 @@ ob_start();
                 <h1>My Notes</h1>
                 <p><?php echo $noteCount; ?> note<?php echo $noteCount !== 1 ? 's' : ''; ?> total</p>
             </div>
+            <?php if ($noteCount > 0 || $search): ?>
             <button onclick="openNewNoteModal()" class="btn btn-primary">
                 <span>+</span> New Note
             </button>
+            <?php endif; ?>
         </div>
 
+        <?php if ($noteCount > 0 || $search): ?>
         <!-- Search Bar -->
         <div class="search-form" style="margin-bottom: var(--spacing-xl, 2rem);">
             <form method="GET" action="/?route=notes" style="display: flex; gap: 0.5rem;">
@@ -31,6 +34,7 @@ ob_start();
                 <?php endif; ?>
             </form>
         </div>
+        <?php endif; ?>
 
         <?php if ($search): ?>
             <p style="margin-bottom: 1rem; color: var(--text-secondary, #666);">Showing results for "<?php echo e($search); ?>"</p>
