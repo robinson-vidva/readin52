@@ -3,9 +3,9 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'readin52-v2';
-const STATIC_CACHE = 'readin52-static-v2';
-const API_CACHE = 'readin52-api-v2';
+const CACHE_NAME = 'readin52-v3';
+const STATIC_CACHE = 'readin52-static-v3';
+const API_CACHE = 'readin52-api-v3';
 
 // Static assets to cache
 const STATIC_ASSETS = [
@@ -14,8 +14,8 @@ const STATIC_ASSETS = [
     '/assets/css/style.css',
     '/assets/js/app.js',
     '/assets/js/bible-api.js',
-    '/assets/images/icon-192.png',
-    '/assets/images/icon-512.png'
+    '/assets/images/icon.svg',
+    '/assets/images/logo.svg'
 ];
 
 // Install event - cache static assets
@@ -143,8 +143,8 @@ self.addEventListener('push', event => {
         const data = event.data.json();
         self.registration.showNotification(data.title, {
             body: data.body,
-            icon: '/assets/images/icon-192.png',
-            badge: '/assets/images/icon-192.png'
+            icon: '/assets/images/icon.svg',
+            badge: '/assets/images/icon.svg'
         });
     }
 });

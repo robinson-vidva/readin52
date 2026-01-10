@@ -553,8 +553,21 @@ h1, h2, h3, h4, h5, h6 {
     .nav-avatar-link {
         display: flex;
         justify-content: center;
+        align-items: center;
         width: 100%;
         padding: 8px;
+    }
+
+    /* Ensure avatar stays circular in mobile menu */
+    .nav-avatar-link .avatar-small {
+        width: 48px !important;
+        min-width: 48px !important;
+        max-width: 48px !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+        font-size: 1rem;
+        aspect-ratio: 1 / 1;
     }
 
     .nav-user-dropdown {
