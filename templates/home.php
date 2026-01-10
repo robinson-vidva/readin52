@@ -29,7 +29,7 @@
 
     <?php if ($parentSiteUrl && $parentSiteName): ?>
     <nav class="home-topbar">
-        <a href="<?php echo e($parentSiteUrl); ?>" class="topbar-brand">
+        <a href="<?php echo e($parentSiteUrl); ?>" class="topbar-brand" title="<?php echo e($parentSiteName); ?>">
             <span class="topbar-arrow">&larr;</span>
             <span class="topbar-text"><?php echo e($parentSiteName); ?></span>
         </a>
@@ -39,14 +39,13 @@
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
             z-index: 100;
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+            padding: 0.75rem;
         }
         .topbar-brand {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             background: rgba(255,255,255,0.15);
@@ -58,14 +57,36 @@
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
         }
         .topbar-brand:hover {
             background: rgba(255,255,255,0.25);
-            transform: translateX(-2px);
         }
         .topbar-arrow {
             font-size: 1.1rem;
+        }
+        .topbar-text {
+            display: inline;
+        }
+
+        /* Mobile: Compact circular button */
+        @media (max-width: 600px) {
+            .home-topbar {
+                padding: 0.5rem;
+            }
+            .topbar-brand {
+                width: 40px;
+                height: 40px;
+                padding: 0;
+                border-radius: 50%;
+                overflow: hidden;
+            }
+            .topbar-text {
+                display: none;
+            }
+            .topbar-arrow {
+                font-size: 1.2rem;
+            }
         }
     </style>
     <?php endif; ?>
