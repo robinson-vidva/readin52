@@ -58,8 +58,13 @@ try {
                 $result = Auth::login($email, $password);
 
                 if ($result['success']) {
-                    setFlash('success', 'Welcome back!');
-                    redirect('/?route=dashboard');
+                    // Check if user must change password on first login
+                    if (User::mustChangePassword(Auth::getUserId())) {
+                        redirect('/?route=setup-credentials');
+                    } else {
+                        setFlash('success', 'Welcome back!');
+                        redirect('/?route=dashboard');
+                    }
                 } else {
                     render('login', [
                         'error' => $result['error'],
@@ -236,6 +241,56 @@ try {
             }
 
             redirect(Auth::isLoggedIn() ? '/?route=settings' : '/?route=login');
+            break;
+
+        case 'setup-credentials':
+            Auth::requireAuth();
+
+            // Only show if user must change password
+            if (!User::mustChangePassword(Auth::getUserId())) {
+                redirect('/?route=dashboard');
+            }
+
+            $data = [];
+
+            if ($method === 'POST') {
+                if (!validateCsrf()) {
+                    $data['error'] = 'Invalid request. Please try again.';
+                } else {
+                    $newName = trim(post('name', ''));
+                    $newEmail = trim(post('email', ''));
+                    $newPassword = post('password', '');
+                    $confirmPassword = post('password_confirm', '');
+                    $userId = Auth::getUserId();
+
+                    // Validate inputs
+                    if (empty($newName) || strlen($newName) < 2) {
+                        $data['error'] = 'Please enter your name (at least 2 characters).';
+                    } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                        $data['error'] = 'Please enter a valid email address.';
+                    } elseif (strlen($newPassword) < 6) {
+                        $data['error'] = 'Password must be at least 6 characters.';
+                    } elseif ($newPassword !== $confirmPassword) {
+                        $data['error'] = 'Passwords do not match.';
+                    } else {
+                        // Check if email is already in use by another user
+                        $existingUser = User::findByEmail($newEmail);
+                        if ($existingUser && $existingUser['id'] !== $userId) {
+                            $data['error'] = 'This email is already in use.';
+                        } else {
+                            // Update name, email and password
+                            User::update($userId, ['name' => $newName, 'email' => $newEmail]);
+                            User::updatePassword($userId, $newPassword);
+                            User::clearMustChangePassword($userId);
+
+                            setFlash('success', 'Your account has been set up. Welcome to ' . ReadingPlan::getAppName() . '!');
+                            redirect('/?route=dashboard');
+                        }
+                    }
+                }
+            }
+
+            render('setup-credentials', $data);
             break;
 
         // ============ Authenticated Routes ============

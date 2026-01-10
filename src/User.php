@@ -7,21 +7,43 @@ class User
     /**
      * Create a new user
      */
-    public static function create(string $name, string $email, string $password, string $role = 'user'): ?int
+    public static function create(string $name, string $email, string $password, string $role = 'user', bool $mustChangePassword = false): ?int
     {
         $pdo = Database::getInstance();
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO users (name, email, password_hash, role)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO users (name, email, password_hash, role, must_change_password)
+                VALUES (?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$name, $email, $passwordHash, $role]);
+            $stmt->execute([$name, $email, $passwordHash, $role, $mustChangePassword ? 1 : 0]);
             return (int) $pdo->lastInsertId();
         } catch (PDOException $e) {
             return null;
         }
+    }
+
+    /**
+     * Check if user must change password on first login
+     */
+    public static function mustChangePassword(int $userId): bool
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("SELECT must_change_password FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch();
+        return $result && $result['must_change_password'] == 1;
+    }
+
+    /**
+     * Clear the must change password flag
+     */
+    public static function clearMustChangePassword(int $userId): bool
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("UPDATE users SET must_change_password = 0 WHERE id = ?");
+        return $stmt->execute([$userId]);
     }
 
     /**

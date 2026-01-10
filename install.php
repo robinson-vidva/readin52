@@ -78,11 +78,12 @@ if (php_sapi_name() !== 'cli' && !isset($_GET['confirm'])) {
             </div>
 
             <div class="info">
-                <strong>Default accounts will be created:</strong>
+                <strong>Default admin account will be created:</strong>
                 <ul>
-                    <li><strong>Admin:</strong> admin@readin52.app / Admin@123</li>
-                    <li><strong>Test User:</strong> testuser@readin52.app / Test@123</li>
+                    <li><strong>Email:</strong> setup@localhost</li>
+                    <li><strong>Password:</strong> ChangeMe52!</li>
                 </ul>
+                <p style="margin-top: 10px; font-size: 0.9em;"><strong>Note:</strong> You will be prompted to change your email and password on first login.</p>
             </div>
 
             <p style="margin-bottom: 20px;">Click the button below to start installation:</p>
@@ -130,30 +131,19 @@ try {
     Database::insertDefaultSettings();
     $messages[] = 'Default settings inserted';
 
-    // Step 5: Create admin user
-    $adminExists = User::findByEmail('admin@readin52.app');
+    // Step 5: Create admin user (with must_change_password flag)
+    $adminExists = User::findByEmail('setup@localhost');
     if (!$adminExists) {
-        $adminId = User::create('Administrator', 'admin@readin52.app', 'Admin@123', 'admin');
+        // Create admin with mustChangePassword = true for security
+        $adminId = User::create('Administrator', 'setup@localhost', 'ChangeMe52!', 'admin', true);
         if ($adminId) {
-            $messages[] = 'Admin user created (admin@readin52.app / Admin@123)';
+            $messages[] = 'Admin user created (setup@localhost / ChangeMe52!)';
+            $messages[] = 'You will be prompted to change credentials on first login';
         } else {
             $errors[] = 'Failed to create admin user';
         }
     } else {
         $messages[] = 'Admin user already exists';
-    }
-
-    // Step 6: Create test user
-    $testUserExists = User::findByEmail('testuser@readin52.app');
-    if (!$testUserExists) {
-        $testUserId = User::create('Test User', 'testuser@readin52.app', 'Test@123', 'user');
-        if ($testUserId) {
-            $messages[] = 'Test user created (testuser@readin52.app / Test@123)';
-        } else {
-            $errors[] = 'Failed to create test user';
-        }
-    } else {
-        $messages[] = 'Test user already exists';
     }
 
     // Step 7: Create .gitkeep in data folder
