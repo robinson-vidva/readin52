@@ -231,26 +231,31 @@ ob_start();
             <span class="verse-count" id="verseCount"></span>
             <span class="reading-time" id="readingTime"></span>
         </div>
-        <div style="display: flex; flex: 1; overflow: hidden; min-height: 0;">
-            <div class="reader-body" id="readerContent" style="flex: 1; overflow-y: auto;">
+        <div style="display: flex; flex-direction: column; flex: 1; overflow: hidden; min-height: 0;">
+            <!-- Scripture Content - 80% when notes open -->
+            <div class="reader-body" id="readerContent" style="flex: 1; overflow-y: auto; transition: flex 0.3s ease;">
                 <div class="loading-spinner"></div>
             </div>
-            <!-- Notes Panel -->
-            <div id="notesPanel" style="width: 280px; border-left: 1px solid var(--border-color, #e0e0e0); background: var(--card-bg, #fff); display: none; flex-direction: column; overflow: hidden;">
-                <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color, #e0e0e0); display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 600; font-size: 0.9rem;">Notes</span>
-                    <button onclick="openNewNoteForm()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">+ Add</button>
+            <!-- Notes Panel - Horizontal at bottom (20%) -->
+            <div id="notesPanel" style="height: 0; min-height: 0; border-top: 1px solid var(--border-color, #e0e0e0); background: var(--card-bg, #fff); display: none; flex-direction: column; overflow: hidden; transition: all 0.3s ease;">
+                <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color, #e0e0e0); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">Notes for this chapter</span>
+                    <button onclick="openNewNoteForm()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">+ Add Note</button>
                 </div>
-                <div id="newNoteForm" style="display: none; padding: 0.75rem; border-bottom: 1px solid var(--border-color, #e0e0e0); background: var(--background, #f8f8f8);">
-                    <input type="text" id="noteTitle" placeholder="Title (optional)" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem;">
-                    <textarea id="noteContent" placeholder="Write your note..." rows="3" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem; resize: none; font-family: inherit;"></textarea>
-                    <div style="display: flex; gap: 0.4rem;">
-                        <button onclick="saveNote()" style="flex: 1; background: var(--primary, #5D4037); color: white; border: none; padding: 0.4rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Save</button>
-                        <button onclick="cancelNote()" style="background: transparent; border: 1px solid var(--border-color, #e0e0e0); padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Cancel</button>
+                <div style="display: flex; flex: 1; overflow: hidden; min-height: 0;">
+                    <!-- New Note Form -->
+                    <div id="newNoteForm" style="display: none; width: 300px; padding: 0.75rem; border-right: 1px solid var(--border-color, #e0e0e0); background: var(--background, #f8f8f8); flex-shrink: 0; overflow-y: auto;">
+                        <input type="text" id="noteTitle" placeholder="Title (optional)" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem; box-sizing: border-box;">
+                        <textarea id="noteContent" placeholder="Write your note..." rows="3" style="width: 100%; padding: 0.4rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem; resize: none; font-family: inherit; box-sizing: border-box;"></textarea>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button onclick="saveNote()" style="flex: 1; background: var(--primary, #5D4037); color: white; border: none; padding: 0.4rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Save</button>
+                            <button onclick="cancelNote()" style="background: transparent; border: 1px solid var(--border-color, #e0e0e0); padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Cancel</button>
+                        </div>
                     </div>
-                </div>
-                <div id="notesList" style="flex: 1; overflow-y: auto; padding: 0.5rem;">
-                    <p id="noNotesMsg" style="text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 1rem;">No notes yet</p>
+                    <!-- Notes List - Scrollable horizontal -->
+                    <div id="notesList" style="flex: 1; overflow-y: auto; overflow-x: auto; padding: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start;">
+                        <p id="noNotesMsg" style="width: 100%; text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 0.5rem;">No notes for this chapter yet. Click "+ Add Note" to create one.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -302,8 +307,20 @@ ob_start();
     // Notes Functions
     function toggleNotesPanel() {
         const panel = document.getElementById('notesPanel');
+        const readerContent = document.getElementById('readerContent');
         notesPanelOpen = !notesPanelOpen;
-        panel.style.display = notesPanelOpen ? 'flex' : 'none';
+
+        if (notesPanelOpen) {
+            panel.style.display = 'flex';
+            panel.style.height = '20%';
+            panel.style.minHeight = '150px';
+            readerContent.style.flex = '0 0 80%';
+        } else {
+            panel.style.display = 'none';
+            panel.style.height = '0';
+            panel.style.minHeight = '0';
+            readerContent.style.flex = '1';
+        }
     }
 
     function openNewNoteForm() {
@@ -339,15 +356,15 @@ ob_start();
         count.textContent = chapterNotes.length;
 
         if (chapterNotes.length === 0) {
-            list.innerHTML = '<p id="noNotesMsg" style="text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 1rem;">No notes for this chapter</p>';
+            list.innerHTML = '<p id="noNotesMsg" style="width: 100%; text-align: center; color: var(--text-muted, #888); font-size: 0.85rem; padding: 0.5rem;">No notes for this chapter yet. Click "+ Add Note" to create one.</p>';
             return;
         }
 
         let html = '';
         chapterNotes.forEach(note => {
-            html += `<div class="note-item" onclick="editNote(${note.id})" style="background: var(--background, #f8f8f8); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.4rem; cursor: pointer;">
-                <div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 0.2rem;">${escapeHtml(note.title)}</div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary, #666); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${escapeHtml(note.content.substring(0, 100))}</div>
+            html += `<div class="note-item" onclick="editNote(${note.id})" style="background: var(--background, #f8f8f8); border-radius: 8px; padding: 0.75rem; cursor: pointer; width: 220px; flex-shrink: 0; border: 1px solid var(--border-color, #e0e0e0); transition: box-shadow 0.2s;">
+                <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(note.title)}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary, #666); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;">${escapeHtml(note.content.substring(0, 100))}</div>
             </div>`;
         });
         list.innerHTML = html;
