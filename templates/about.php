@@ -74,7 +74,6 @@ ob_start();
                 <h2>Credits</h2>
                 <ul class="credits-list">
                     <li><strong>Scripture Content:</strong> <a href="https://bible.helloao.org/" target="_blank" rel="noopener">HelloAO Bible API</a></li>
-                    <li><strong>Reading Plan:</strong> Based on Professor Grant Horner's Bible Reading System</li>
                     <li><strong>Development:</strong> Built with PHP, MySQL, and modern web technologies</li>
                 </ul>
             </section>
