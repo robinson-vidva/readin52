@@ -71,16 +71,15 @@ This app is structured for direct deployment to Cloudways Custom PHP via GitHub.
 4. Visit `/install.php` to initialize the database
 5. Delete `install.php` after setup
 
-### Default Accounts
+### Default Admin Account
 
-After installation, two test accounts are created:
+After installation, a temporary admin account is created:
 
-| Account | Email | Password |
-|---------|-------|----------|
-| Admin | admin@readin52.app | Admin@123 |
-| Test User | testuser@readin52.app | Test@123 |
+| Email | Password |
+|-------|----------|
+| setup@localhost | ChangeMe52! |
 
-**Important**: Change these passwords immediately in production!
+**Security**: On first login, you will be prompted to set up your own name, email, and password. This ensures no default credentials remain in production.
 
 ## Configuration
 
