@@ -182,11 +182,15 @@ ob_start();
             <div class="danger-item">
                 <div class="danger-info">
                     <h4>Clear All Reading Progress</h4>
-                    <p>Delete all reading progress for all users. This cannot be undone.</p>
+                    <p>Delete all reading progress for all users. This cannot be undone. Requires password confirmation.</p>
                 </div>
-                <form method="POST" action="/?route=admin/settings" onsubmit="return confirm('Are you sure? This will delete ALL reading progress for ALL users!');">
+                <form method="POST" action="/?route=admin/settings" onsubmit="return confirm('Are you sure? This will delete ALL reading progress for ALL users!');" style="display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap;">
                     <?php echo csrfField(); ?>
                     <input type="hidden" name="action" value="clear_progress">
+                    <div style="flex: 1; min-width: 150px;">
+                        <label for="confirm_password_progress" style="display: block; font-size: 0.75rem; color: #666; margin-bottom: 0.25rem;">Your Password</label>
+                        <input type="password" name="confirm_password" id="confirm_password_progress" required placeholder="Enter password" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
                     <button type="submit" class="btn btn-danger">Clear Progress</button>
                 </form>
             </div>
