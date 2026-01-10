@@ -18,13 +18,13 @@ foreach ($categoryProgress as $catId => $category) {
 ob_start();
 ?>
 
-<div class="books-page" style="padding: 2rem 0;">
+<div class="books-page">
     <div class="container">
         <!-- Page Header -->
-        <div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div class="page-header">
             <div>
-                <h1 style="margin: 0 0 0.25rem 0; font-size: 1.5rem; font-weight: 600;">Bible Book Progress</h1>
-                <p style="margin: 0; color: var(--text-secondary, #666); font-size: 0.95rem;">Track your reading progress by book</p>
+                <h1>Bible Book Progress</h1>
+                <p>Track your reading progress by book</p>
             </div>
         </div>
 

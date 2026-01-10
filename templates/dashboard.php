@@ -28,13 +28,13 @@ foreach ($weekData['readings'] as $categoryId => $reading) {
 ob_start();
 ?>
 
-<div class="dashboard" style="padding: 2rem 0;">
+<div class="dashboard">
     <div class="container">
         <!-- Stats Header -->
-        <div class="dashboard-header" style="margin-bottom: 2rem;">
+        <div class="dashboard-header">
             <div class="welcome-section">
-                <h1 style="margin: 0 0 0.25rem 0; font-size: 1.5rem; font-weight: 600;">Welcome, <?php echo e($user['name']); ?>!</h1>
-                <p class="tagline" style="margin: 0; color: var(--text-secondary, #666); font-size: 0.95rem;">Your Bible Reading Journey</p>
+                <h1>Welcome, <?php echo e($user['name']); ?>!</h1>
+                <p class="tagline">Your Bible Reading Journey</p>
             </div>
 
             <div class="progress-overview">

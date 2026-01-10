@@ -7,27 +7,27 @@ $noteCount = count($notes);
 ob_start();
 ?>
 
-<div class="notes-page" style="padding: 2rem 0;">
+<div class="notes-page">
     <div class="container">
         <!-- Page Header -->
-        <div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div class="page-header">
             <div>
-                <h1 style="margin: 0 0 0.25rem 0; font-size: 1.5rem; font-weight: 600;">My Notes</h1>
-                <p style="margin: 0; color: var(--text-secondary, #666); font-size: 0.95rem;"><?php echo $noteCount; ?> note<?php echo $noteCount !== 1 ? 's' : ''; ?> total</p>
+                <h1>My Notes</h1>
+                <p><?php echo $noteCount; ?> note<?php echo $noteCount !== 1 ? 's' : ''; ?> total</p>
             </div>
-            <button onclick="openNewNoteModal()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 1.1rem;">+</span> New Note
+            <button onclick="openNewNoteModal()" class="btn btn-primary">
+                <span>+</span> New Note
             </button>
         </div>
 
         <!-- Search Bar -->
-        <div style="margin-bottom: 2rem;">
+        <div class="search-form" style="margin-bottom: var(--spacing-xl, 2rem);">
             <form method="GET" action="/?route=notes" style="display: flex; gap: 0.5rem;">
                 <input type="hidden" name="route" value="notes">
-                <input type="text" name="search" value="<?php echo e($search); ?>" placeholder="Search notes..." style="flex: 1; padding: 0.75rem 1rem; border: 1px solid var(--border-color, #ddd); border-radius: 8px; font-size: 1rem;">
-                <button type="submit" style="padding: 0.75rem 1.25rem; background: var(--primary, #5D4037); color: white; border: none; border-radius: 8px; cursor: pointer;">Search</button>
+                <input type="text" name="search" value="<?php echo e($search); ?>" placeholder="Search notes..." style="flex: 1;">
+                <button type="submit" class="btn btn-primary">Search</button>
                 <?php if ($search): ?>
-                    <a href="/?route=notes" style="padding: 0.75rem 1rem; background: var(--background, #f5f5f5); color: var(--text-secondary, #666); border: 1px solid var(--border-color, #ddd); border-radius: 8px; text-decoration: none;">Clear</a>
+                    <a href="/?route=notes" class="btn btn-secondary">Clear</a>
                 <?php endif; ?>
             </form>
         </div>
@@ -46,7 +46,7 @@ ob_start();
                 <?php else: ?>
                     <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary, #333);">No notes yet</h3>
                     <p style="margin: 0 0 1.5rem 0; color: var(--text-secondary, #666);">Start adding notes while reading to capture your thoughts and insights</p>
-                    <button onclick="openNewNoteModal()" style="background: var(--primary, #5D4037); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 0.95rem;">Create Your First Note</button>
+                    <button onclick="openNewNoteModal()" class="btn btn-primary">Create Your First Note</button>
                 <?php endif; ?>
             </div>
         <?php else: ?>
