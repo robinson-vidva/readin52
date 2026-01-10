@@ -132,6 +132,20 @@ public_html/              # Document root (Cloudways)
 - Host header validation to prevent injection attacks
 - Secure variable extraction in template rendering
 
+## Credits & Attribution
+
+### Bible API
+
+Scripture content is provided by the [HelloAO Free Use Bible API](https://bible.helloao.org/). The API and its source code are freely available under the MIT license with no usage limits, no API keys required, and no copyright restrictions.
+
+### Berean Standard Bible
+
+The Holy Bible, Berean Standard Bible (BSB) is produced in cooperation with [Bible Hub](https://biblehub.com/), Discovery Bible, [OpenBible.com](https://openbible.com/), and the Berean Bible Translation Committee. This text of God's Word has been dedicated to the public domain.
+
+### Other Translations
+
+Various Bible translations available through the API are provided by their respective publishers and may have different licensing terms. Please refer to individual translation documentation for specific usage rights.
+
 ## License
 
 MIT License - See LICENSE file for details.
