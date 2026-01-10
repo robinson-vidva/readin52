@@ -29,7 +29,7 @@
 
     <?php if ($parentSiteUrl && $parentSiteName): ?>
     <nav class="home-topbar">
-        <a href="<?php echo e($parentSiteUrl); ?>" class="topbar-brand">
+        <a href="<?php echo e($parentSiteUrl); ?>" class="topbar-brand" title="<?php echo e($parentSiteName); ?>">
             <span class="topbar-arrow">&larr;</span>
             <span class="topbar-text"><?php echo e($parentSiteName); ?></span>
         </a>
@@ -39,14 +39,13 @@
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
             z-index: 100;
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+            padding: 0.75rem;
         }
         .topbar-brand {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             background: rgba(255,255,255,0.15);
@@ -58,14 +57,36 @@
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
         }
         .topbar-brand:hover {
             background: rgba(255,255,255,0.25);
-            transform: translateX(-2px);
         }
         .topbar-arrow {
             font-size: 1.1rem;
+        }
+        .topbar-text {
+            display: inline;
+        }
+
+        /* Mobile: Compact circular button */
+        @media (max-width: 600px) {
+            .home-topbar {
+                padding: 0.5rem;
+            }
+            .topbar-brand {
+                width: 40px;
+                height: 40px;
+                padding: 0;
+                border-radius: 50%;
+                overflow: hidden;
+            }
+            .topbar-text {
+                display: none;
+            }
+            .topbar-arrow {
+                font-size: 1.2rem;
+            }
         }
     </style>
     <?php endif; ?>
@@ -200,40 +221,11 @@
         <div class="install-modal-backdrop"></div>
         <div class="install-modal-content">
             <button type="button" class="install-modal-close" id="closeInstallModal">&times;</button>
-            <h3 style="margin: 0 0 1rem; color: #5D4037;">Install <?php echo e(ReadingPlan::getAppName()); ?></h3>
+            <h3 style="margin: 0 0 0.5rem; color: #5D4037;">Install <?php echo e(ReadingPlan::getAppName()); ?></h3>
+            <p id="deviceInfo" style="font-size: 0.75rem; color: #999; margin-bottom: 1rem;"></p>
 
-            <!-- iOS Instructions -->
-            <div id="iosInstructions" style="display: none;">
-                <p style="margin-bottom: 1rem; color: #666;">Add this app to your home screen for quick access:</p>
-                <ol style="text-align: left; padding-left: 1.5rem; color: #333; line-height: 1.8;">
-                    <li>Tap the <strong>Share</strong> button <span style="display: inline-block; width: 20px; height: 20px; background: #007AFF; color: white; border-radius: 4px; text-align: center; line-height: 20px; font-size: 12px;">↑</span> at the bottom of Safari</li>
-                    <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
-                    <li>Tap <strong>"Add"</strong> in the top right corner</li>
-                </ol>
-                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">The app will appear on your home screen like a regular app.</p>
-            </div>
-
-            <!-- Android Instructions -->
-            <div id="androidInstructions" style="display: none;">
-                <p style="margin-bottom: 1rem; color: #666;">Add this app to your home screen for quick access:</p>
-                <ol style="text-align: left; padding-left: 1.5rem; color: #333; line-height: 1.8;">
-                    <li>Tap the <strong>menu</strong> button <span style="display: inline-block; padding: 2px 6px; background: #333; color: white; border-radius: 4px; font-size: 12px;">&#8942;</span> in Chrome</li>
-                    <li>Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></li>
-                    <li>Tap <strong>"Add"</strong> or <strong>"Install"</strong> to confirm</li>
-                </ol>
-                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">The app will appear on your home screen like a regular app.</p>
-            </div>
-
-            <!-- Desktop Instructions -->
-            <div id="desktopInstructions" style="display: none;">
-                <p style="margin-bottom: 1rem; color: #666;">Install this app for quick access:</p>
-                <ol style="text-align: left; padding-left: 1.5rem; color: #333; line-height: 1.8;">
-                    <li>Look for the <strong>install icon</strong> in your browser's address bar</li>
-                    <li>Or click the <strong>menu</strong> and select <strong>"Install app"</strong></li>
-                    <li>Click <strong>"Install"</strong> to confirm</li>
-                </ol>
-                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">On mobile? Open this page on your phone or tablet for mobile-specific instructions.</p>
-            </div>
+            <!-- Dynamic Instructions Container -->
+            <div id="installInstructions"></div>
 
             <button type="button" class="btn btn-primary" id="closeInstallModalBtn" style="margin-top: 1.5rem;">Got it!</button>
         </div>
@@ -317,27 +309,211 @@
             // Don't show install button if already installed
             if (isStandalone) return;
 
+            const ua = navigator.userAgent;
+
+            // Detect OS
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            const isAndroid = /Android/.test(ua);
+            const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(ua);
+            const isWindows = /Win32|Win64|Windows/.test(ua);
+            const isLinux = /Linux/.test(ua) && !isAndroid;
+
+            // Detect Browser
+            const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(ua);
+            const isChrome = /Chrome/.test(ua) && !/Edg|OPR|SamsungBrowser/.test(ua);
+            const isChromeIOS = /CriOS/.test(ua);
+            const isFirefox = /Firefox|FxiOS/.test(ua);
+            const isEdge = /Edg/.test(ua);
+            const isOpera = /OPR|Opera/.test(ua);
+            const isSamsungBrowser = /SamsungBrowser/.test(ua);
+
+            // Get friendly names
+            function getOSName() {
+                if (isIOS) return 'iOS';
+                if (isAndroid) return 'Android';
+                if (isMac) return 'macOS';
+                if (isWindows) return 'Windows';
+                if (isLinux) return 'Linux';
+                return 'Unknown OS';
+            }
+
+            function getBrowserName() {
+                if (isSamsungBrowser) return 'Samsung Internet';
+                if (isChromeIOS) return 'Chrome';
+                if (isEdge) return 'Edge';
+                if (isOpera) return 'Opera';
+                if (isChrome) return 'Chrome';
+                if (isFirefox) return 'Firefox';
+                if (isSafari) return 'Safari';
+                return 'Browser';
+            }
+
+            // Generate instructions based on device/browser
+            function getInstructions() {
+                const os = getOSName();
+                const browser = getBrowserName();
+
+                // iOS devices
+                if (isIOS) {
+                    if (isSafari) {
+                        return {
+                            intro: 'Add this app to your home screen:',
+                            steps: [
+                                'Tap the <strong>Share</strong> button <span class="icon-badge" style="background:#007AFF;">↑</span> at the bottom of the screen',
+                                'Scroll down and tap <strong>"Add to Home Screen"</strong>',
+                                'Tap <strong>"Add"</strong> in the top right corner'
+                            ],
+                            note: 'The app will appear on your home screen.'
+                        };
+                    } else {
+                        return {
+                            intro: 'To install this app on iOS:',
+                            steps: [
+                                'Open this page in <strong>Safari</strong> browser',
+                                'Tap the <strong>Share</strong> button <span class="icon-badge" style="background:#007AFF;">↑</span>',
+                                'Tap <strong>"Add to Home Screen"</strong>'
+                            ],
+                            note: 'Note: ' + browser + ' on iOS doesn\'t support app installation. Please use Safari.'
+                        };
+                    }
+                }
+
+                // Android devices
+                if (isAndroid) {
+                    if (isChrome) {
+                        return {
+                            intro: 'Add this app to your home screen:',
+                            steps: [
+                                'Tap the <strong>menu</strong> button <span class="icon-badge" style="background:#333;">⋮</span> in the top right',
+                                'Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>',
+                                'Tap <strong>"Install"</strong> to confirm'
+                            ],
+                            note: 'The app will appear on your home screen.'
+                        };
+                    } else if (isSamsungBrowser) {
+                        return {
+                            intro: 'Add this app to your home screen:',
+                            steps: [
+                                'Tap the <strong>menu</strong> button <span class="icon-badge" style="background:#333;">☰</span> (3 lines)',
+                                'Tap <strong>"Add page to"</strong>',
+                                'Select <strong>"Home screen"</strong>'
+                            ],
+                            note: 'The app will appear on your home screen.'
+                        };
+                    } else if (isFirefox) {
+                        return {
+                            intro: 'Add this app to your home screen:',
+                            steps: [
+                                'Tap the <strong>menu</strong> button <span class="icon-badge" style="background:#333;">⋮</span>',
+                                'Tap <strong>"Install"</strong>',
+                                'Confirm by tapping <strong>"Add"</strong>'
+                            ],
+                            note: 'The app will appear on your home screen.'
+                        };
+                    } else if (isEdge) {
+                        return {
+                            intro: 'Add this app to your home screen:',
+                            steps: [
+                                'Tap the <strong>menu</strong> button <span class="icon-badge" style="background:#333;">⋯</span> at the bottom',
+                                'Tap <strong>"Add to phone"</strong>',
+                                'Select <strong>"Add to Home screen"</strong>'
+                            ],
+                            note: 'The app will appear on your home screen.'
+                        };
+                    } else if (isOpera) {
+                        return {
+                            intro: 'Add this app to your home screen:',
+                            steps: [
+                                'Tap the <strong>menu</strong> button <span class="icon-badge" style="background:#333;">⋮</span>',
+                                'Tap <strong>"Home screen"</strong>',
+                                'Tap <strong>"Add"</strong> to confirm'
+                            ],
+                            note: 'The app will appear on your home screen.'
+                        };
+                    } else {
+                        return {
+                            intro: 'For best experience, use Chrome:',
+                            steps: [
+                                'Open this page in <strong>Chrome</strong>',
+                                'Tap the menu <span class="icon-badge" style="background:#333;">⋮</span> and select <strong>"Install app"</strong>',
+                                'Tap <strong>"Install"</strong> to confirm'
+                            ],
+                            note: 'Or look for "Add to Home screen" option in your browser menu.'
+                        };
+                    }
+                }
+
+                // Desktop browsers
+                if (isChrome || isEdge) {
+                    return {
+                        intro: 'Install this app on your computer:',
+                        steps: [
+                            'Look for the <strong>install icon</strong> <span class="icon-badge" style="background:#333;">+</span> in the address bar (right side)',
+                            'Or click the <strong>menu</strong> <span class="icon-badge" style="background:#333;">⋮</span> and select <strong>"Install ' + '<?php echo e(ReadingPlan::getAppName()); ?>' + '"</strong>',
+                            'Click <strong>"Install"</strong> to confirm'
+                        ],
+                        note: 'The app will open in its own window.'
+                    };
+                } else if (isFirefox) {
+                    return {
+                        intro: 'Firefox has limited PWA support:',
+                        steps: [
+                            'For the best experience, open this page in <strong>Chrome</strong> or <strong>Edge</strong>',
+                            'Then click the install icon in the address bar',
+                            'Or bookmark this page for quick access'
+                        ],
+                        note: 'You can still use the site normally in Firefox.'
+                    };
+                } else if (isSafari && isMac) {
+                    return {
+                        intro: 'Add to Dock (macOS Sonoma+):',
+                        steps: [
+                            'Click <strong>File</strong> in the menu bar',
+                            'Select <strong>"Add to Dock"</strong>',
+                            'The app will appear in your Dock'
+                        ],
+                        note: 'Requires macOS Sonoma (14.0) or later. For older versions, use Chrome.'
+                    };
+                } else {
+                    return {
+                        intro: 'Install this app:',
+                        steps: [
+                            'For the best experience, open this page in <strong>Chrome</strong> or <strong>Edge</strong>',
+                            'Click the install icon in the address bar',
+                            'Or click the menu and select "Install app"'
+                        ],
+                        note: 'This allows the app to work offline and feel like a native app.'
+                    };
+                }
+            }
+
             const wrapper = document.getElementById('installAppWrapper');
             const btn = document.getElementById('installAppBtn');
             const modal = document.getElementById('installModal');
             const closeBtn = document.getElementById('closeInstallModal');
             const closeBtnBottom = document.getElementById('closeInstallModalBtn');
             const backdrop = modal.querySelector('.install-modal-backdrop');
-
-            // Detect device type
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-            const isMobile = isIOS || isAndroid;
+            const deviceInfo = document.getElementById('deviceInfo');
+            const instructionsDiv = document.getElementById('installInstructions');
 
             // Show the install button
             wrapper.style.display = 'block';
 
             // Show appropriate instructions
             function showModal() {
+                const instructions = getInstructions();
+                deviceInfo.textContent = getOSName() + ' • ' + getBrowserName();
+
+                let html = '<p style="margin-bottom: 1rem; color: #666;">' + instructions.intro + '</p>';
+                html += '<ol style="text-align: left; padding-left: 1.5rem; color: #333; line-height: 2;">';
+                instructions.steps.forEach(step => {
+                    html += '<li>' + step + '</li>';
+                });
+                html += '</ol>';
+                html += '<p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">' + instructions.note + '</p>';
+
+                instructionsDiv.innerHTML = html;
                 modal.style.display = 'flex';
-                document.getElementById('iosInstructions').style.display = isIOS ? 'block' : 'none';
-                document.getElementById('androidInstructions').style.display = isAndroid ? 'block' : 'none';
-                document.getElementById('desktopInstructions').style.display = (!isIOS && !isAndroid) ? 'block' : 'none';
             }
 
             function hideModal() {
@@ -349,26 +525,41 @@
             closeBtnBottom.addEventListener('click', hideModal);
             backdrop.addEventListener('click', hideModal);
 
-            // Handle native install prompt (Chrome/Edge)
+            // Handle native install prompt (Chrome/Edge on Android/Desktop)
             let deferredPrompt;
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
+            });
 
-                // Replace modal with native prompt for supported browsers
-                btn.addEventListener('click', async (evt) => {
-                    if (deferredPrompt) {
-                        evt.stopImmediatePropagation();
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        deferredPrompt = null;
-                        if (outcome === 'accepted') {
-                            wrapper.style.display = 'none';
-                        }
+            // Override click to use native prompt when available
+            btn.addEventListener('click', async (evt) => {
+                if (deferredPrompt) {
+                    evt.stopImmediatePropagation();
+                    modal.style.display = 'none';
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    if (outcome === 'accepted') {
+                        wrapper.style.display = 'none';
                     }
-                }, { once: true });
+                }
             });
         })();
     </script>
+
+    <style>
+        .icon-badge {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+    </style>
 </body>
 </html>
