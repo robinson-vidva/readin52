@@ -3,7 +3,6 @@ $user = Auth::getUser();
 $stats = Progress::getStats($user['id']);
 $initials = getUserInitials($user['name']);
 $avatarColor = getAvatarColor($user['name']);
-$categories = ReadingPlan::getCategories();
 $userBadges = Badge::getUserBadges($user['id']);
 $allBadges = Badge::getAllWithProgress($user['id']);
 $badgeCount = count($userBadges);
@@ -105,34 +104,6 @@ ob_start();
                         <?php endforeach; ?>
                     </div>
                 </details>
-            </div>
-        </div>
-
-        <!-- Progress by Category -->
-        <div class="profile-card" style="margin-top: 1.5rem;">
-            <div class="card-header">
-                <h2>Progress by Category</h2>
-            </div>
-            <div class="card-body">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                    <?php foreach ($categories as $cat):
-                        $catCount = $stats['by_category'][$cat['id']] ?? 0;
-                        $catPercent = round(($catCount / 52) * 100);
-                    ?>
-                    <div style="background: var(--background, #f8f8f8); padding: 1rem; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <span style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
-                                <span style="width: 10px; height: 10px; border-radius: 50%; background: <?php echo e($cat['color']); ?>;"></span>
-                                <?php echo e($cat['name']); ?>
-                            </span>
-                            <span style="font-size: 0.85rem; color: var(--text-secondary, #666);"><?php echo $catCount; ?>/52</span>
-                        </div>
-                        <div style="background: var(--border-color, #e0e0e0); height: 6px; border-radius: 3px; overflow: hidden;">
-                            <div style="width: <?php echo $catPercent; ?>%; height: 100%; background: <?php echo e($cat['color']); ?>; border-radius: 3px;"></div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
             </div>
         </div>
 
