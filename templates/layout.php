@@ -174,46 +174,21 @@ if (Auth::isLoggedIn()) {
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-brand">
-                    <span class="footer-logo">&#x1F4D6;</span>
-                    <span class="footer-name"><?php echo e(ReadingPlan::getAppName()); ?></span>
-                </div>
-                <div class="footer-features">
-                    <span class="footer-feature"><span class="footer-icon">&#x1F4C5;</span> 52 Weeks</span>
-                    <span class="footer-feature"><span class="footer-icon">&#x1F4DA;</span> 66 Books</span>
-                    <span class="footer-feature"><span class="footer-icon">&#x1F4D6;</span> 1,189 Chapters</span>
-                </div>
-                <div class="footer-links">
-                    <a href="/?route=privacy" class="footer-link">Privacy Policy</a>
-                    <span class="footer-divider">|</span>
-                    <a href="/?route=terms" class="footer-link">Terms & Conditions</a>
-                </div>
-                <div class="footer-credit">
-                    <p>Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener">HelloAO Bible API</a></p>
-                    <p>&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. Journey Through Scripture.</p>
-                </div>
+                <p class="footer-copyright">&copy; <?php echo date('Y'); ?> <?php echo e(ReadingPlan::getAppName()); ?>. <span class="footer-tagline">Journey Through Scripture in 52 Weeks.</span></p>
+                <p class="footer-credit">Scripture provided by <a href="https://bible.helloao.org/" target="_blank" rel="noopener">HelloAO Bible API</a></p>
+                <p class="footer-links"><a href="/?route=privacy">Privacy Policy</a> · <a href="/?route=terms">Terms & Conditions</a></p>
             </div>
         </div>
     </footer>
     <style>
-        .footer-content { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 0.5rem 0; }
-        .footer-brand { display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem; font-weight: 700; }
-        .footer-logo { font-size: 1.5rem; }
-        .footer-features { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
-        .footer-feature { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; opacity: 0.9; }
-        .footer-icon { font-size: 1rem; }
-        .footer-links { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
-        .footer-link { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.8rem; transition: color 0.2s; }
-        .footer-link:hover { color: white; text-decoration: underline; }
-        .footer-divider { opacity: 0.5; font-size: 0.75rem; }
-        .footer-credit { text-align: center; font-size: 0.75rem; opacity: 0.7; margin-top: 0.5rem; }
-        .footer-credit p { margin: 0.25rem 0; }
+        .footer-content { text-align: center; }
+        .footer-copyright { font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .footer-tagline { opacity: 0.85; }
+        .footer-credit { font-size: 0.8rem; opacity: 0.75; margin-bottom: 0.5rem; }
         .footer-credit a { color: inherit; text-decoration: underline; }
-        .footer-credit a:hover { opacity: 1; }
-        @media (max-width: 480px) {
-            .footer-features { gap: 1rem; }
-            .footer-feature { font-size: 0.8rem; }
-        }
+        .footer-links { font-size: 0.8rem; opacity: 0.75; }
+        .footer-links a { color: inherit; text-decoration: underline; margin: 0 0.25rem; }
+        .footer-links a:hover, .footer-credit a:hover { opacity: 1; color: white; }
     </style>
     <?php endif; ?>
 
