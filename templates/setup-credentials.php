@@ -44,6 +44,22 @@
                 <?php echo csrfField(); ?>
 
                 <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value="<?php echo e($_POST['name'] ?? ''); ?>"
+                        required
+                        autocomplete="name"
+                        autofocus
+                        minlength="2"
+                        maxlength="100"
+                        placeholder="Enter your full name"
+                    >
+                </div>
+
+                <div class="form-group">
                     <label for="email">Your Email Address</label>
                     <input
                         type="email"
@@ -52,7 +68,6 @@
                         value="<?php echo e($_POST['email'] ?? ''); ?>"
                         required
                         autocomplete="email"
-                        autofocus
                         placeholder="your.email@example.com"
                     >
                     <small class="form-hint">Enter your real email address</small>

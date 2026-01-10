@@ -257,13 +257,16 @@ try {
                 if (!validateCsrf()) {
                     $data['error'] = 'Invalid request. Please try again.';
                 } else {
+                    $newName = trim(post('name', ''));
                     $newEmail = trim(post('email', ''));
                     $newPassword = post('password', '');
                     $confirmPassword = post('password_confirm', '');
                     $userId = Auth::getUserId();
 
-                    // Validate email
-                    if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                    // Validate inputs
+                    if (empty($newName) || strlen($newName) < 2) {
+                        $data['error'] = 'Please enter your name (at least 2 characters).';
+                    } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
                         $data['error'] = 'Please enter a valid email address.';
                     } elseif (strlen($newPassword) < 6) {
                         $data['error'] = 'Password must be at least 6 characters.';
@@ -275,12 +278,12 @@ try {
                         if ($existingUser && $existingUser['id'] !== $userId) {
                             $data['error'] = 'This email is already in use.';
                         } else {
-                            // Update email and password
-                            User::update($userId, ['email' => $newEmail]);
+                            // Update name, email and password
+                            User::update($userId, ['name' => $newName, 'email' => $newEmail]);
                             User::updatePassword($userId, $newPassword);
                             User::clearMustChangePassword($userId);
 
-                            setFlash('success', 'Your credentials have been updated. Welcome to ' . ReadingPlan::getAppName() . '!');
+                            setFlash('success', 'Your account has been set up. Welcome to ' . ReadingPlan::getAppName() . '!');
                             redirect('/?route=dashboard');
                         }
                     }
