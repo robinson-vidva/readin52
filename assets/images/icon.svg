@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#5D4037" rx="51"/>
+  <text x="256" y="290" text-anchor="middle" font-size="200" fill="white" font-family="Georgia, serif" font-weight="bold">52</text>
+  <text x="256" y="400" text-anchor="middle" font-size="60" fill="#FFB300" font-family="Arial, sans-serif" font-weight="bold">READ IN</text>
+</svg>
