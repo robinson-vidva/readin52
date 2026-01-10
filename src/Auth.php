@@ -206,9 +206,9 @@ class Auth
     }
 
     /**
-     * Clear login attempts for email
+     * Clear login attempts for email (public for password reset flow)
      */
-    private static function clearLoginAttempts(string $email): void
+    public static function clearLoginAttempts(string $email): void
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE email = ?");
