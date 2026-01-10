@@ -236,8 +236,8 @@ try {
         case 'notes/save':
             Auth::requireAuth();
             if ($method === 'POST') {
-                // Check if AJAX request
-                $isAjax = isAjax() || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+                // Check if AJAX request - look for ajax parameter or XHR header
+                $isAjax = isAjax() || post('ajax') === '1' || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 
                 if (!validateCsrf()) {
                     if ($isAjax) {
