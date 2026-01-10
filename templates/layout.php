@@ -94,8 +94,8 @@ if (Auth::isLoggedIn()) {
             .navbar-toggle span { display: block; width: 24px; height: 2px; background: white; }
             .navbar-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #3E2723; flex-direction: column; padding: 1rem; }
             .navbar-menu.show { display: flex; }
-            /* Mobile avatar - ensure perfect circle */
-            .navbar-menu .avatar-small { display: flex !important; align-items: center !important; justify-content: center !important; width: 48px !important; height: 48px !important; min-width: 48px !important; min-height: 48px !important; max-width: 48px !important; max-height: 48px !important; flex: 0 0 48px !important; font-size: 1rem !important; border-radius: 50% !important; }
+            /* Hide avatar in mobile menu */
+            .nav-avatar-link { display: none !important; }
         }
         @media (max-width: 480px) {
             .stats-banner { grid-template-columns: repeat(2, 1fr) !important; padding: 1rem !important; }
