@@ -312,6 +312,10 @@ ob_start();
     const hasDualTranslation = <?php echo !empty($user['secondary_translation']) ? 'true' : 'false'; ?>;
     const weekChapters = <?php echo json_encode($weekChapters); ?>;
     const csrfToken = '<?php echo getCsrfToken(); ?>';
+
+    // Book name mapping for note titles
+    const bookNames = <?php echo json_encode(ReadingPlan::getBookNames()); ?>;
+
     // Use var to make these global (accessible from app.js)
     var currentViewMode = 'primary'; // 'primary' or 'secondary'
     var cachedPrimaryData = null;
@@ -360,8 +364,10 @@ ob_start();
                 deleteSection.style.display = 'block';
             }
         } else {
-            // New note mode
-            titleInput.value = '';
+            // New note mode - set default title with book, chapter, and week
+            const bookName = bookNames[currentNotesBook] || currentNotesBook;
+            const defaultTitle = `${bookName} ${currentNotesChapter} - Week ${currentWeek}`;
+            titleInput.value = defaultTitle;
             contentInput.value = '';
             editingIdInput.value = '';
             modalTitle.textContent = 'Add Note';

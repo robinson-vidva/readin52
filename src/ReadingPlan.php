@@ -350,11 +350,11 @@ class ReadingPlan
     }
 
     /**
-     * Get book name from ID
+     * Get all book names as array (for JavaScript)
      */
-    public static function getBookName(string $bookId): string
+    public static function getBookNames(): array
     {
-        $books = [
+        return [
             'GEN' => 'Genesis', 'EXO' => 'Exodus', 'LEV' => 'Leviticus',
             'NUM' => 'Numbers', 'DEU' => 'Deuteronomy', 'JOS' => 'Joshua',
             'JDG' => 'Judges', 'RUT' => 'Ruth', '1SA' => '1 Samuel',
@@ -379,7 +379,14 @@ class ReadingPlan
             '2JN' => '2 John', '3JN' => '3 John', 'JUD' => 'Jude',
             'REV' => 'Revelation'
         ];
+    }
 
+    /**
+     * Get book name from ID
+     */
+    public static function getBookName(string $bookId): string
+    {
+        $books = self::getBookNames();
         return $books[$bookId] ?? $bookId;
     }
 }
