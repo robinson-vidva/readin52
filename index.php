@@ -292,6 +292,16 @@ try {
             header('Content-Type: application/json');
             if ($method === 'POST') {
                 $input = json_decode(file_get_contents('php://input'), true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
+                    exit;
+                }
+                // Validate CSRF token
+                $csrfToken = $input['csrf_token'] ?? '';
+                if (!Auth::verifyCsrfToken($csrfToken)) {
+                    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+                    exit;
+                }
                 $noteId = (int) ($input['note_id'] ?? 0);
                 if ($noteId && Note::delete($noteId, Auth::getUserId())) {
                     echo json_encode(['success' => true]);
@@ -455,6 +465,16 @@ try {
 
             if ($method === 'POST') {
                 $input = json_decode(file_get_contents('php://input'), true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
+                    exit;
+                }
+                // Validate CSRF token
+                $csrfToken = $input['csrf_token'] ?? '';
+                if (!Auth::verifyCsrfToken($csrfToken)) {
+                    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+                    exit;
+                }
                 $week = intval($input['week'] ?? 0);
                 $category = $input['category'] ?? '';
 
@@ -480,6 +500,16 @@ try {
 
             if ($method === 'POST') {
                 $input = json_decode(file_get_contents('php://input'), true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
+                    exit;
+                }
+                // Validate CSRF token
+                $csrfToken = $input['csrf_token'] ?? '';
+                if (!Auth::verifyCsrfToken($csrfToken)) {
+                    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+                    exit;
+                }
                 $week = intval($input['week'] ?? 0);
                 $category = $input['category'] ?? '';
                 $book = $input['book'] ?? '';

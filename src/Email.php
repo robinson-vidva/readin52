@@ -136,11 +136,18 @@ class Email
 
     /**
      * Get base URL for links
+     * Validates Host header to prevent header injection attacks
      */
     private static function getBaseUrl(): string
     {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        // Validate host header - only allow alphanumeric, dots, hyphens, and optional port
+        if (!preg_match('/^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?(:\d+)?$/', $host)) {
+            $host = 'localhost';
+        }
+
         return $protocol . '://' . $host;
     }
 

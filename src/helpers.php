@@ -74,10 +74,11 @@ function jsonResponse(array $data, int $statusCode = 200): void
 
 /**
  * Render a template
+ * Uses EXTR_SKIP to prevent overwriting existing variables for security
  */
 function render(string $template, array $data = []): void
 {
-    extract($data);
+    extract($data, EXTR_SKIP);
     $templatePath = TEMPLATE_PATH . '/' . $template . '.php';
 
     if (!file_exists($templatePath)) {
@@ -89,11 +90,18 @@ function render(string $template, array $data = []): void
 
 /**
  * Get base URL
+ * Validates Host header to prevent header injection attacks
  */
 function baseUrl(): string
 {
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    // Validate host header - only allow alphanumeric, dots, hyphens, and optional port
+    if (!preg_match('/^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?(:\d+)?$/', $host)) {
+        $host = 'localhost';
+    }
+
     return $protocol . '://' . $host;
 }
 
