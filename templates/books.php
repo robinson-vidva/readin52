@@ -23,8 +23,8 @@ ob_start();
         <!-- Page Header -->
         <div class="page-header">
             <div>
-                <h1>Bible Book Progress</h1>
-                <p>Track your reading progress by book</p>
+                <h1>Reading Progress</h1>
+                <p>Track your progress by book</p>
             </div>
         </div>
 
@@ -410,5 +410,5 @@ $extraStyles = '
 </style>
 ';
 
-$pageTitle = 'Books';
+$pageTitle = 'Progress';
 require TEMPLATE_PATH . '/layout.php';

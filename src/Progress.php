@@ -452,37 +452,21 @@ class Progress
     }
 
     /**
-     * Get current week based on user's progress
+     * Get current week based on user's chapter-level progress
+     * Returns the lowest week number that is not fully complete
      */
     private static function getCurrentWeek(int $userId): int
     {
-        $pdo = Database::getInstance();
-
-        // Find the lowest week with incomplete readings
-        $stmt = $pdo->prepare("
-            SELECT MIN(w.week) as current_week
-            FROM (
-                SELECT 1 as week UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5
-                UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10
-                UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15
-                UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20
-                UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24 UNION SELECT 25
-                UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29 UNION SELECT 30
-                UNION SELECT 31 UNION SELECT 32 UNION SELECT 33 UNION SELECT 34 UNION SELECT 35
-                UNION SELECT 36 UNION SELECT 37 UNION SELECT 38 UNION SELECT 39 UNION SELECT 40
-                UNION SELECT 41 UNION SELECT 42 UNION SELECT 43 UNION SELECT 44 UNION SELECT 45
-                UNION SELECT 46 UNION SELECT 47 UNION SELECT 48 UNION SELECT 49 UNION SELECT 50
-                UNION SELECT 51 UNION SELECT 52
-            ) w
-            WHERE (
-                SELECT COUNT(*) FROM reading_progress
-                WHERE user_id = ? AND week_number = w.week AND completed = 1
-            ) < 4
-        ");
-        $stmt->execute([$userId]);
-        $result = $stmt->fetch();
-
-        return $result['current_week'] ?? 1;
+        // Check each week from 1 to 52 and find the first incomplete one
+        for ($week = 1; $week <= 52; $week++) {
+            $counts = self::getWeekChapterCounts($userId, $week);
+            // If this week has any incomplete chapters, it's the current week
+            if ($counts['completed'] < $counts['total']) {
+                return $week;
+            }
+        }
+        // All weeks complete - return week 52
+        return 52;
     }
 
     /**

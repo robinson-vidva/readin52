@@ -139,7 +139,7 @@ if (Auth::isLoggedIn()) {
 
             <div class="navbar-menu" id="navbarMenu">
                 <a href="/?route=dashboard" class="nav-link <?php echo activeClass('dashboard'); ?>">Dashboard</a>
-                <a href="/?route=books" class="nav-link <?php echo activeClass('books'); ?>">Books</a>
+                <a href="/?route=books" class="nav-link <?php echo activeClass('books'); ?>">Progress</a>
                 <a href="/?route=notes" class="nav-link <?php echo activeClass('notes'); ?>">Notes</a>
                 <?php if (Auth::isAdmin()): ?>
                     <a href="/?route=admin" class="nav-link <?php echo strpos(currentRoute(), 'admin') === 0 ? 'active' : ''; ?>">Admin</a>

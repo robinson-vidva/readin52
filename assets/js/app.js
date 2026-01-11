@@ -127,6 +127,9 @@ function closeReader() {
         document.body.style.overflow = '';
     }
     hideConfirmModal();
+
+    // Refresh the page to ensure dashboard shows correct state
+    window.location.reload();
 }
 
 /**
@@ -275,17 +278,38 @@ function updateFooterButtons() {
  * Mark current chapter as complete and go to next
  */
 async function markCompleteAndNext() {
-    // If already complete, just go to next
-    if (isCurrentChapterComplete) {
-        goToNextChapter();
-        return;
+    // Disable button to prevent double-clicks
+    const btnComplete = document.getElementById('btnComplete');
+    if (btnComplete) {
+        btnComplete.disabled = true;
     }
 
-    // Mark as complete
-    await markChapterComplete();
+    try {
+        // If already complete, just go to next
+        if (isCurrentChapterComplete) {
+            goToNextChapter();
+            return;
+        }
 
-    // Go to next
-    goToNextChapter();
+        // Mark as complete and wait for it to finish
+        const success = await markChapterComplete();
+
+        if (success) {
+            // Go to next chapter
+            goToNextChapter();
+        } else {
+            console.error('Failed to mark chapter complete, not proceeding to next');
+            // Re-enable button on failure
+            if (btnComplete) {
+                btnComplete.disabled = false;
+            }
+        }
+    } catch (error) {
+        console.error('Error in markCompleteAndNext:', error);
+        if (btnComplete) {
+            btnComplete.disabled = false;
+        }
+    }
 }
 
 /**
@@ -335,8 +359,10 @@ function confirmSkip() {
  */
 async function confirmComplete() {
     hideConfirmModal();
-    await markChapterComplete();
-    goToNextChapter();
+    const success = await markChapterComplete();
+    if (success) {
+        goToNextChapter();
+    }
 }
 
 /**
@@ -524,10 +550,17 @@ function goToNextChapter() {
     currentCategory = next.category;
     currentBook = next.book;
     currentChapter = next.chapter;
-    isCurrentChapterComplete = next.completed;
+    // Use the updated completed status from weekChapters (which we update after API calls)
+    isCurrentChapterComplete = next.completed === true;
 
     loadChapter(next.book, next.chapter);
     updateFooterButtons();
+
+    // Re-enable the complete button for the new chapter
+    const btnComplete = document.getElementById('btnComplete');
+    if (btnComplete) {
+        btnComplete.disabled = false;
+    }
 }
 
 /**
