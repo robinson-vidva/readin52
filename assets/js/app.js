@@ -274,26 +274,56 @@ function updateFooterButtons() {
     }
 }
 
+// Flag to prevent multiple simultaneous API calls
+let isMarkingComplete = false;
+
 /**
  * Mark current chapter as complete and go to next
  */
 async function markCompleteAndNext() {
-    console.log('markCompleteAndNext called, isCurrentChapterComplete:', isCurrentChapterComplete);
+    // Prevent multiple simultaneous calls
+    if (isMarkingComplete) {
+        console.log('Already processing, ignoring click');
+        return;
+    }
 
     // If already complete, just go to next
     if (isCurrentChapterComplete) {
-        console.log('Already complete, going to next chapter');
         goToNextChapter();
         return;
     }
 
-    // Mark as complete and wait for it to finish
-    console.log('Marking chapter complete...');
-    const success = await markChapterComplete();
-    console.log('markChapterComplete returned:', success);
+    // Set flag and disable button
+    isMarkingComplete = true;
+    const btnComplete = document.getElementById('btnComplete');
+    if (btnComplete) {
+        btnComplete.disabled = true;
+        btnComplete.textContent = 'Saving...';
+    }
 
-    // Always go to next chapter after attempting to mark complete
-    goToNextChapter();
+    try {
+        // Mark as complete and wait for it to finish
+        const success = await markChapterComplete();
+
+        if (success) {
+            // Go to next chapter
+            goToNextChapter();
+        } else {
+            // Re-enable button on failure
+            if (btnComplete) {
+                btnComplete.disabled = false;
+                btnComplete.textContent = 'Mark Complete & Next';
+            }
+        }
+    } catch (error) {
+        console.error('Error in markCompleteAndNext:', error);
+        if (btnComplete) {
+            btnComplete.disabled = false;
+            btnComplete.textContent = 'Mark Complete & Next';
+        }
+    } finally {
+        isMarkingComplete = false;
+    }
 }
 
 /**
@@ -343,8 +373,21 @@ function confirmSkip() {
  */
 async function confirmComplete() {
     hideConfirmModal();
-    await markChapterComplete();
-    goToNextChapter();
+
+    // Prevent double execution
+    if (isMarkingComplete) {
+        return;
+    }
+    isMarkingComplete = true;
+
+    try {
+        const success = await markChapterComplete();
+        if (success) {
+            goToNextChapter();
+        }
+    } finally {
+        isMarkingComplete = false;
+    }
 }
 
 /**
@@ -512,28 +555,22 @@ function updateOverallProgress(stats) {
  * Go to next chapter in the week's reading
  */
 function goToNextChapter() {
-    console.log('goToNextChapter called, currentChapterIndex:', currentChapterIndex);
-
     if (typeof weekChapters === 'undefined' || currentChapterIndex < 0) {
-        console.log('No weekChapters or invalid index, closing reader');
         closeReader();
         return;
     }
 
     const nextIndex = currentChapterIndex + 1;
-    console.log('nextIndex:', nextIndex, 'weekChapters.length:', weekChapters.length);
 
     // Check if we've reached the end
     if (nextIndex >= weekChapters.length) {
         // Week complete, go back to list
-        console.log('Reached end of week, closing reader');
         closeReader();
         return;
     }
 
     // Load next chapter
     const next = weekChapters[nextIndex];
-    console.log('Loading next chapter:', next);
 
     currentChapterIndex = nextIndex;
     currentCategory = next.category;
@@ -544,6 +581,12 @@ function goToNextChapter() {
 
     loadChapter(next.book, next.chapter);
     updateFooterButtons();
+
+    // Re-enable the button for the new chapter
+    const btnComplete = document.getElementById('btnComplete');
+    if (btnComplete) {
+        btnComplete.disabled = false;
+    }
 }
 
 /**
