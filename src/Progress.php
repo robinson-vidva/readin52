@@ -457,14 +457,41 @@ class Progress
      */
     private static function getCurrentWeek(int $userId): int
     {
-        // Check each week from 1 to 52 and find the first incomplete one
+        $pdo = Database::getInstance();
+
+        // For each week 1-52, check if all chapters are complete using a single efficient query
+        // Get count of completed chapters per week
+        $stmt = $pdo->prepare("
+            SELECT week_number, COUNT(*) as completed_count
+            FROM chapter_progress
+            WHERE user_id = ? AND completed = 1
+            GROUP BY week_number
+        ");
+        $stmt->execute([$userId]);
+        $completedByWeek = [];
+        while ($row = $stmt->fetch()) {
+            $completedByWeek[$row['week_number']] = (int)$row['completed_count'];
+        }
+
+        // Find first incomplete week
         for ($week = 1; $week <= 52; $week++) {
-            $counts = self::getWeekChapterCounts($userId, $week);
-            // If this week has any incomplete chapters, it's the current week
-            if ($counts['completed'] < $counts['total']) {
+            $weekData = ReadingPlan::getWeek($week);
+            if (!$weekData) continue;
+
+            // Count total chapters in this week
+            $totalChapters = 0;
+            foreach ($weekData['readings'] as $reading) {
+                foreach ($reading['passages'] as $passage) {
+                    $totalChapters += count($passage['chapters']);
+                }
+            }
+
+            $completedChapters = $completedByWeek[$week] ?? 0;
+            if ($completedChapters < $totalChapters) {
                 return $week;
             }
         }
+
         // All weeks complete - return week 52
         return 52;
     }
