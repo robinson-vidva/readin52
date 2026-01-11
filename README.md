@@ -107,7 +107,10 @@ You will be prompted to change these credentials on first login.
    define('DB_PASS', 'your_database_password');
    ```
 5. Visit `https://yourdomain.com/install.php`
-6. **Delete `install.php` after setup**
+6. **IMPORTANT: Delete `install.php` after setup** — This file allows anyone to reinitialize your database. Remove it immediately after installation:
+   ```bash
+   rm install.php
+   ```
 
 ### Option 2: Standard PHP Hosting
 
@@ -115,7 +118,7 @@ You will be prompted to change these credentials on first login.
 2. Create `config/db.php` with database credentials
 3. Ensure `.htaccess` rules are active
 4. Visit `/install.php`
-5. **Delete `install.php` after setup**
+5. **IMPORTANT: Delete `install.php` after setup** — This is a security requirement, not optional
 
 ### Option 3: Docker (Coming Soon)
 
@@ -245,7 +248,7 @@ A: Check that `config/db.php` exists with correct credentials. Verify the databa
 A: The database already has tables. To reinstall, drop all tables or use a fresh database.
 
 **Q: Should I delete install.php?**
-A: Yes! Always delete `install.php` after installation for security.
+A: **Yes, this is critical!** The `install.php` file can reinitialize your database and create a new admin account. Delete it immediately after installation using `rm install.php` or your hosting file manager. Leaving it exposed is a serious security risk.
 
 ### Features
 

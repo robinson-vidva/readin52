@@ -233,8 +233,16 @@ ob_start();
 
                 <div class="form-group">
                     <label for="turnstile_secret_key">Secret Key</label>
-                    <input type="password" id="turnstile_secret_key" name="turnstile_secret_key"
-                           value="<?php echo e($turnstileSecretKey); ?>" placeholder="0x4AAAAAAA..." autocomplete="off">
+                    <div style="position: relative;">
+                        <input type="password" id="turnstile_secret_key" name="turnstile_secret_key"
+                               value="<?php echo e($turnstileSecretKey); ?>" placeholder="0x4AAAAAAA..." autocomplete="off"
+                               style="padding-right: 40px;">
+                        <button type="button" id="toggleSecretKey" onclick="toggleSecretKeyVisibility()"
+                                style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; font-size: 1.1rem; opacity: 0.6;"
+                                title="Toggle visibility">
+                            <span id="eyeIcon">&#x1F441;</span>
+                        </button>
+                    </div>
                     <small class="form-hint">Your Turnstile secret key (keep private)</small>
                 </div>
 
@@ -341,6 +349,19 @@ ob_start();
 </div>
 
 <script>
+// Toggle secret key visibility
+function toggleSecretKeyVisibility() {
+    var input = document.getElementById('turnstile_secret_key');
+    var eyeIcon = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        eyeIcon.innerHTML = '&#x1F440;'; // Eyes emoji (visible)
+    } else {
+        input.type = 'password';
+        eyeIcon.innerHTML = '&#x1F441;'; // Eye emoji (hidden)
+    }
+}
+
 // Toggle switch interaction - handle all toggle labels
 document.querySelectorAll('.toggle-label').forEach(function(label) {
     label.addEventListener('click', function(e) {
