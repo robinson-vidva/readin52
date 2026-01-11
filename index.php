@@ -590,42 +590,52 @@ try {
             Auth::requireAuth();
             header('Content-Type: application/json');
 
-            if ($method === 'POST') {
-                $input = json_decode(file_get_contents('php://input'), true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
-                    exit;
-                }
-                // Validate CSRF token
-                $csrfToken = $input['csrf_token'] ?? '';
-                if (!Auth::verifyCsrfToken($csrfToken)) {
-                    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
-                    exit;
-                }
-                $week = intval($input['week'] ?? 0);
-                $category = $input['category'] ?? '';
-                $book = $input['book'] ?? '';
-                $chapter = intval($input['chapter'] ?? 0);
+            try {
+                if ($method === 'POST') {
+                    $input = json_decode(file_get_contents('php://input'), true);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
+                        exit;
+                    }
+                    // Validate CSRF token
+                    $csrfToken = $input['csrf_token'] ?? '';
+                    if (!Auth::verifyCsrfToken($csrfToken)) {
+                        echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+                        exit;
+                    }
+                    $week = intval($input['week'] ?? 0);
+                    $category = $input['category'] ?? '';
+                    $book = $input['book'] ?? '';
+                    $chapter = intval($input['chapter'] ?? 0);
 
-                $result = Progress::toggleChapter(Auth::getUserId(), $week, $category, $book, $chapter);
+                    $result = Progress::toggleChapter(Auth::getUserId(), $week, $category, $book, $chapter);
 
-                // Also get updated counts for UI refresh
-                if ($result['success']) {
-                    $userId = Auth::getUserId();
-                    $result['weekCounts'] = Progress::getWeekChapterCounts($userId, $week);
-                    $result['overallStats'] = Progress::getChapterStats($userId);
-                }
+                    // Also get updated counts for UI refresh (wrap in try-catch to not fail the main operation)
+                    if ($result['success']) {
+                        try {
+                            $userId = Auth::getUserId();
+                            $result['weekCounts'] = Progress::getWeekChapterCounts($userId, $week);
+                            $result['overallStats'] = Progress::getChapterStats($userId);
+                        } catch (Exception $e) {
+                            // Log but don't fail - the main toggle succeeded
+                            error_log('Error getting stats after chapter toggle: ' . $e->getMessage());
+                        }
+                    }
 
-                echo json_encode($result);
-            } elseif ($method === 'GET') {
-                $week = intval($_GET['week'] ?? 0);
-                if ($week > 0) {
-                    $progress = Progress::getWeekChapterProgress(Auth::getUserId(), $week);
-                    $counts = Progress::getWeekChapterCounts(Auth::getUserId(), $week);
-                    echo json_encode(['success' => true, 'progress' => $progress, 'counts' => $counts]);
-                } else {
-                    echo json_encode(['success' => false, 'error' => 'Week required']);
+                    echo json_encode($result);
+                } elseif ($method === 'GET') {
+                    $week = intval($_GET['week'] ?? 0);
+                    if ($week > 0) {
+                        $progress = Progress::getWeekChapterProgress(Auth::getUserId(), $week);
+                        $counts = Progress::getWeekChapterCounts(Auth::getUserId(), $week);
+                        echo json_encode(['success' => true, 'progress' => $progress, 'counts' => $counts]);
+                    } else {
+                        echo json_encode(['success' => false, 'error' => 'Week required']);
+                    }
                 }
+            } catch (Exception $e) {
+                error_log('API chapter-progress error: ' . $e->getMessage());
+                echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
             }
             exit;
 
