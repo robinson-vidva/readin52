@@ -80,6 +80,8 @@
                     </label>
                 </div>
 
+                <?php echo turnstileWidget(); ?>
+
                 <button type="submit" class="btn btn-primary btn-block">Sign In</button>
             </form>
 
@@ -94,6 +96,8 @@
             </div>
         </div>
     </div>
+
+    <?php echo turnstileScript(); ?>
 
     <!-- PWA Service Worker -->
     <script>

@@ -7,6 +7,9 @@ $parentSiteUrl = Database::getSetting('parent_site_url', '');
 $parentSiteName = Database::getSetting('parent_site_name', '');
 $githubRepoUrl = Database::getSetting('github_repo_url', 'https://github.com/askdevotions/readin52');
 $adminEmail = Database::getSetting('admin_email', '');
+$turnstileEnabled = Database::getSetting('turnstile_enabled', '0');
+$turnstileSiteKey = Database::getSetting('turnstile_site_key', '');
+$turnstileSecretKey = Database::getSetting('turnstile_secret_key', '');
 $translations = ReadingPlan::getTranslations();
 $translationsByLanguage = ReadingPlan::getTranslationsGroupedByLanguage();
 
@@ -186,6 +189,62 @@ ob_start();
         </div>
     </div>
 
+    <!-- Security - Turnstile -->
+    <div class="admin-card">
+        <div class="card-header">
+            <h2>Bot Protection (Cloudflare Turnstile)</h2>
+        </div>
+        <div class="card-body">
+            <?php if (isset($turnstileSuccess)): ?>
+                <div class="alert alert-success"><?php echo e($turnstileSuccess); ?></div>
+            <?php endif; ?>
+            <?php if (isset($turnstileError)): ?>
+                <div class="alert alert-error"><?php echo e($turnstileError); ?></div>
+            <?php endif; ?>
+
+            <p style="margin-bottom: 1rem; color: var(--text-secondary, #666);">
+                Cloudflare Turnstile provides invisible bot protection for login, registration, and password reset forms.
+                <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank" rel="noopener">Get your keys from Cloudflare Dashboard</a>.
+            </p>
+
+            <form method="POST" action="/?route=admin/settings">
+                <?php echo csrfField(); ?>
+                <input type="hidden" name="action" value="save_turnstile">
+
+                <div class="form-group">
+                    <label class="toggle-label" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                        <input type="checkbox" name="turnstile_enabled" value="1"
+                               <?php echo $turnstileEnabled === '1' ? 'checked' : ''; ?>
+                               style="display: none;" id="turnstileEnabledCheckbox">
+                        <span class="toggle-switch" id="turnstileToggle" style="position: relative; width: 48px; min-width: 48px; height: 24px; background-color: <?php echo $turnstileEnabled === '1' ? '#43A047' : '#ccc'; ?>; border-radius: 12px; transition: background-color 0.2s;">
+                            <span style="content: ''; position: absolute; top: 2px; left: <?php echo $turnstileEnabled === '1' ? '26px' : '2px'; ?>; width: 20px; height: 20px; background-color: white; border-radius: 50%; transition: left 0.2s;"></span>
+                        </span>
+                        <span class="toggle-text">Enable Turnstile Protection</span>
+                    </label>
+                    <small class="form-hint">Adds human verification to login, registration, and password reset pages</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="turnstile_site_key">Site Key</label>
+                    <input type="text" id="turnstile_site_key" name="turnstile_site_key"
+                           value="<?php echo e($turnstileSiteKey); ?>" placeholder="0x4AAAAAAA...">
+                    <small class="form-hint">Your Turnstile widget site key (public)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="turnstile_secret_key">Secret Key</label>
+                    <input type="password" id="turnstile_secret_key" name="turnstile_secret_key"
+                           value="<?php echo e($turnstileSecretKey); ?>" placeholder="0x4AAAAAAA..." autocomplete="off">
+                    <small class="form-hint">Your Turnstile secret key (keep private)</small>
+                </div>
+
+                <div class="form-actions" style="margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary">Save Turnstile Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Bible Translations -->
     <div class="admin-card">
         <div class="card-header">
@@ -282,22 +341,24 @@ ob_start();
 </div>
 
 <script>
-// Toggle switch interaction
-document.querySelector('.toggle-label')?.addEventListener('click', function(e) {
-    var checkbox = this.querySelector('input[type="checkbox"]');
-    var toggleSwitch = this.querySelector('.toggle-switch');
-    var knob = toggleSwitch.querySelector('span');
+// Toggle switch interaction - handle all toggle labels
+document.querySelectorAll('.toggle-label').forEach(function(label) {
+    label.addEventListener('click', function(e) {
+        var checkbox = this.querySelector('input[type="checkbox"]');
+        var toggleSwitch = this.querySelector('.toggle-switch');
+        var knob = toggleSwitch.querySelector('span');
 
-    // Toggle state will be handled by the checkbox
-    setTimeout(function() {
-        if (checkbox.checked) {
-            toggleSwitch.style.backgroundColor = '#43A047';
-            knob.style.left = '26px';
-        } else {
-            toggleSwitch.style.backgroundColor = '#ccc';
-            knob.style.left = '2px';
-        }
-    }, 10);
+        // Toggle state will be handled by the checkbox
+        setTimeout(function() {
+            if (checkbox.checked) {
+                toggleSwitch.style.backgroundColor = '#43A047';
+                knob.style.left = '26px';
+            } else {
+                toggleSwitch.style.backgroundColor = '#ccc';
+                knob.style.left = '2px';
+            }
+        }, 10);
+    });
 });
 
 // Translation data grouped by language

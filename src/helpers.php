@@ -316,3 +316,100 @@ function getAvatarColor(string $name): string
     $hash = crc32(strtolower(trim($name)));
     return $colors[abs($hash) % count($colors)];
 }
+
+/**
+ * Check if Cloudflare Turnstile is enabled
+ */
+function isTurnstileEnabled(): bool
+{
+    $siteKey = Database::getSetting('turnstile_site_key', '');
+    $secretKey = Database::getSetting('turnstile_secret_key', '');
+    $enabled = Database::getSetting('turnstile_enabled', '0');
+    return $enabled === '1' && !empty($siteKey) && !empty($secretKey);
+}
+
+/**
+ * Get Turnstile site key
+ */
+function getTurnstileSiteKey(): string
+{
+    return Database::getSetting('turnstile_site_key', '');
+}
+
+/**
+ * Render Turnstile widget HTML
+ */
+function turnstileWidget(): string
+{
+    if (!isTurnstileEnabled()) {
+        return '';
+    }
+
+    $siteKey = e(getTurnstileSiteKey());
+    return <<<HTML
+<div class="form-group">
+    <div class="cf-turnstile" data-sitekey="{$siteKey}" data-theme="light"></div>
+</div>
+HTML;
+}
+
+/**
+ * Render Turnstile script tag (include once per page)
+ */
+function turnstileScript(): string
+{
+    if (!isTurnstileEnabled()) {
+        return '';
+    }
+
+    return '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>';
+}
+
+/**
+ * Verify Turnstile response
+ * Returns true if verification passes or if Turnstile is not enabled
+ */
+function verifyTurnstile(): bool
+{
+    if (!isTurnstileEnabled()) {
+        return true;
+    }
+
+    $token = post('cf-turnstile-response', '');
+    if (empty($token)) {
+        return false;
+    }
+
+    $secretKey = Database::getSetting('turnstile_secret_key', '');
+    if (empty($secretKey)) {
+        return true; // Fail open if misconfigured
+    }
+
+    $url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+    $data = [
+        'secret' => $secretKey,
+        'response' => $token,
+        'remoteip' => getClientIp()
+    ];
+
+    $options = [
+        'http' => [
+            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method' => 'POST',
+            'content' => http_build_query($data),
+            'timeout' => 10
+        ]
+    ];
+
+    $context = stream_context_create($options);
+    $result = @file_get_contents($url, false, $context);
+
+    if ($result === false) {
+        // Network error - fail open to not block users
+        error_log('Turnstile verification failed: network error');
+        return true;
+    }
+
+    $response = json_decode($result, true);
+    return isset($response['success']) && $response['success'] === true;
+}

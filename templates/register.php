@@ -97,6 +97,8 @@
                     </label>
                 </div>
 
+                <?php echo turnstileWidget(); ?>
+
                 <button type="submit" class="btn btn-primary btn-block">Create Account</button>
             </form>
 
@@ -332,5 +334,6 @@
             navigator.serviceWorker.register('/sw.js');
         }
     </script>
+    <?php echo turnstileScript(); ?>
 </body>
 </html>

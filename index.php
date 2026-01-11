@@ -52,6 +52,11 @@ try {
                     break;
                 }
 
+                if (!verifyTurnstile()) {
+                    render('login', ['error' => 'Human verification failed. Please try again.']);
+                    break;
+                }
+
                 $email = trim(post('email', ''));
                 $password = post('password', '');
 
@@ -89,6 +94,11 @@ try {
             if ($method === 'POST') {
                 if (!validateCsrf()) {
                     render('register', ['error' => 'Invalid request. Please try again.']);
+                    break;
+                }
+
+                if (!verifyTurnstile()) {
+                    render('register', ['error' => 'Human verification failed. Please try again.']);
                     break;
                 }
 
@@ -159,6 +169,11 @@ try {
             if ($method === 'POST') {
                 if (!validateCsrf()) {
                     render('forgot-password', ['error' => 'Invalid request. Please try again.']);
+                    break;
+                }
+
+                if (!verifyTurnstile()) {
+                    render('forgot-password', ['error' => 'Human verification failed. Please try again.']);
                     break;
                 }
 
@@ -858,6 +873,20 @@ try {
                     } elseif ($action === 'reset_settings') {
                         Database::insertDefaultSettings();
                         $data['success'] = 'Settings have been reset to defaults.';
+                    } elseif ($action === 'save_turnstile') {
+                        $siteKey = trim(post('turnstile_site_key', ''));
+                        $secretKey = trim(post('turnstile_secret_key', ''));
+                        $enabled = post('turnstile_enabled', '0') ? '1' : '0';
+
+                        // Validate keys if enabling
+                        if ($enabled === '1' && (empty($siteKey) || empty($secretKey))) {
+                            $data['turnstileError'] = 'Both Site Key and Secret Key are required to enable Turnstile.';
+                        } else {
+                            Database::setSetting('turnstile_enabled', $enabled);
+                            Database::setSetting('turnstile_site_key', $siteKey);
+                            Database::setSetting('turnstile_secret_key', $secretKey);
+                            $data['turnstileSuccess'] = 'Turnstile settings saved successfully.';
+                        }
                     } else {
                         // Update settings
                         Database::setSetting('app_name', trim(post('app_name', 'ReadIn52')));

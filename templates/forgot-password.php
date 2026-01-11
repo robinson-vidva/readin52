@@ -58,6 +58,8 @@
                         >
                     </div>
 
+                    <?php echo turnstileWidget(); ?>
+
                     <button type="submit" class="btn btn-primary btn-block">Send Reset Link</button>
                 </form>
 
@@ -67,6 +69,8 @@
             <?php endif; ?>
         </div>
     </div>
+
+    <?php echo turnstileScript(); ?>
 
     <!-- PWA Service Worker -->
     <script>
