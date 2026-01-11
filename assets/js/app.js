@@ -343,6 +343,12 @@ async function confirmComplete() {
  * Mark current chapter as complete
  */
 async function markChapterComplete() {
+    // Store current values before any async operation
+    const categoryToUpdate = currentCategory;
+    const bookToUpdate = currentBook;
+    const chapterToUpdate = currentChapter;
+    const indexToUpdate = currentChapterIndex;
+
     try {
         const response = await fetch('/?route=api/chapter-progress', {
             method: 'POST',
@@ -352,9 +358,9 @@ async function markChapterComplete() {
             },
             body: JSON.stringify({
                 week: currentWeek,
-                category: currentCategory,
-                book: currentBook,
-                chapter: currentChapter,
+                category: categoryToUpdate,
+                book: bookToUpdate,
+                chapter: chapterToUpdate,
                 csrf_token: typeof csrfToken !== 'undefined' ? csrfToken : ''
             })
         });
@@ -365,12 +371,12 @@ async function markChapterComplete() {
             isCurrentChapterComplete = true;
 
             // Update weekChapters array
-            if (currentChapterIndex >= 0 && typeof weekChapters !== 'undefined') {
-                weekChapters[currentChapterIndex].completed = true;
+            if (indexToUpdate >= 0 && typeof weekChapters !== 'undefined') {
+                weekChapters[indexToUpdate].completed = true;
             }
 
-            // Update chapter item in the list
-            updateChapterItem(currentCategory, currentBook, currentChapter, true);
+            // Update chapter item in the list (use stored values)
+            updateChapterItem(categoryToUpdate, bookToUpdate, chapterToUpdate, true);
 
             // Update weekly progress bar
             if (result.weekCounts) {
@@ -383,6 +389,8 @@ async function markChapterComplete() {
             }
 
             return true;
+        } else {
+            console.error('Failed to mark chapter complete:', result.error || 'Unknown error');
         }
     } catch (error) {
         console.error('Error marking chapter complete:', error);
@@ -394,9 +402,10 @@ async function markChapterComplete() {
  * Update chapter item appearance in the list
  */
 function updateChapterItem(category, book, chapter, completed) {
-    const item = document.querySelector(
-        '.chapter-item[data-category="' + category + '"][data-book="' + book + '"][data-chapter="' + chapter + '"]'
-    );
+    // Ensure chapter is treated as a string for attribute selector
+    const selector = '.chapter-item[data-category="' + category + '"][data-book="' + book + '"][data-chapter="' + String(chapter) + '"]';
+    const item = document.querySelector(selector);
+
     if (item) {
         if (completed) {
             item.classList.add('completed');
@@ -411,6 +420,8 @@ function updateChapterItem(category, book, chapter, completed) {
             const checkmark = item.querySelector('.chapter-done');
             if (checkmark) checkmark.remove();
         }
+    } else {
+        console.warn('Chapter item not found for selector:', selector);
     }
 
     // Update category progress
