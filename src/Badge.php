@@ -98,7 +98,16 @@ class Badge
                 continue;
             }
 
+            // Skip badges without valid criteria
+            if (empty($badge['criteria'])) {
+                continue;
+            }
+
             $criteria = json_decode($badge['criteria'], true);
+            if (!is_array($criteria)) {
+                continue;
+            }
+
             $earned = self::checkCriteria($userId, $criteria, $stats);
 
             if ($earned && self::award($userId, $badge['id'])) {
@@ -118,25 +127,25 @@ class Badge
 
         switch ($type) {
             case 'book':
-                return self::checkBookCompletion($userId, $criteria['book']);
+                return isset($criteria['book']) && self::checkBookCompletion($userId, $criteria['book']);
 
             case 'category':
-                return self::checkCategoryCompletion($userId, $criteria['category']);
+                return isset($criteria['category']) && self::checkCategoryCompletion($userId, $criteria['category']);
 
             case 'readings':
-                return $stats['total_completed'] >= $criteria['count'];
+                return isset($criteria['count']) && $stats['total_completed'] >= $criteria['count'];
 
             case 'week_complete':
-                return $stats['complete_weeks'] >= $criteria['count'];
+                return isset($criteria['count']) && $stats['complete_weeks'] >= $criteria['count'];
 
             case 'consecutive_weeks':
-                return $stats['streak'] >= $criteria['count'];
+                return isset($criteria['count']) && $stats['streak'] >= $criteria['count'];
 
             case 'percentage':
-                return $stats['percentage'] >= $criteria['value'];
+                return isset($criteria['value']) && $stats['percentage'] >= $criteria['value'];
 
             case 'streak_days':
-                return $stats['day_streak'] >= $criteria['count'];
+                return isset($criteria['count']) && $stats['day_streak'] >= $criteria['count'];
 
             default:
                 return false;
