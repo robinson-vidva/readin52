@@ -2,84 +2,126 @@
 
 **Journey Through Scripture in 52 Weeks**
 
-ReadIn52 is a full-featured Progressive Web App (PWA) designed to help users read through the entire Bible in one year with a structured 52-week reading plan. Built as a modern PHP application with offline capabilities, user authentication, progress tracking, and gamification features.
+ReadIn52 is a free, open-source Progressive Web App (PWA) designed to help individuals and church communities read through the entire Bible in one year with a structured 52-week reading plan. Built for the glory of God and freely available to all.
+
+> *"Your word is a lamp for my feet, a light on my path."* — Psalm 119:105
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Admin Guide](#admin-guide)
+- [Security](#security)
+- [FAQ](#faq)
+- [API Reference](#api-reference)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+- [Credits](#credits)
+
+---
 
 ## Features
 
-### Core Features
-- **52-Week Reading Plan**: Structured Bible reading across 4 categories per week
-- **Four Reading Categories**: Poetry & Wisdom, History & Law, Chronicles & Prophecy, Gospels & Epistles
-- **Chapter-Level Progress Tracking**: Track completion with visual progress indicators
-- **Built-in Bible Reader**: Modal-based reader with HelloAO Bible API integration
-- **Personal Notes**: Take notes while reading, organized by book/chapter with color tags and search
+### Core Reading Features
+- **52-Week Reading Plan** — Structured Bible reading across 4 categories per week
+- **Four Reading Categories** — Poetry & Wisdom, History & Law, Chronicles & Prophecy, Gospels & Epistles
+- **Chapter-Level Progress** — Track completion with visual progress indicators
+- **Built-in Bible Reader** — Modal-based reader with HelloAO Bible API integration
+- **Personal Notes** — Take notes while reading, organized by book/chapter with color tags
 
 ### Bible & Translations
-- **50+ Bible Translations**: Support for multiple languages via HelloAO API
-- **Dual Translation Mode**: Compare two translations side-by-side
-- **No API Keys Required**: Free, open Bible API with no usage limits
+- **50+ Bible Translations** — Support for multiple languages via HelloAO API
+- **Dual Translation Mode** — Compare two translations side-by-side
+- **No API Keys Required** — Free, open Bible API with no usage limits
 
 ### User Experience
-- **PWA Support**: Install on devices for offline access with Service Worker caching
-- **Theme Support**: Light, dark, and auto (system) theme modes
-- **Responsive Design**: Mobile-first design that works on all devices
-- **Badge/Achievement System**: 25+ badges for reading milestones and engagement
+- **PWA Support** — Install on devices for offline access
+- **Theme Support** — Light, dark, and auto (system) theme modes
+- **Responsive Design** — Mobile-first design that works on all devices
+- **Badge System** — 25+ achievement badges for reading milestones
+
+### Security Features
+- **Bot Protection** — Optional Cloudflare Turnstile integration
+- **Rate Limiting** — Brute-force protection on login
+- **CSRF Protection** — Token validation on all forms
+- **Secure Sessions** — HttpOnly, SameSite cookies
 
 ### Administration
-- **User Management**: View, edit, delete users and manage roles
-- **Progress Monitoring**: View individual user reading progress and statistics
-- **Reading Plan Editor**: Modify weekly readings with import/export support
-- **Translation Sync**: Sync Bible translations from API
-- **App Branding**: Custom logo upload and settings
+- **User Management** — View, edit, delete users and manage roles
+- **Progress Monitoring** — View individual user reading progress
+- **Reading Plan Editor** — Modify weekly readings with import/export
+- **Customizable Branding** — Custom logo and app name
+
+---
 
 ## Requirements
 
 - PHP 8.0+
 - MySQL 5.7+ or MariaDB 10.3+
 - Apache with mod_rewrite enabled
-- HTTPS (enforced in production)
+- HTTPS recommended for production
+
+---
+
+## Quick Start
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/robinson-vidva/readin52.git
+
+# 2. Configure database
+cp config/db.example.php config/db.php
+# Edit config/db.php with your database credentials
+
+# 3. Run local server
+php -S localhost:8000
+
+# 4. Visit http://localhost:8000/install.php
+```
+
+Default admin login after installation:
+- **Email:** `setup@localhost`
+- **Password:** `ChangeMe52!`
+
+You will be prompted to change these credentials on first login.
+
+---
 
 ## Installation
 
-### Cloudways Deployment (Recommended)
+### Option 1: Cloudways (Recommended)
 
-This app is structured for direct deployment to Cloudways Custom PHP via GitHub.
-
-1. **Create Application**: Create a Custom PHP application on Cloudways
-2. **Connect Repository**: Connect your GitHub repository
-3. **Deploy**: Deploy to `public_html/` (repo contents go directly to public_html)
-4. **Configure Database**:
-   - Go to Cloudways > Application > Access Details > Database
-   - Copy DB Name, Username, and Password
-   - Create `config/db.php` via SSH or File Manager:
+1. Create a Custom PHP application on Cloudways
+2. Connect your GitHub repository
+3. Deploy to `public_html/`
+4. Create `config/db.php` via SSH:
    ```php
    <?php
    define('DB_HOST', 'localhost');
    define('DB_NAME', 'your_database_name');
    define('DB_USER', 'your_database_user');
    define('DB_PASS', 'your_database_password');
-   define('DB_PORT', '3306');
-   define('DB_CHARSET', 'utf8mb4');
    ```
-5. **Run Installer**: Visit `https://yourdomain.com/install.php`
-6. **Delete Installer**: Remove `install.php` after installation for security
+5. Visit `https://yourdomain.com/install.php`
+6. **Delete `install.php` after setup**
 
-### Standard PHP Hosting
+### Option 2: Standard PHP Hosting
 
 1. Upload all files to your web root
-2. Create `config/db.php` with your database credentials
-3. Ensure `.htaccess` rules are active (Apache mod_rewrite)
-4. Visit `/install.php` to initialize the database
-5. Delete `install.php` after setup
+2. Create `config/db.php` with database credentials
+3. Ensure `.htaccess` rules are active
+4. Visit `/install.php`
+5. **Delete `install.php` after setup**
 
-### Default Admin Account
+### Option 3: Docker (Coming Soon)
 
-After installation, a temporary admin account is created:
+Docker support is planned for future releases.
 
-| Email | Password |
-|-------|----------|
-| setup@localhost | ChangeMe52! |
-
-**Security**: On first login, you will be prompted to set up your own name, email, and password. This ensures no default credentials remain in production.
+---
 
 ## Configuration
 
@@ -91,15 +133,13 @@ define('DB_HOST', 'localhost');
 define('DB_NAME', 'database_name');
 define('DB_USER', 'database_user');
 define('DB_PASS', 'database_password');
-define('DB_PORT', '3306');
+define('DB_PORT', '3306');        // Optional
 define('DB_CHARSET', 'utf8mb4');
 ```
 
-This file is gitignored and won't be overwritten on deployment.
-
 ### Email Service (`config/email.php`)
 
-For password reset and email verification features, configure Brevo (formerly Sendinblue):
+For password reset emails, configure [Brevo](https://www.brevo.com/) (free tier available):
 
 ```php
 <?php
@@ -109,230 +149,269 @@ define('EMAIL_FROM_ADDRESS', 'noreply@yourdomain.com');
 define('EMAIL_REPLY_TO', 'support@yourdomain.com');
 ```
 
-Get your API key from [Brevo](https://www.brevo.com/).
+### Bot Protection (Cloudflare Turnstile)
 
-### Reading Plan (`config/reading-plan.json`)
+Turnstile provides invisible bot protection. Configure in **Admin → Settings → Bot Protection**:
 
-The 52-week reading plan is stored as JSON and imported to the database on first run. Admins can modify the plan via the admin panel and export/import JSON files.
+1. Get keys from [Cloudflare Turnstile Dashboard](https://dash.cloudflare.com/?to=/:account/turnstile)
+2. Enter Site Key and Secret Key
+3. Enable protection
 
-## API Endpoints
+Protected forms: Login, Registration, Forgot Password
 
-### Authentication Required
+---
 
-All API endpoints require user authentication via session.
+## Admin Guide
 
-### Progress API
+### First-Time Setup
 
-```
-GET  /?route=api/progress           - Get all reading progress
-POST /?route=api/progress           - Toggle reading completion
-     Body: { week, category, csrf_token }
+1. Log in with default credentials
+2. You'll be prompted to set your own name, email, and password
+3. Configure app settings in **Admin → Settings**
 
-GET  /?route=api/chapter-progress?week=N  - Get chapter progress for week
-POST /?route=api/chapter-progress   - Toggle chapter completion
-     Body: { week, category, book, chapter, csrf_token }
+### Managing Users
 
-GET  /?route=api/stats              - Get user statistics
-```
+- **View all users:** Admin → Users
+- **Edit user:** Click on user row
+- **Reset password:** Create temporary password (user must change on login)
+- **Delete user:** Removes all user data including progress
 
-### Notes API
+### Customizing the App
 
-```
-GET  /?route=api/notes/{id}         - Get a specific note
-GET  /?route=api/notes/chapter?book=X&chapter=N  - Get notes for chapter
-POST /?route=notes/save             - Create/update note (form data)
-POST /?route=notes/delete           - Delete note (JSON body)
-```
+| Setting | Location | Description |
+|---------|----------|-------------|
+| App Name | Admin → Settings | Displayed in header and title |
+| Logo | Admin → Settings → Branding | Custom logo image |
+| Registration | Admin → Settings | Enable/disable new signups |
+| Bot Protection | Admin → Settings → Turnstile | Enable Cloudflare protection |
 
-### Week Data
+### Reading Plan Management
 
-```
-GET  /?route=api/week/{n}           - Get reading plan for week N
-```
+- **View plan:** Admin → Reading Plan
+- **Edit readings:** Click on any week
+- **Export:** Download JSON backup
+- **Import:** Upload JSON file
 
-## Security Features
+---
+
+## Security
 
 ### Implemented Security Measures
 
-| Feature | Implementation |
-|---------|---------------|
-| **SQL Injection** | PDO prepared statements throughout |
-| **XSS Prevention** | Output escaping via `e()` helper function |
-| **CSRF Protection** | Token validation on all forms and API endpoints |
-| **Password Hashing** | bcrypt via `password_hash()` |
-| **Session Security** | HttpOnly, SameSite=Lax, Secure cookies |
-| **Rate Limiting** | 5 login attempts per 15 minutes |
-| **Directory Protection** | `.htaccess` blocks /config, /src, /templates, /data |
-| **HTTPS Enforcement** | Automatic redirect in production |
-| **Security Headers** | X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, CSP |
-| **Host Header Validation** | Regex validation prevents header injection |
-| **Sensitive Action Confirmation** | Password required for dangerous admin actions |
+| Feature | Description |
+|---------|-------------|
+| SQL Injection | PDO prepared statements |
+| XSS Prevention | Output escaping via `e()` helper |
+| CSRF Protection | Token validation on all forms |
+| Password Hashing | bcrypt via `password_hash()` |
+| Session Security | HttpOnly, SameSite=Lax, Secure cookies |
+| Rate Limiting | 5 login attempts per 15 minutes |
+| Bot Protection | Cloudflare Turnstile (optional) |
+| Directory Protection | `.htaccess` blocks sensitive directories |
+| HTTPS Enforcement | Automatic redirect in production |
 
 ### Content Security Policy
 
 ```
 default-src 'self';
-script-src 'self' 'unsafe-inline';
+script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com;
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: https:;
 connect-src 'self' https://bible.helloao.org;
-frame-ancestors 'self'
+frame-src https://challenges.cloudflare.com;
 ```
 
-## Badge System
+---
 
-Users earn badges for reading achievements:
+## FAQ
 
-### Book Completion Badges
-- Genesis Journey, Exodus Explorer, Psalms Singer, etc.
-- Awarded when all chapters of a book are completed
+### General
 
-### Category Badges
-- Poetry Master, History Scholar, Prophecy Student, Gospel Bearer
-- Awarded when all readings in a category are completed
+**Q: Is ReadIn52 really free?**
+A: Yes! ReadIn52 is completely free and open source under the MIT License. Use it for your personal reading, your family, your church, or any ministry.
 
-### Engagement Badges
-- First Steps (1 reading), Getting Started (10), Dedicated Reader (50), etc.
-- Week Warrior: Complete all 4 readings in one week
+**Q: Can I customize the reading plan?**
+A: Yes. Admins can modify the 52-week reading plan through Admin → Reading Plan. You can also import/export plans as JSON.
 
-### Milestone Badges
-- Halfway There (50%), Almost Done (90%), Finisher (100%)
+**Q: Does it work offline?**
+A: Yes, as a PWA it can be installed on devices and works offline for previously loaded content.
 
-### Streak Badges
-- On Fire (7-day streak), Consistent (30-day), Devoted (100-day)
+### Installation
 
-## Tech Stack
+**Q: I get a database connection error**
+A: Check that `config/db.php` exists with correct credentials. Verify the database user has full permissions.
 
-- **Backend**: PHP 8.0+ (vanilla, no framework)
-- **Database**: MySQL/MariaDB with PDO
-- **Frontend**: Vanilla HTML/CSS/JS (no jQuery or frameworks)
-- **Bible API**: [HelloAO](https://bible.helloao.org/) (MIT license, no API key)
-- **Email**: Brevo API for transactional emails
-- **PWA**: Service Worker + Web App Manifest
+**Q: The installer says "Application already installed"**
+A: The database already has tables. To reinstall, drop all tables or use a fresh database.
 
-## File Structure
+**Q: Should I delete install.php?**
+A: Yes! Always delete `install.php` after installation for security.
 
-```
-public_html/
-├── index.php              # Main router (all requests)
-├── install.php            # Installation script (delete after setup)
-├── manifest.json          # PWA web app manifest
-├── sw.js                  # Service Worker for offline support
-├── .htaccess              # URL rewriting & security headers
-│
-├── assets/
-│   ├── css/style.css      # All application styles
-│   ├── js/app.js          # Main application logic
-│   ├── js/bible-api.js    # Bible API integration
-│   └── images/            # Logo and app icons
-│
-├── config/                # Protected directory
-│   ├── config.php         # Main configuration
-│   ├── db.php             # Database credentials (gitignored)
-│   ├── db.example.php     # Template for db.php
-│   ├── email.php          # Email credentials (gitignored)
-│   ├── email.example.php  # Template for email.php
-│   └── reading-plan.json  # 52-week reading schedule
-│
-├── src/                   # Protected directory - PHP classes
-│   ├── Auth.php           # Authentication & CSRF
-│   ├── Badge.php          # Achievement system
-│   ├── Bible.php          # Book definitions
-│   ├── Database.php       # PDO singleton & schema
-│   ├── Email.php          # Brevo email integration
-│   ├── Note.php           # Personal notes
-│   ├── Progress.php       # Reading progress tracking
-│   ├── ReadingPlan.php    # Reading plan logic
-│   ├── User.php           # User management
-│   └── helpers.php        # Utility functions
-│
-├── templates/             # Protected directory - HTML templates
-│   ├── layout.php         # Main layout wrapper
-│   ├── home.php           # Landing page
-│   ├── login.php          # Login form
-│   ├── register.php       # Registration form
-│   ├── dashboard.php      # Main reading interface
-│   ├── reader.php         # Bible reader modal
-│   ├── profile.php        # User profile
-│   ├── settings.php       # User settings
-│   ├── notes.php          # Notes manager
-│   ├── books.php          # Book browser
-│   └── admin/             # Admin templates
-│       ├── layout.php
-│       ├── dashboard.php
-│       ├── users.php
-│       ├── user-progress.php
-│       ├── reading-plan.php
-│       └── settings.php
-│
-├── uploads/               # User uploads
-│   └── logos/             # Custom app logos
-│
-└── data/                  # Protected data directory
+### Features
+
+**Q: How do I enable email features?**
+A: Create `config/email.php` with your Brevo API credentials. See [Email Configuration](#email-service-configemailphp).
+
+**Q: What is Cloudflare Turnstile?**
+A: Turnstile is a free, privacy-focused alternative to CAPTCHA that protects forms from bots. Enable it in Admin → Settings → Bot Protection.
+
+**Q: Can users see each other's progress?**
+A: No. Each user only sees their own progress. Admins can view all user progress.
+
+### Troubleshooting
+
+**Q: Login doesn't work / Session issues**
+A: Ensure your server supports PHP sessions. Check that `session.save_path` is writable.
+
+**Q: Styles look broken**
+A: Ensure `.htaccess` is being processed. Check that mod_rewrite is enabled.
+
+**Q: Bible API not loading**
+A: The Bible API requires internet access. Check your server's outbound connections.
+
+---
+
+## API Reference
+
+All API endpoints require user authentication via session.
+
+### Progress
+
+```http
+GET  /?route=api/progress           # Get all reading progress
+POST /?route=api/progress           # Toggle reading completion
+     Body: { week, category, csrf_token }
+
+GET  /?route=api/chapter-progress   # Get chapter progress for week
+POST /?route=api/chapter-progress   # Toggle chapter completion
+     Body: { week, category, book, chapter, csrf_token }
+
+GET  /?route=api/stats              # Get user statistics
 ```
 
-## Database Schema
+### Notes
 
-### Core Tables
-- `users` - User accounts with preferences
-- `reading_progress` - Week-level completion tracking
-- `chapter_progress` - Chapter-level tracking
-- `notes` - Personal reading notes
+```http
+GET  /?route=api/notes/{id}                      # Get specific note
+GET  /?route=api/notes/chapter?book=X&chapter=N  # Get notes for chapter
+POST /?route=notes/save                          # Create/update note
+POST /?route=notes/delete                        # Delete note
+```
 
-### Reference Tables
-- `reading_plan` - 52 weeks x 4 categories of readings
-- `reading_categories` - Category definitions with colors
-- `bible_translations` - Available translations
+### Week Data
 
-### Security Tables
-- `login_attempts` - Rate limiting for brute-force prevention
-- `password_resets` - Password reset tokens (1-hour expiry)
-- `email_verifications` - Email change verification (24-hour expiry)
+```http
+GET  /?route=api/week/{n}           # Get reading plan for week N
+```
 
-### Gamification
-- `badges` - Badge definitions with criteria
-- `user_badges` - Earned badges per user
+---
 
 ## Development
 
 ### Local Setup
 
-1. Clone the repository
-2. Create `config/db.php` with local database credentials
-3. Run a local PHP server: `php -S localhost:8000`
-4. Visit `http://localhost:8000/install.php`
+```bash
+git clone https://github.com/robinson-vidva/readin52.git
+cd readin52
+cp config/db.example.php config/db.php
+# Configure config/db.php
+php -S localhost:8000
+```
+
+### File Structure
+
+```
+readin52/
+├── index.php              # Main router
+├── install.php            # Installation script
+├── manifest.json          # PWA manifest
+├── sw.js                  # Service Worker
+├── .htaccess              # URL rewriting & security
+│
+├── assets/
+│   ├── css/style.css      # All styles
+│   ├── js/app.js          # Main app logic
+│   └── images/            # Icons and images
+│
+├── config/
+│   ├── config.php         # Main configuration
+│   ├── db.php             # Database credentials (gitignored)
+│   ├── email.php          # Email credentials (gitignored)
+│   └── reading-plan.json  # 52-week schedule
+│
+├── src/                   # PHP classes
+│   ├── Auth.php           # Authentication
+│   ├── Badge.php          # Achievement system
+│   ├── Database.php       # PDO wrapper
+│   ├── Email.php          # Brevo integration
+│   ├── Progress.php       # Progress tracking
+│   └── helpers.php        # Utility functions
+│
+└── templates/             # HTML templates
+    ├── layout.php
+    ├── dashboard.php
+    ├── reader.php
+    └── admin/
+```
 
 ### Code Style
 
 - PHP: PSR-12 compatible
-- JavaScript: ES6+ with vanilla JS (no frameworks)
-- CSS: BEM-like naming with CSS custom properties
+- JavaScript: ES6+ vanilla JS
+- CSS: BEM-like with CSS custom properties
 
-### Adding New Features
+---
 
-1. Add routes in `index.php`
-2. Create/modify classes in `src/`
-3. Add templates in `templates/`
-4. Run migrations automatically via `Database::migrate()`
+## Contributing
 
-## Credits & Attribution
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-### Bible API
+### Ways to Contribute
 
-Scripture content is provided by the [HelloAO Free Use Bible API](https://bible.helloao.org/). The API and its source code are freely available under the MIT license with no usage limits, no API keys required, and no copyright restrictions.
+- Report bugs via [GitHub Issues](https://github.com/robinson-vidva/readin52/issues)
+- Suggest features
+- Submit pull requests
+- Improve documentation
+- Translate to other languages
 
-### Berean Standard Bible
-
-The Holy Bible, Berean Standard Bible (BSB) is produced in cooperation with [Bible Hub](https://biblehub.com/), Discovery Bible, [OpenBible.com](https://openbible.com/), and the Berean Bible Translation Committee. This text of God's Word has been dedicated to the public domain.
-
-### Other Translations
-
-Various Bible translations available through the API are provided by their respective publishers and may have different licensing terms.
+---
 
 ## License
 
-MIT License - See [LICENSE](LICENSE) file for details.
+MIT License — See [LICENSE](LICENSE) for full text.
+
+**What this means:**
+- Free to use for any purpose (personal, church, ministry, commercial)
+- Free to modify and customize
+- Free to distribute and share
+- Free to use in your own projects
+
+We only ask that you keep the copyright notice if you redistribute the code.
+
+---
+
+## Credits
+
+### Bible API
+
+Scripture content provided by [HelloAO Free Use Bible API](https://bible.helloao.org/) — MIT licensed, no API keys required, no usage limits.
+
+### Berean Standard Bible
+
+The Holy Bible, Berean Standard Bible (BSB) is produced in cooperation with [Bible Hub](https://biblehub.com/) and dedicated to the public domain.
+
+### Development
+
+Built with love for the Church by the [ASK Devotions](https://askdevotions.com) community.
+
+---
 
 ## Support
 
-For issues and feature requests, please use the GitHub issue tracker.
+- **Documentation:** This README
+- **Issues:** [GitHub Issues](https://github.com/robinson-vidva/readin52/issues)
+- **Contact:** seek@askdevotions.com
+
+---
+
+*Soli Deo Gloria* — To God alone be the glory.

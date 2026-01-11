@@ -29,7 +29,8 @@
     Header set X-XSS-Protection "1; mode=block"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     # Content Security Policy - allows inline scripts/styles for app functionality
-    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://bible.helloao.org; frame-ancestors 'self'"
+    # Includes Cloudflare Turnstile domains for bot protection
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://bible.helloao.org; frame-src https://challenges.cloudflare.com; frame-ancestors 'self'"
     # Permissions Policy
     Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 </IfModule>
