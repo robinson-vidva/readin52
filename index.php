@@ -590,6 +590,11 @@ try {
             Auth::requireAuth();
             header('Content-Type: application/json');
 
+            // Catch ALL errors including fatal ones
+            set_error_handler(function($errno, $errstr, $errfile, $errline) {
+                throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+            });
+
             try {
                 if ($method === 'POST') {
                     $input = json_decode(file_get_contents('php://input'), true);
@@ -616,7 +621,7 @@ try {
                             $userId = Auth::getUserId();
                             $result['weekCounts'] = Progress::getWeekChapterCounts($userId, $week);
                             $result['overallStats'] = Progress::getChapterStats($userId);
-                        } catch (Exception $e) {
+                        } catch (Throwable $e) {
                             // Log but don't fail - the main toggle succeeded
                             error_log('Error getting stats after chapter toggle: ' . $e->getMessage());
                         }
@@ -633,10 +638,12 @@ try {
                         echo json_encode(['success' => false, 'error' => 'Week required']);
                     }
                 }
-            } catch (Exception $e) {
-                error_log('API chapter-progress error: ' . $e->getMessage());
+            } catch (Throwable $e) {
+                error_log('API chapter-progress error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
                 echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
             }
+
+            restore_error_handler();
             exit;
 
         // ============ Notes API ============
