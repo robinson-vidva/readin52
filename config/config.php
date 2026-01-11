@@ -15,14 +15,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
-// Prevent Varnish/proxy caching of dynamic pages
-header('Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0');
-header('Cache-Control: post-check=0, pre-check=0', false);
-header('Pragma: no-cache');
-header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
-header('X-Varnish-Bypass: 1');
-header('Vary: Cookie');
-
 // Detect HTTPS (Cloudways uses proxy, check X-Forwarded-Proto)
 $isHttps = (
     (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
@@ -48,15 +40,23 @@ session_set_cookie_params([
     'samesite' => 'Lax'
 ]);
 
-// Start session early to ensure consistent behavior
+// Start session BEFORE any headers are sent
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Prevent Varnish/proxy caching of dynamic pages (after session start)
+header('Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+header('X-Varnish-Bypass: 1');
+header('Vary: Cookie');
+
 // Application settings
 define('APP_NAME', 'ReadIn52');
 define('APP_TAGLINE', 'Journey Through Scripture in 52 Weeks');
-define('APP_VERSION', '1.23.1');
+define('APP_VERSION', '1.23.2');
 
 // Paths - All relative to document root (public_html)
 define('ROOT_PATH', __DIR__ . '/..');
