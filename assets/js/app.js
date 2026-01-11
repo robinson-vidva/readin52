@@ -377,6 +377,11 @@ async function markChapterComplete() {
                 updateWeeklyProgress(result.weekCounts);
             }
 
+            // Update overall progress (dashboard header, stats cards)
+            if (result.overallStats) {
+                updateOverallProgress(result.overallStats);
+            }
+
             return true;
         }
     } catch (error) {
@@ -448,6 +453,40 @@ function updateWeeklyProgress(counts) {
         fill.style.width = percentage + '%';
         text.textContent = counts.completed + '/' + counts.total + ' chapters this week';
     }
+}
+
+/**
+ * Update overall progress (dashboard header circle, stats cards)
+ */
+function updateOverallProgress(stats) {
+    // Update progress circle
+    const circleProgress = document.querySelector('.circle-progress');
+    const progressValue = document.querySelector('.progress-value');
+    const progressDetails = document.querySelector('.progress-details .completed');
+
+    if (circleProgress) {
+        circleProgress.setAttribute('stroke-dasharray', stats.percentage + ', 100');
+    }
+    if (progressValue) {
+        progressValue.textContent = stats.percentage + '%';
+    }
+    if (progressDetails) {
+        progressDetails.textContent = stats.completed_chapters + '/' + stats.total_chapters;
+    }
+
+    // Update stats cards
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(function(card) {
+        const label = card.querySelector('.stat-label');
+        const value = card.querySelector('.stat-value');
+        if (label && value) {
+            if (label.textContent === 'Chapters Done') {
+                value.textContent = stats.completed_chapters;
+            } else if (label.textContent === 'Remaining') {
+                value.textContent = stats.total_chapters - stats.completed_chapters;
+            }
+        }
+    });
 }
 
 /**

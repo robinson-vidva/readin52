@@ -609,9 +609,11 @@ try {
 
                 $result = Progress::toggleChapter(Auth::getUserId(), $week, $category, $book, $chapter);
 
-                // Also get updated week chapter counts
+                // Also get updated counts for UI refresh
                 if ($result['success']) {
-                    $result['weekCounts'] = Progress::getWeekChapterCounts(Auth::getUserId(), $week);
+                    $userId = Auth::getUserId();
+                    $result['weekCounts'] = Progress::getWeekChapterCounts($userId, $week);
+                    $result['overallStats'] = Progress::getChapterStats($userId);
                 }
 
                 echo json_encode($result);
