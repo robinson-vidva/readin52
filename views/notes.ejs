@@ -1,0 +1,77 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="container app-main">
+  <div class="page-head">
+    <h1>Notes</h1>
+    <div class="page-head-actions">
+      <div class="seg" id="noteFilter">
+        <button class="seg-btn active" data-color="all">All</button>
+        <% ['yellow','green','blue','red','purple'].forEach(function(c){ %>
+          <button class="seg-btn color-dot c-<%= c %>" data-color="<%= c %>" title="<%= c %>"></button>
+        <% }); %>
+      </div>
+      <div class="menu" id="exportMenu">
+        <button class="btn btn-ghost btn-sm" id="exportBtn">Export ▾</button>
+        <div class="menu-panel">
+          <a href="/api/notes/export?format=md">Markdown (.md)</a>
+          <a href="/api/notes/export?format=json">JSON (.json)</a>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="newNoteBtn">＋ New note</button>
+    </div>
+  </div>
+
+  <% if (!notes.length) { %>
+    <div class="empty">
+      <div class="empty-ico">✍️</div>
+      <h3>No notes yet</h3>
+      <p class="muted">Capture reflections as you read. Notes you take in the reader show up here too.</p>
+      <button class="btn btn-primary" id="newNoteBtnEmpty">Write your first note</button>
+    </div>
+  <% } %>
+
+  <div class="notes-masonry" id="notesList">
+    <% notes.forEach(function(n){ %>
+      <article class="note-card c-<%= n.color %>" data-color="<%= n.color %>" data-id="<%= n.id %>"
+               data-title="<%= n.title.replace(/"/g,'&quot;') %>" data-content="<%= n.content.replace(/"/g,'&quot;') %>"
+               data-week="<%= n.week_number||'' %>" data-cat="<%= n.category||'' %>" data-bookcode="<%= n.book||'' %>" data-chapter="<%= n.chapter||'' %>">
+        <div class="note-head">
+          <h3><%= n.title %></h3>
+          <div class="note-tools">
+            <button class="icon-btn note-edit" title="Edit">✎</button>
+            <button class="icon-btn note-del" title="Delete">🗑</button>
+          </div>
+        </div>
+        <% if (n.book || n.week_number) { %>
+          <div class="note-ref"><%= n.book ? (bookNames[n.book] + (n.chapter ? ' ' + n.chapter : '')) : ('Week ' + n.week_number) %></div>
+        <% } %>
+        <p class="note-body"><%= n.content %></p>
+        <div class="note-date"><%= new Date(n.updated_at + 'Z').toLocaleDateString() %></div>
+      </article>
+    <% }); %>
+  </div>
+</main>
+
+<!-- Note editor modal -->
+<div class="modal-backdrop" id="noteModal" hidden>
+  <div class="modal">
+    <div class="modal-head"><h2 id="noteModalTitle">New note</h2><button class="icon-btn" id="noteModalClose">✕</button></div>
+    <form id="noteForm" class="stack">
+      <input type="hidden" id="noteId" />
+      <label>Title<input type="text" id="noteTitleInput" required /></label>
+      <label>Note<textarea id="noteContentInput" rows="6" required></textarea></label>
+      <div class="field-row">
+        <label>Reference (optional)<input type="text" id="noteBookInput" placeholder="e.g. JHN" /></label>
+        <label>Chapter<input type="number" id="noteChapterInput" min="1" /></label>
+      </div>
+      <div class="nd-colors" id="noteColors">
+        <% ['default','yellow','green','blue','red','purple'].forEach(function(c){ %>
+          <button type="button" class="color-dot c-<%= c %> <%= c==='default'?'sel':'' %>" data-color="<%= c %>"></button>
+        <% }); %>
+      </div>
+      <div class="modal-actions"><button type="submit" class="btn btn-primary">Save note</button></div>
+    </form>
+  </div>
+</div>
+<%- include('partials/footer') %>

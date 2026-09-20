@@ -1,0 +1,21 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h1>Create your account</h1>
+    <p class="muted">Start reading the Bible in 52 weeks — it's free.</p>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="POST" action="/register" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <label>Name<input type="text" name="name" value="<%= name %>" required autofocus /></label>
+      <label>Email<input type="email" name="email" value="<%= email %>" required /></label>
+      <label>Password<input type="password" name="password" minlength="6" required /></label>
+      <label>Confirm password<input type="password" name="password_confirm" minlength="6" required /></label>
+      <label class="checkbox"><input type="checkbox" name="accept_terms" value="1" required /> <span>I accept the <a href="/terms" target="_blank">Terms</a> &amp; <a href="/privacy" target="_blank">Privacy Policy</a>.</span></label>
+      <button type="submit" class="btn btn-primary btn-block">Create account</button>
+    </form>
+    <div class="auth-links"><a href="/login">Already have an account? Sign in</a></div>
+  </div>
+</main>
+<%- include('partials/footer') %>

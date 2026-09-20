@@ -1,0 +1,12 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="container app-main">
+  <div class="empty" style="margin-top:4rem">
+    <div class="empty-ico">🕯️</div>
+    <h1><%= title %></h1>
+    <p class="muted"><%= message %></p>
+    <a href="<%= currentUser ? '/dashboard' : '/' %>" class="btn btn-primary">Return home</a>
+  </div>
+</main>
+<%- include('partials/footer') %>

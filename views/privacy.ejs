@@ -1,0 +1,23 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="container app-main narrow prose">
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated <%= new Date().toLocaleDateString() %></p>
+  <p>We keep it simple. <%= app.appName %> stores only what it needs to run your account: your name, email, an encrypted password, your reading progress, notes, highlights and bookmarks.</p>
+  <h2>What we collect</h2>
+  <ul>
+    <li>Account details you provide (name, email).</li>
+    <li>Your reading progress, notes, highlights and bookmarks.</li>
+    <li>Basic login activity used only for rate-limiting and security.</li>
+  </ul>
+  <h2>What we don't do</h2>
+  <ul>
+    <li>We don't sell your data.</li>
+    <li>We don't share your reading with other users — your progress is private to you.</li>
+    <li>Bible text is fetched from the HelloAO API and cached in your browser.</li>
+  </ul>
+  <h2>Your control</h2>
+  <p>You can reset your progress or permanently delete your account and all associated data at any time from <a href="/settings">Settings</a>.</p>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,21 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h1>Welcome back</h1>
+    <p class="muted">Sign in to continue your journey through Scripture.</p>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form method="POST" action="/login" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <label>Email<input type="email" name="email" value="<%= email %>" required autofocus /></label>
+      <label>Password<input type="password" name="password" required /></label>
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+    <div class="auth-links">
+      <a href="/forgot-password">Forgot password?</a>
+      <% if (app.registrationEnabled) { %><a href="/register">Create an account</a><% } %>
+    </div>
+  </div>
+</main>
+<%- include('partials/footer') %>

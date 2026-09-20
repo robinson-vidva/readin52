@@ -1,0 +1,16 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="container app-main narrow prose">
+  <h1>About <%= app.appName %></h1>
+  <p><%= app.appName %> is a free, open-source app that helps individuals and church communities read through the entire Bible in one year with a structured 52-week plan, built for the glory of God.</p>
+  <p>Each week you read across four tracks — Psalms &amp; Wisdom, Law &amp; History, the Prophets, and the Gospels &amp; Letters — so your reading stays varied and balanced through the year.</p>
+  <h2>Credits</h2>
+  <ul>
+    <li>Scripture content from the <a href="https://bible.helloao.org/" target="_blank" rel="noopener">HelloAO Free Use Bible API</a> — no API keys, no limits.</li>
+    <li>The Berean Standard Bible (BSB), dedicated to the public domain.</li>
+    <li>This is a modern Node.js rebuild of the original PHP project.</li>
+  </ul>
+  <p class="muted"><em>Soli Deo Gloria</em> — To God alone be the glory.</p>
+</main>
+<%- include('partials/footer') %>

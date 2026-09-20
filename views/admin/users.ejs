@@ -1,0 +1,67 @@
+<%- include('../partials/head') %>
+<body>
+<%- include('../partials/header') %>
+<main class="container app-main">
+  <div class="page-head"><h1>Users</h1></div>
+  <%- include('../partials/admin-nav') %>
+  <section class="card">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Last login</th><th></th></tr></thead>
+      <tbody>
+        <% users.forEach(function(u){ %>
+          <tr>
+            <td><%= u.name %></td>
+            <td><%= u.email %></td>
+            <td><span class="pill <%= u.role %>"><%= u.role %></span></td>
+            <td><%= new Date(u.created_at + 'Z').toLocaleDateString() %></td>
+            <td><%= u.last_login ? new Date(u.last_login + 'Z').toLocaleDateString() : '—' %></td>
+            <td><button class="btn btn-ghost btn-sm admin-edit-user"
+                  data-id="<%= u.id %>" data-name="<%= u.name %>" data-email="<%= u.email %>" data-role="<%= u.role %>" data-tr="<%= u.preferred_translation %>">Edit</button></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<div class="modal-backdrop" id="userModal" hidden>
+  <div class="modal">
+    <div class="modal-head"><h2>Edit user</h2><button class="icon-btn" id="userModalClose">✕</button></div>
+    <form method="POST" action="/admin/users" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="update" />
+      <input type="hidden" name="user_id" id="um_id" />
+      <label>Name<input type="text" name="name" id="um_name" required /></label>
+      <label>Email<input type="email" name="email" id="um_email" required /></label>
+      <label>Role<select name="role" id="um_role"><option value="user">User</option><option value="admin">Admin</option></select></label>
+      <label>Reset password (optional)<input type="password" name="new_password" minlength="6" placeholder="Leave blank to keep" /></label>
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+    <form method="POST" action="/admin/users" onsubmit="return confirm('Delete this user and all their data?')" style="margin-top:1rem">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="delete" />
+      <input type="hidden" name="user_id" id="um_del_id" />
+      <button type="submit" class="btn btn-danger btn-sm">Delete user</button>
+    </form>
+  </div>
+</div>
+<script>
+  (function(){
+    var modal = document.getElementById('userModal');
+    document.querySelectorAll('.admin-edit-user').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.getElementById('um_id').value = btn.dataset.id;
+        document.getElementById('um_del_id').value = btn.dataset.id;
+        document.getElementById('um_name').value = btn.dataset.name;
+        document.getElementById('um_email').value = btn.dataset.email;
+        document.getElementById('um_role').value = btn.dataset.role;
+        modal.hidden = false;
+      });
+    });
+    document.getElementById('userModalClose').addEventListener('click', function(){ modal.hidden = true; });
+    modal.addEventListener('click', function(e){ if(e.target===modal) modal.hidden = true; });
+  })();
+</script>
+<%- include('../partials/footer') %>

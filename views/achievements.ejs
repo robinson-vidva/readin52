@@ -1,0 +1,34 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<%
+  const groups = { book: 'Books & Tracks', engagement: 'Engagement', milestone: 'Milestones', streak: 'Streaks' };
+  const byCat = {}; badges.forEach(b => { (byCat[b.category] = byCat[b.category] || []).push(b); });
+%>
+<main class="container app-main">
+  <div class="page-head">
+    <h1>Achievements</h1>
+    <p class="muted">You've earned <strong><%= earnedCount %></strong> of <%= total %> badges.</p>
+  </div>
+  <div class="ach-progress"><i style="width:<%= Math.round(earnedCount/total*100) %>%"></i></div>
+
+  <% Object.keys(groups).forEach(function(cat){ if(!byCat[cat]) return; %>
+    <h2 class="section-title"><%= groups[cat] %></h2>
+    <div class="badge-grid">
+      <% byCat[cat].forEach(function(b){ %>
+        <div class="badge-card <%= b.earned ? 'earned' : 'locked' %>">
+          <div class="badge-ico"><%= b.icon %></div>
+          <div class="badge-name"><%= b.name %></div>
+          <div class="badge-desc"><%= b.description %></div>
+          <% if (b.earned) { %>
+            <div class="badge-status earned">✓ Earned<% if (b.earned_at) { %> · <%= new Date(b.earned_at + 'Z').toLocaleDateString() %><% } %></div>
+          <% } else { %>
+            <div class="badge-mini-bar"><i style="width:<%= Math.round(b.progress*100) %>%"></i></div>
+            <div class="badge-status"><%= Math.round(b.progress*100) %>%</div>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  <% }); %>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,24 @@
+<%- include('../partials/head') %>
+<body>
+<%- include('../partials/header') %>
+<main class="container app-main">
+  <div class="page-head"><h1>User progress</h1></div>
+  <%- include('../partials/admin-nav') %>
+  <section class="card">
+    <table class="table">
+      <thead><tr><th>User</th><th>Progress</th><th>Readings</th><th>Day streak</th><th>Week streak</th></tr></thead>
+      <tbody>
+        <% users.forEach(function(u){ %>
+          <tr>
+            <td><strong><%= u.name %></strong><br><span class="muted small"><%= u.email %></span></td>
+            <td style="min-width:160px"><div class="cbar"><i style="width:<%= u.stats.percentage %>%"></i></div><span class="muted small"><%= u.stats.percentage %>%</span></td>
+            <td><%= u.stats.total_completed %>/208</td>
+            <td><%= u.stats.day_streak %></td>
+            <td><%= u.stats.streak %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </section>
+</main>
+<%- include('../partials/footer') %>

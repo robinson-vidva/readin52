@@ -1,0 +1,78 @@
+<%- include('partials/head') %>
+<body class="reader-body">
+<%- include('partials/header') %>
+<main class="reader" id="reader"
+      data-book="<%= book %>" data-chapter="<%= chapter %>"
+      data-bookname="<%= bookName %>" data-total="<%= totalChapters %>">
+
+  <div class="reader-toolbar">
+    <div class="rt-left">
+      <button class="icon-btn" id="rBookBtn" title="Choose book"><%= bookName %> <%= chapter %> ▾</button>
+    </div>
+    <div class="rt-center">
+      <select id="rTranslation" class="select-sm" aria-label="Translation">
+        <% translations.forEach(function(t){ %><option value="<%= t.id %>"><%= t.name %></option><% }); %>
+      </select>
+      <button class="icon-btn" id="rDualBtn" title="Compare a second translation">＋ Compare</button>
+      <select id="rSecondary" class="select-sm" aria-label="Second translation" hidden>
+        <% translations.forEach(function(t){ %><option value="<%= t.id %>"><%= t.name %></option><% }); %>
+      </select>
+    </div>
+    <div class="rt-right">
+      <button class="icon-btn" id="rBookmark" title="Bookmark this chapter" aria-pressed="false">☆</button>
+      <button class="icon-btn" id="rNotesBtn" title="Notes for this chapter">✍️ <span id="rNoteCount"></span></button>
+      <div class="type-controls">
+        <button class="icon-btn" id="rFontDown" title="Smaller text">A−</button>
+        <button class="icon-btn" id="rFontFamily" title="Toggle serif / sans">Aa</button>
+        <button class="icon-btn" id="rFontUp" title="Larger text">A+</button>
+      </div>
+      <button class="icon-btn" id="rFocus" title="Focus mode">⛶</button>
+    </div>
+  </div>
+
+  <div class="reader-scroll">
+    <article class="reader-page" id="readerContent">
+      <div class="reader-loading">Loading…</div>
+    </article>
+
+    <nav class="chapter-nav">
+      <button class="btn btn-ghost" id="rPrev">← Previous</button>
+      <span id="rProgressMark"></span>
+      <button class="btn btn-ghost" id="rNext">Next →</button>
+    </nav>
+  </div>
+
+  <!-- Book picker -->
+  <div class="picker-backdrop" id="bookPicker" hidden>
+    <div class="picker">
+      <div class="picker-head"><input type="text" id="bookSearch" placeholder="Search books…" /><button class="icon-btn" id="bookPickerClose">✕</button></div>
+      <div class="picker-body" id="bookList"></div>
+    </div>
+  </div>
+
+  <!-- Notes drawer -->
+  <aside class="notes-drawer" id="notesDrawer" hidden>
+    <div class="nd-head"><h3>Notes · <span id="ndRef"></span></h3><button class="icon-btn" id="ndClose">✕</button></div>
+    <div class="nd-list" id="ndList"></div>
+    <form class="nd-form" id="ndForm">
+      <input type="text" id="ndTitle" placeholder="Note title" required />
+      <textarea id="ndContent" placeholder="Write your reflection…" rows="4" required></textarea>
+      <div class="nd-colors" id="ndColors">
+        <% ['default','yellow','green','blue','red','purple'].forEach(function(c){ %>
+          <button type="button" class="color-dot c-<%= c %> <%= c==='default'?'sel':'' %>" data-color="<%= c %>" aria-label="<%= c %>"></button>
+        <% }); %>
+      </div>
+      <input type="hidden" id="ndNoteId" />
+      <div class="nd-actions"><button type="submit" class="btn btn-primary btn-sm">Save note</button><button type="button" class="btn btn-ghost btn-sm" id="ndCancel" hidden>Cancel</button></div>
+    </form>
+  </aside>
+
+  <!-- Highlight popover -->
+  <div class="hl-popover" id="hlPopover" hidden>
+    <% ['yellow','green','blue','red','purple'].forEach(function(c){ %>
+      <button class="hl-swatch c-<%= c %>" data-color="<%= c %>" aria-label="Highlight <%= c %>"></button>
+    <% }); %>
+    <button class="hl-swatch hl-clear" data-color="" title="Clear">✕</button>
+  </div>
+</main>
+<%- include('partials/footer') %>

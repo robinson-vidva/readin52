@@ -1,0 +1,32 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="container app-main">
+  <div class="page-head">
+    <h1>Read the Bible</h1>
+    <p class="muted">Jump into any book. Progress reflects chapters you've completed in the plan.</p>
+  </div>
+
+  <% function renderGroup(title, list) { %>
+    <h2 class="section-title"><%= title %></h2>
+    <div class="book-grid">
+      <% list.forEach(function(b){
+           const st = bookStats[b] || { completed: 0, total: bookChapters[b] || 0, percentage: 0, isComplete: false };
+           const total = bookChapters[b];
+           const planned = st.total; %>
+        <a class="book-card <%= st.isComplete && planned>0 ? 'done' : '' %>" href="/reader/<%= b %>/1">
+          <div class="bc-top">
+            <span class="bc-name"><%= bookNames[b] %></span>
+            <% if (st.isComplete && planned>0) { %><span class="bc-check">✓</span><% } %>
+          </div>
+          <div class="bc-meta"><%= total %> chapter<%= total>1?'s':'' %></div>
+          <div class="bc-bar"><i style="width:<%= st.percentage %>%"></i></div>
+        </a>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% renderGroup('Old Testament', oldTestament) %>
+  <% renderGroup('New Testament', newTestament) %>
+</main>
+<%- include('partials/footer') %>

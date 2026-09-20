@@ -1,0 +1,91 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<%
+  const catColor = {}; categories.forEach(c => catColor[c.id] = c.color);
+  const catName = {}; categories.forEach(c => catName[c.id] = c.name);
+  const current = stats.current_week;
+  const currentWeek = weeks[current - 1];
+  const pct = stats.percentage;
+%>
+<main class="container app-main">
+  <!-- Hero -->
+  <section class="dash-hero">
+    <div class="dash-hero-main card">
+      <div class="hero-head">
+        <div>
+          <p class="eyebrow">Week <%= current %> of 52</p>
+          <h1>Hello, <%= currentUser.name.split(' ')[0] %> 👋</h1>
+          <p class="muted">You're <%= pct %>% through the plan — <%= chapterStats.completed_chapters %> of <%= chapterStats.total_chapters %> chapters read.</p>
+        </div>
+        <div class="ring" style="--pct:<%= pct %>">
+          <svg viewBox="0 0 120 120"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" cx="60" cy="60" r="52"/></svg>
+          <span class="ring-label"><%= Math.round(pct) %>%</span>
+        </div>
+      </div>
+      <% if (currentWeek) { %>
+      <div class="current-readings">
+        <% ['poetry','history','prophecy','gospels'].forEach(function(cid){ var r = currentWeek.readings[cid]; if(!r) return; %>
+          <a class="reading-pill" href="/reader/<%= r.passages[0].book %>/<%= r.passages[0].chapters[0] %>" style="--c:<%= catColor[cid] %>">
+            <span class="dot"></span>
+            <span class="rp-body"><small><%= catName[cid] %></small><strong><%= r.reference %></strong></span>
+          </a>
+        <% }); %>
+      </div>
+      <a href="#week-<%= current %>" class="btn btn-primary" id="continueBtn" data-week="<%= current %>">Continue week <%= current %> →</a>
+      <% } %>
+    </div>
+
+    <aside class="dash-hero-side card daily-verse" id="dailyVerse">
+      <p class="eyebrow">Verse of the day</p>
+      <blockquote id="dailyVerseText" class="verse-loading">Loading a verse…</blockquote>
+      <cite id="dailyVerseRef"></cite>
+    </aside>
+  </section>
+
+  <!-- Stat cards -->
+  <section class="stat-row">
+    <div class="stat card"><span class="stat-ico">✅</span><div><strong><%= stats.total_completed %>/208</strong><small>Readings done</small></div></div>
+    <div class="stat card"><span class="stat-ico">🔥</span><div><strong><%= stats.day_streak %></strong><small>Day streak</small></div></div>
+    <div class="stat card"><span class="stat-ico">📅</span><div><strong><%= stats.streak %></strong><small>Week streak</small></div></div>
+    <div class="stat card"><span class="stat-ico">🏆</span><div><strong><%= badgeCount %></strong><small>Badges</small></div></div>
+    <div class="stat card"><span class="stat-ico">✍️</span><div><strong><%= noteCount %></strong><small>Notes</small></div></div>
+  </section>
+
+  <!-- 52-week grid -->
+  <section class="card weeks-card">
+    <div class="card-head">
+      <h2>Your 52 weeks</h2>
+      <div class="legend">
+        <% categories.forEach(function(c){ %><span class="lg"><i style="background:<%= c.color %>"></i><%= c.name %></span><% }); %>
+      </div>
+    </div>
+    <div class="weeks-grid">
+      <% weekly.forEach(function(w){
+           const done = w.categories; const isFull = done === 4;
+           const chPct = w.chaptersTotal ? Math.round(w.chaptersDone / w.chaptersTotal * 100) : 0; %>
+        <button type="button" class="week-cell <%= isFull ? 'full' : '' %> <%= w.week === current ? 'is-current' : '' %>"
+                data-week="<%= w.week %>" style="--fill:<%= done/4 %>" title="Week <%= w.week %> — <%= chPct %>% (<%= done %>/4 tracks)">
+          <span class="wc-num"><%= w.week %></span>
+          <span class="wc-bars">
+            <% ['poetry','history','prophecy','gospels'].forEach(function(cid){ %>
+              <i class="wc-bar" data-cat="<%= cid %>" data-on="<%= w.categoriesDone[cid] ? 1 : 0 %>" style="--c:<%= catColor[cid] %>"></i>
+            <% }); %>
+          </span>
+        </button>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- Week detail panel (filled by JS) -->
+  <section class="card week-detail" id="weekDetail" hidden>
+    <div class="card-head">
+      <h2 id="weekDetailTitle">Week</h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="weekDetailClose">Close</button>
+    </div>
+    <div id="weekDetailBody" class="week-detail-body"></div>
+  </section>
+</main>
+
+<script id="catData" type="application/json"><%- JSON.stringify(categories) %></script>
+<%- include('partials/footer') %>

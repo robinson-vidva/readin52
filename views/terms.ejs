@@ -1,0 +1,19 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="container app-main narrow prose">
+  <h1>Terms &amp; Conditions</h1>
+  <p class="muted">Last updated <%= new Date().toLocaleDateString() %></p>
+  <p><%= app.appName %> is provided free of charge, "as is", for personal and community Bible reading. By creating an account you agree to use the service respectfully and lawfully.</p>
+  <h2>Acceptable use</h2>
+  <ul>
+    <li>Keep your account secure and don't share credentials.</li>
+    <li>Don't attempt to disrupt, abuse, or reverse-engineer the service.</li>
+    <li>Content you create (notes) remains yours.</li>
+  </ul>
+  <h2>No warranty</h2>
+  <p>The service is offered without warranty of any kind. Scripture text is provided by third-party sources and may contain errors.</p>
+  <h2>License</h2>
+  <p>This software is released under the MIT License. You are free to use, modify and share it.</p>
+</main>
+<%- include('partials/footer') %>

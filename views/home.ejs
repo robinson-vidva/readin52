@@ -1,0 +1,69 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<main class="landing">
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+      <span class="eyebrow">Free &amp; open source · <%= app.appTagline %></span>
+      <h1 class="hero-title">Read the whole Bible in <span class="accent">52 weeks</span>.</h1>
+      <p class="hero-sub">A calm, structured plan across four tracks — Psalms &amp; Wisdom, Law &amp; History, the Prophets, and the Gospels &amp; Letters — with a built-in reader in 50+ translations, chapter-level progress, streaks and achievements.</p>
+      <div class="hero-cta">
+        <% if (app.registrationEnabled) { %><a href="/register" class="btn btn-primary btn-lg">Start your journey</a><% } %>
+        <a href="/login" class="btn btn-ghost btn-lg">I already have an account</a>
+      </div>
+      <div class="hero-verse">“Your word is a lamp for my feet, a light on my path.” — Psalm 119:105</div>
+    </div>
+  </section>
+
+  <section class="features container">
+    <div class="feature-grid">
+      <article class="feature-card">
+        <div class="feature-ico">📅</div>
+        <h3>Structured 52-week plan</h3>
+        <p>Four balanced readings each week keep you moving through Scripture without burning out.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-ico">📖</div>
+        <h3>Built-in reader</h3>
+        <p>Read right here in 50+ translations, compare two side-by-side, and adjust type for comfort.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-ico">✅</div>
+        <h3>Chapter-level progress</h3>
+        <p>Tick off chapters as you go and watch your year fill in on a 52-week heatmap.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-ico">🔥</div>
+        <h3>Streaks &amp; badges</h3>
+        <p>Build a daily reading habit and unlock 25+ achievements as you reach milestones.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-ico">✍️</div>
+        <h3>Personal notes</h3>
+        <p>Capture reflections by chapter with color tags, and export them any time.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-ico">📲</div>
+        <h3>Installable &amp; offline</h3>
+        <p>Add it to your home screen as an app — recently read chapters work offline.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="tracks container">
+    <h2 class="section-title">Four tracks, one year</h2>
+    <div class="track-row">
+      <div class="track" style="--c:#a8703c"><span>Psalms &amp; Wisdom</span></div>
+      <div class="track" style="--c:#2e8b57"><span>Law &amp; History</span></div>
+      <div class="track" style="--c:#4169e1"><span>Prophetic Books</span></div>
+      <div class="track" style="--c:#b3403a"><span>Gospel &amp; Letters</span></div>
+    </div>
+    <div class="cta-band">
+      <h2>Begin today. One week at a time.</h2>
+      <% if (app.registrationEnabled) { %><a href="/register" class="btn btn-primary btn-lg">Create free account</a>
+      <% } else { %><a href="/login" class="btn btn-primary btn-lg">Sign in</a><% } %>
+    </div>
+  </section>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,39 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <strong><%= app.appName %></strong>
+      <span class="muted"><%= app.appTagline %></span>
+    </div>
+    <nav class="footer-links">
+      <a href="/about">About</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <% if (app.githubUrl) { %><a href="<%= app.githubUrl %>" target="_blank" rel="noopener">GitHub</a><% } %>
+    </nav>
+    <p class="muted small">Scripture via <a href="https://bible.helloao.org/" target="_blank" rel="noopener">HelloAO</a> · <em>Soli Deo Gloria</em></p>
+  </div>
+</footer>
+
+<% if (currentUser) { %>
+<!-- Quick jump palette -->
+<div class="palette-backdrop" id="paletteBackdrop" hidden>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Quick jump">
+    <input type="text" id="paletteInput" placeholder="Jump to a book &amp; chapter, e.g. John 3 or Ps 23" autocomplete="off" />
+    <ul class="palette-results" id="paletteResults"></ul>
+    <div class="palette-hint">Type a book and chapter · <kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close</div>
+  </div>
+</div>
+<% } %>
+
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+<script>
+  window.READIN52 = {
+    csrf: '<%= csrfToken %>',
+    user: <%- currentUser ? JSON.stringify({ id: currentUser.id, name: currentUser.name, translation: currentUser.preferred_translation, secondary: currentUser.secondary_translation, fontSize: currentUser.reader_font_size, fontFamily: currentUser.reader_font_family }) : 'null' %>
+  };
+</script>
+<script src="/static/js/app.js?v=<%= assetVer %>"></script>
+<% if (typeof pageScripts !== 'undefined') { pageScripts.forEach(function(s){ %><script src="/static/js/<%= s %>?v=<%= assetVer %>"></script><% }); } %>
+</body>
+</html>

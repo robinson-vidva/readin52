@@ -1,0 +1,53 @@
+<%- include('../partials/head') %>
+<body>
+<%- include('../partials/header') %>
+<main class="container app-main">
+  <div class="page-head"><h1>Reading plan</h1></div>
+  <%- include('../partials/admin-nav') %>
+
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Edit week</h2>
+      <div class="rp-tools">
+        <a href="/admin/reading-plan/export" class="btn btn-ghost btn-sm">Export JSON</a>
+      </div>
+    </div>
+    <form method="GET" action="/admin/reading-plan" class="inline-form">
+      <label>Week
+        <select name="week" onchange="this.form.submit()">
+          <% for (let i=1;i<=52;i++){ %><option value="<%= i %>" <%= selectedWeek===i?'selected':'' %>>Week <%= i %></option><% } %>
+        </select>
+      </label>
+    </form>
+
+    <% if (week) { %>
+    <form method="POST" action="/admin/reading-plan" class="stack rp-edit">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="week" value="<%= selectedWeek %>" />
+      <% categories.forEach(function(c){ const r = week.readings[c.id] || {reference:'', passages:[]}; %>
+        <fieldset class="rp-cat" style="--c:<%= c.color %>">
+          <legend><%= c.name %></legend>
+          <label>Reference<input type="text" name="readings[<%= c.id %>][reference]" value="<%= r.reference %>" /></label>
+          <label>Passages (JSON)
+            <textarea name="readings[<%= c.id %>][passages]" rows="2" class="mono"><%= JSON.stringify(r.passages) %></textarea>
+          </label>
+        </fieldset>
+      <% }); %>
+      <button type="submit" class="btn btn-primary">Save week <%= selectedWeek %></button>
+    </form>
+    <% } %>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Import plan</h2></div>
+    <form method="POST" action="/admin/reading-plan/import" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <label>Paste reading-plan JSON<textarea name="json_data" rows="6" class="mono" placeholder='{"weeks":[...]}'></textarea></label>
+      <button type="submit" class="btn btn-ghost">Import</button>
+    </form>
+  </section>
+</main>
+<%- include('../partials/footer') %>

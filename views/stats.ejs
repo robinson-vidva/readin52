@@ -1,0 +1,58 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<%
+  const catColor = {}; categories.forEach(c => catColor[c.id] = c.color);
+  const catName = {}; categories.forEach(c => catName[c.id] = c.name);
+%>
+<main class="container app-main">
+  <div class="page-head"><h1>Your statistics</h1><p class="muted">A closer look at your journey through Scripture.</p></div>
+
+  <section class="stat-row">
+    <div class="stat card big"><span class="stat-ico">📖</span><div><strong><%= chapterStats.completed_chapters %></strong><small>of <%= chapterStats.total_chapters %> chapters</small></div></div>
+    <div class="stat card big"><span class="stat-ico">📊</span><div><strong><%= stats.percentage %>%</strong><small>Plan complete</small></div></div>
+    <div class="stat card big"><span class="stat-ico">🔥</span><div><strong><%= stats.day_streak %></strong><small>Day streak</small></div></div>
+    <div class="stat card big"><span class="stat-ico">📅</span><div><strong><%= stats.complete_weeks %></strong><small>Weeks finished</small></div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>By track</h2></div>
+    <div class="cat-bars">
+      <% ['poetry','history','prophecy','gospels'].forEach(function(cid){ const v = stats.by_category[cid]||0; const p = Math.round(v/52*100); %>
+        <div class="cat-bar-row">
+          <span class="cbl" style="--c:<%= catColor[cid] %>"><%= catName[cid] %></span>
+          <div class="cbar"><i style="width:<%= p %>%;background:<%= catColor[cid] %>"></i></div>
+          <span class="cbv"><%= v %>/52</span>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>52-week heatmap</h2><span class="muted small">Shade = chapters completed that week</span></div>
+    <div class="heatmap">
+      <% weekly.forEach(function(w){ const p = w.chaptersTotal ? w.chaptersDone/w.chaptersTotal : 0; %>
+        <span class="hm-cell" style="--i:<%= p.toFixed(2) %>" title="Week <%= w.week %>: <%= w.chaptersDone %>/<%= w.chaptersTotal %> chapters"><%= w.week %></span>
+      <% }); %>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Reading activity</h2><span class="muted small">Last 26 weeks</span></div>
+    <div id="activityHeatmap" class="activity-heatmap" data-dates='<%- JSON.stringify(readingDates) %>'></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Book completion</h2></div>
+    <div class="book-progress-grid">
+      <% bookOrder.forEach(function(b){ const st = bookStats[b]; if(!st) return; %>
+        <div class="bp-row <%= st.isComplete ? 'done':'' %>">
+          <span class="bp-name"><%= bookNames[b] %></span>
+          <div class="bp-bar"><i style="width:<%= st.percentage %>%"></i></div>
+          <span class="bp-val"><%= st.completed %>/<%= st.total %></span>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+</main>
+<%- include('partials/footer') %>

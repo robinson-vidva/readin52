@@ -1,0 +1,105 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<% const u = currentUser; %>
+<main class="container app-main narrow">
+  <div class="page-head"><h1>Settings</h1></div>
+
+  <section class="card">
+    <h2>Reading preferences</h2>
+    <% if (messages.prefsSuccess) { %><div class="alert alert-success"><%= messages.prefsSuccess %></div><% } %>
+    <form method="POST" action="/settings" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="save_preferences" />
+      <label>Primary translation
+        <select name="preferred_translation">
+          <% translations.forEach(function(t){ %><option value="<%= t.id %>" <%= u.preferred_translation===t.id?'selected':'' %>><%= t.name %> (<%= t.language %>)</option><% }); %>
+        </select>
+      </label>
+      <label>Compare translation (optional)
+        <select name="secondary_translation">
+          <option value="">— None —</option>
+          <% translations.forEach(function(t){ %><option value="<%= t.id %>" <%= u.secondary_translation===t.id?'selected':'' %>><%= t.name %> (<%= t.language %>)</option><% }); %>
+        </select>
+      </label>
+      <label>Theme
+        <select name="theme">
+          <option value="auto" <%= u.theme==='auto'?'selected':'' %>>Auto (match system)</option>
+          <option value="light" <%= u.theme==='light'?'selected':'' %>>Light</option>
+          <option value="dark" <%= u.theme==='dark'?'selected':'' %>>Dark</option>
+        </select>
+      </label>
+      <div class="field-row">
+        <label>Reader text size
+          <select name="reader_font_size">
+            <% [14,16,18,20,22,24,26,28].forEach(function(s){ %><option value="<%= s %>" <%= u.reader_font_size==s?'selected':'' %>><%= s %>px</option><% }); %>
+          </select>
+        </label>
+        <label>Reader font
+          <select name="reader_font_family">
+            <option value="serif" <%= u.reader_font_family==='serif'?'selected':'' %>>Serif</option>
+            <option value="sans" <%= u.reader_font_family==='sans'?'selected':'' %>>Sans-serif</option>
+          </select>
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary">Save preferences</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Profile</h2>
+    <% if (messages.nameSuccess) { %><div class="alert alert-success"><%= messages.nameSuccess %></div><% } %>
+    <% if (messages.nameError) { %><div class="alert alert-error"><%= messages.nameError %></div><% } %>
+    <form method="POST" action="/settings" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="update_name" />
+      <label>Name<input type="text" name="name" value="<%= u.name %>" required /></label>
+      <button type="submit" class="btn btn-ghost">Update name</button>
+    </form>
+    <hr />
+    <% if (messages.emailSuccess) { %><div class="alert alert-success"><%= messages.emailSuccess %></div><% } %>
+    <% if (messages.emailError) { %><div class="alert alert-error"><%= messages.emailError %></div><% } %>
+    <form method="POST" action="/settings" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="change_email" />
+      <label>Email address<input type="email" name="new_email" value="<%= u.email %>" required /></label>
+      <label>Confirm with password<input type="password" name="password" required /></label>
+      <button type="submit" class="btn btn-ghost">Update email</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Change password</h2>
+    <% if (messages.passwordSuccess) { %><div class="alert alert-success"><%= messages.passwordSuccess %></div><% } %>
+    <% if (messages.passwordError) { %><div class="alert alert-error"><%= messages.passwordError %></div><% } %>
+    <form method="POST" action="/settings" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="change_password" />
+      <label>Current password<input type="password" name="current_password" required /></label>
+      <label>New password<input type="password" name="new_password" minlength="6" required /></label>
+      <label>Confirm new password<input type="password" name="confirm_password" minlength="6" required /></label>
+      <button type="submit" class="btn btn-ghost">Change password</button>
+    </form>
+  </section>
+
+  <section class="card danger-zone">
+    <h2>Danger zone</h2>
+    <div class="dz-row">
+      <div><strong>Reset reading progress</strong><p class="muted small">Clears all chapter progress. This cannot be undone.</p></div>
+      <form method="POST" action="/settings/reset-progress" onsubmit="return confirm('Reset all your reading progress? This cannot be undone.')">
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit" class="btn btn-danger btn-sm">Reset</button>
+      </form>
+    </div>
+    <div class="dz-row">
+      <div><strong>Delete account</strong><p class="muted small">Permanently deletes your account and all data.</p></div>
+      <form method="POST" action="/settings/delete-account" onsubmit="return confirm('Permanently delete your account? This cannot be undone.')">
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+      </form>
+    </div>
+  </section>
+</main>
+<%- include('partials/footer') %>

@@ -1,0 +1,41 @@
+<%- include('../partials/head') %>
+<body>
+<%- include('../partials/header') %>
+<main class="container app-main narrow">
+  <div class="page-head"><h1>App settings</h1></div>
+  <%- include('../partials/admin-nav') %>
+
+  <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+  <% if (messages.error) { %><div class="alert alert-error"><%= messages.error %></div><% } %>
+
+  <section class="card">
+    <h2>General</h2>
+    <form method="POST" action="/admin/settings" class="stack">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="general" />
+      <label>App name<input type="text" name="app_name" value="<%= app.appName %>" /></label>
+      <label>Tagline<input type="text" name="app_tagline" value="<%= app.appTagline %>" /></label>
+      <label>Default translation<input type="text" name="default_translation" value="<%= app.defaultTranslation %>" /></label>
+      <label class="checkbox"><input type="checkbox" name="registration_enabled" value="1" <%= app.registrationEnabled?'checked':'' %> /> <span>Allow new registrations</span></label>
+      <div class="field-row">
+        <label>Parent site name<input type="text" name="parent_site_name" value="<%= app.parentSiteName %>" /></label>
+        <label>Parent site URL<input type="text" name="parent_site_url" value="<%= app.parentSiteUrl %>" /></label>
+      </div>
+      <label>Admin email<input type="email" name="admin_email" value="<%= app.adminEmail %>" /></label>
+      <label>GitHub repo URL<input type="text" name="github_repo_url" value="<%= app.githubUrl %>" /></label>
+      <button type="submit" class="btn btn-primary">Save settings</button>
+    </form>
+  </section>
+
+  <section class="card danger-zone">
+    <h2>Danger zone</h2>
+    <form method="POST" action="/admin/settings" class="stack" onsubmit="return confirm('Clear reading progress for ALL users?')">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+      <input type="hidden" name="action" value="clear_progress" />
+      <p class="muted small">Clears reading progress for every user. Confirm with your password.</p>
+      <label>Your password<input type="password" name="confirm_password" required /></label>
+      <button type="submit" class="btn btn-danger btn-sm">Clear all progress</button>
+    </form>
+  </section>
+</main>
+<%- include('../partials/footer') %>
