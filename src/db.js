@@ -154,6 +154,12 @@ async function createSchema() {
       token TEXT NOT NULL UNIQUE, expires_at TEXT NOT NULL,
       used INTEGER DEFAULT 0, created_at TEXT DEFAULT ${NOW}
     );
+    CREATE TABLE IF NOT EXISTS email_verifications (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      new_email TEXT NOT NULL, token TEXT NOT NULL UNIQUE, expires_at TEXT NOT NULL,
+      used INTEGER DEFAULT 0, created_at TEXT DEFAULT ${NOW}
+    );
     CREATE TABLE IF NOT EXISTS login_attempts (
       id SERIAL PRIMARY KEY, email TEXT NOT NULL, ip_address TEXT NOT NULL,
       attempted_at TEXT DEFAULT ${NOW}

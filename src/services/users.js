@@ -94,6 +94,29 @@ export async function resetPasswordWithToken(token, password) {
   return true;
 }
 
+// ---- Email change verification ----
+export async function createEmailVerificationToken(userId, newEmail) {
+  newEmail = newEmail.toLowerCase();
+  const existing = await findByEmail(newEmail);
+  if (existing && existing.id !== userId) return null; // email already in use
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + 3600 * 1000).toISOString().slice(0, 19).replace('T', ' ');
+  await run('INSERT INTO email_verifications (user_id, new_email, token, expires_at) VALUES (?, ?, ?, ?)',
+    userId, newEmail, token, expires);
+  return { token, newEmail };
+}
+
+export async function completeEmailChange(token) {
+  const row = await get(`SELECT * FROM email_verifications WHERE token=? AND used=0 AND expires_at > ${NOW}`, token);
+  if (!row) return null;
+  // Guard against the address being taken since the token was issued
+  const taken = await findByEmail(row.new_email);
+  if (taken && taken.id !== row.user_id) return null;
+  await updateUser(row.user_id, { email: row.new_email });
+  await run('UPDATE email_verifications SET used = 1 WHERE id = ?', row.id);
+  return { user_id: row.user_id, new_email: row.new_email };
+}
+
 export function safeUser(u) {
   if (!u) return null;
   const { password_hash, ...rest } = u;

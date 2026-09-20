@@ -5,6 +5,7 @@ import * as Progress from '../services/progress.js';
 import * as Notes from '../services/notes.js';
 import * as Badges from '../services/badges.js';
 import * as Plan from '../services/readingPlan.js';
+import * as Email from '../services/email.js';
 import { BOOK_NAMES, BOOK_CHAPTERS, OLD_TESTAMENT, NEW_TESTAMENT } from '../data/books.js';
 
 const router = express.Router();
@@ -12,6 +13,9 @@ const { requireAuth, csrfGuard } = Auth;
 
 // Wrap async handlers so rejected promises reach Express's error handler.
 const a = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// Public base URL for building links in emails (works behind Vercel's proxy).
+const baseUrl = (req) => process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
 
 // ---------- Public ----------
 router.get('/', (req, res) => {
@@ -48,6 +52,9 @@ router.post('/register', csrfGuard, a(async (req, res) => {
   if (password !== password_confirm) return render('Passwords do not match.');
   const result = await Auth.register(name, email, password);
   if (!result.success) return render(result.error);
+  if (Email.isConfigured()) {
+    Email.sendWelcome(email.toLowerCase(), name, `${baseUrl(req)}/login`, res.locals.app.appName).catch(() => {});
+  }
   req.flash('success', 'Account created! Please sign in.');
   res.redirect('/login');
 }));
@@ -61,11 +68,19 @@ router.get('/forgot-password', (req, res) => {
 
 router.post('/forgot-password', csrfGuard, a(async (req, res) => {
   const email = (req.body.email || '').trim();
-  const success = 'If an account exists with this email, a reset link has been generated.';
+  // Always show the same message to prevent email enumeration.
+  const success = 'If an account exists with this email, you will receive a reset link shortly.';
   let devLink = null;
   if (email) {
     const data = await Users.createPasswordResetToken(email.toLowerCase());
-    if (data) devLink = `/reset-password?token=${data.token}`;
+    if (data) {
+      const link = `${baseUrl(req)}/reset-password?token=${data.token}`;
+      if (Email.isConfigured()) {
+        await Email.sendPasswordReset(data.user.email, data.user.name, link, res.locals.app.appName);
+      } else {
+        devLink = `/reset-password?token=${data.token}`; // local dev fallback when email isn't configured
+      }
+    }
   }
   res.render('forgot-password', { title: 'Reset Password', error: null, success, devLink });
 }));
@@ -86,6 +101,13 @@ router.post('/reset-password', csrfGuard, a(async (req, res) => {
     return res.render('reset-password', { title: 'Reset Password', validToken: false, token, error: null, success: 'Your password has been reset. You can now sign in.' });
   }
   res.render('reset-password', { title: 'Reset Password', validToken: false, token, error: 'This reset link is invalid or has expired.', success: null });
+}));
+
+router.get('/verify-email', a(async (req, res) => {
+  const result = await Users.completeEmailChange(req.query.token || '');
+  if (result) req.flash('success', `Your email has been updated to ${result.new_email}.`);
+  else req.flash('error', 'This verification link is invalid or has expired.');
+  res.redirect(req.user ? '/settings' : '/login');
 }));
 
 router.get('/about', (req, res) => res.render('about', { title: 'About' }));
@@ -200,9 +222,22 @@ router.post('/settings', csrfGuard, requireAuth, a(async (req, res) => {
     const email = (req.body.new_email || '').trim().toLowerCase();
     const existing = await Users.findByEmail(email);
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) messages.emailError = 'Please enter a valid email.';
+    else if (email === req.user.email) messages.emailError = 'That is already your email.';
     else if (!(await Users.verifyPassword(uid, req.body.password))) messages.emailError = 'Incorrect password.';
     else if (existing && existing.id !== uid) messages.emailError = 'This email is already in use.';
-    else { await Users.updateUser(uid, { email }); messages.emailSuccess = 'Email updated.'; }
+    else if (Email.isConfigured()) {
+      const data = await Users.createEmailVerificationToken(uid, email);
+      if (!data) messages.emailError = 'This email is already in use.';
+      else {
+        const r = await Email.sendEmailVerification(email, req.user.name, `${baseUrl(req)}/verify-email?token=${data.token}`, res.locals.app.appName);
+        messages[r.success ? 'emailSuccess' : 'emailError'] = r.success
+          ? `Verification email sent to ${email}. Check your inbox to confirm the change.`
+          : 'Could not send verification email. Please try again.';
+      }
+    } else {
+      await Users.updateUser(uid, { email }); // dev fallback when email isn't configured
+      messages.emailSuccess = 'Email updated.';
+    }
   } else {
     const theme = ['light', 'dark', 'auto'].includes(req.body.theme) ? req.body.theme : 'auto';
     let secondary = req.body.secondary_translation || null;
