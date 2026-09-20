@@ -438,6 +438,12 @@ body.focus-mode .reader-toolbar { top: 0; }
 .xref { border-left: 3px solid color-mix(in srgb, var(--accent) 40%, var(--border)); padding: .2rem 0 .2rem .7rem; }
 .xref-ref { font-weight: 700; font-size: .9rem; color: var(--accent-ink); }
 .xref-text { font-family: var(--font-serif); font-size: .92rem; line-height: 1.5; margin-top: .2rem; }
+.sp-title select { margin-left: auto; font-size: .75rem; padding: .2rem .35rem; }
+.sp-commentary { border-top: 1px solid var(--border); }
+.sp-commentary-body { max-height: 280px; overflow-y: auto; }
+.cm-text { font-family: var(--font-serif); font-size: .95rem; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
+.cm-scope { display: inline-block; font-size: .72rem; color: var(--muted); margin-bottom: .3rem; }
+.sp-btns { flex-wrap: wrap; }
 .sp-notes { padding: 0 1.1rem 1.1rem; }
 .sp-note { border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 8px; padding: .6rem; margin-bottom: .5rem; }
 .sp-note.c-yellow { border-left-color: #e6b800; } .sp-note.c-green { border-left-color: #3aa856; }

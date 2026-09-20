@@ -53,6 +53,36 @@ const BibleAPI = (function () {
     }
   }
 
-  return { getChapter, getBookName: (b) => BOOK_NAMES[b] || b, getTotalChapters: (b) => BOOK_CHAPTERS[b] || 1, BOOK_NAMES, BOOK_CHAPTERS };
+  // ---- Commentaries (per-verse, cached) ----
+  const CM_KEY = 'readin52_commentary_cache';
+  function cmGet() { try { return JSON.parse(localStorage.getItem(CM_KEY)) || { entries: [], data: {} }; } catch { return { entries: [], data: {} }; } }
+  function cmSave(c) { try { localStorage.setItem(CM_KEY, JSON.stringify(c)); } catch { c.entries = c.entries.slice(-15); for (const k in c.data) if (!c.entries.includes(k)) delete c.data[k]; try { localStorage.setItem(CM_KEY, JSON.stringify(c)); } catch {} } }
+
+  async function getCommentary(id, book, chapter) {
+    const key = `${id}:${book}:${chapter}`;
+    const c = cmGet();
+    if (c.data[key]) return c.data[key];
+    try {
+      const res = await fetch(`${BASE_URL}/c/${id}/${book}/${chapter}.json`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const api = await res.json();
+      const blocks = []; // { number, text } — number = first verse a block covers
+      const items = (api.chapter && api.chapter.content) || [];
+      for (const item of items) {
+        if (item.type === 'verse' && item.number) {
+          let text = '';
+          for (const p of (item.content || [])) text += (typeof p === 'string' ? p : (p && p.text ? p.text : '')) + ' ';
+          if (text.trim()) blocks.push({ number: item.number, text: text.trim() });
+        }
+      }
+      blocks.sort((a, b) => a.number - b.number);
+      const result = { blocks };
+      while (c.entries.length >= 15) delete c.data[c.entries.shift()];
+      c.entries.push(key); c.data[key] = result; cmSave(c);
+      return result;
+    } catch (e) { return { error: true, message: e.message }; }
+  }
+
+  return { getChapter, getCommentary, getBookName: (b) => BOOK_NAMES[b] || b, getTotalChapters: (b) => BOOK_CHAPTERS[b] || 1, BOOK_NAMES, BOOK_CHAPTERS };
 })();
 window.BibleAPI = BibleAPI;

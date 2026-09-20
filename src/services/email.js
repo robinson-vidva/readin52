@@ -163,6 +163,22 @@ export function sendWelcome(to, name, link, appName = 'ReadIn52') {
   return send({ to, subject: `Welcome to ${appName}`, html: shell(opts), text: textVersion(opts) });
 }
 
+export function sendReminder(to, name, link, weekLine, unsubUrl, appName = 'ReadIn52') {
+  const opts = {
+    appName,
+    preheader: `Your reading for today — ${weekLine}`,
+    heading: `Today's reading`,
+    lead: `Hi ${name || 'there'},`,
+    paras: [
+      `A gentle nudge to spend a few minutes in Scripture today.`,
+      weekLine ? `<strong>${escHtml(weekLine)}</strong>` : `Pick up where you left off and keep your streak going.`,
+    ],
+    button: { href: link, label: 'Open ReadIn52' },
+    note: `You're receiving daily reminders. <a href="${unsubUrl}">Turn them off</a>.`,
+  };
+  return send({ to, subject: `📖 Today's reading — ${appName}`, html: shell(opts), text: textVersion(opts) });
+}
+
 // ---- helpers ----
 function escHtml(s) { return String(s).replace(/[<>]/g, (c) => ({ '<': '&lt;', '>': '&gt;' }[c])); }
 function escAttr(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }

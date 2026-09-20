@@ -86,11 +86,13 @@ async function createSchema() {
       theme TEXT DEFAULT 'auto' CHECK(theme IN ('light','dark','auto')),
       reader_font_size INTEGER DEFAULT 18,
       reader_font_family TEXT DEFAULT 'serif',
+      reminder_email INTEGER DEFAULT 0,
       must_change_password INTEGER DEFAULT 0,
       created_at TEXT DEFAULT ${NOW},
       updated_at TEXT DEFAULT ${NOW},
       last_login TEXT
     );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS reminder_email INTEGER DEFAULT 0;
     CREATE TABLE IF NOT EXISTS chapter_progress (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

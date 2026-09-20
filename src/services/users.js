@@ -21,7 +21,7 @@ export async function createUser(name, email, password, role = 'user', mustChang
   }
 }
 
-const ALLOWED = ['name', 'email', 'role', 'preferred_translation', 'secondary_translation', 'theme', 'reader_font_size', 'reader_font_family'];
+const ALLOWED = ['name', 'email', 'role', 'preferred_translation', 'secondary_translation', 'theme', 'reader_font_size', 'reader_font_family', 'reminder_email'];
 
 export async function updateUser(id, data) {
   const fields = [];
@@ -115,6 +115,22 @@ export async function completeEmailChange(token) {
   await updateUser(row.user_id, { email: row.new_email });
   await run('UPDATE email_verifications SET used = 1 WHERE id = ?', row.id);
   return { user_id: row.user_id, new_email: row.new_email };
+}
+
+export async function getUsersWithReminders() {
+  return await all('SELECT id, name, email, preferred_translation FROM users WHERE reminder_email = 1');
+}
+
+// One-click unsubscribe token (no login needed), signed with SESSION_SECRET.
+export function unsubToken(userId) {
+  const secret = process.env.SESSION_SECRET || 'readin52-dev-secret-change-me';
+  return crypto.createHmac('sha256', secret).update('reminders:' + userId).digest('hex').slice(0, 32);
+}
+export function verifyUnsub(userId, token) {
+  return token === unsubToken(userId);
+}
+export async function disableReminders(userId) {
+  await run('UPDATE users SET reminder_email = 0 WHERE id = ?', userId);
 }
 
 export function safeUser(u) {

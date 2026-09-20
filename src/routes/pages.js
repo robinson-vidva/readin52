@@ -118,6 +118,39 @@ router.get('/verify-email', a(async (req, res) => {
   res.redirect(req.user ? '/settings' : '/login');
 }));
 
+// One-click unsubscribe from reminder emails (no login required)
+router.get('/unsubscribe/reminders', a(async (req, res) => {
+  const u = parseInt(req.query.u, 10);
+  if (u && Users.verifyUnsub(u, req.query.t || '')) {
+    await Users.disableReminders(u);
+    return res.render('error', { title: 'Reminders turned off', message: 'You will no longer receive daily reminder emails. You can re-enable them in Settings any time.' });
+  }
+  res.status(400).render('error', { title: 'Invalid link', message: 'This unsubscribe link is invalid or has expired.' });
+}));
+
+// Daily reminder cron (invoked by Vercel Cron; protected by CRON_SECRET)
+router.get('/cron/reminders', a(async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (secret && req.get('authorization') !== `Bearer ${secret}`) return res.status(401).json({ error: 'unauthorized' });
+  if (!Email.isConfigured()) return res.json({ ok: true, skipped: 'email not configured' });
+  const users = await Users.getUsersWithReminders();
+  const base = baseUrl(req);
+  let sent = 0;
+  for (const u of users) {
+    const wk = await Progress.getCurrentWeek(u.id);
+    const week = Plan.getWeek(wk);
+    let line = `Week ${wk}`;
+    if (week) {
+      const refs = ['poetry', 'history', 'prophecy', 'gospels'].map((c) => week.readings[c] && week.readings[c].reference).filter(Boolean).join(' · ');
+      if (refs) line += ' — ' + refs;
+    }
+    const unsub = `${base}/unsubscribe/reminders?u=${u.id}&t=${Users.unsubToken(u.id)}`;
+    const r = await Email.sendReminder(u.email, u.name, `${base}/dashboard`, line, unsub, res.locals.app.appName);
+    if (r.success) sent++;
+  }
+  res.json({ ok: true, users: users.length, sent });
+}));
+
 router.get('/about', (req, res) => res.render('about', { title: 'About' }));
 router.get('/privacy', (req, res) => res.render('privacy', { title: 'Privacy Policy' }));
 router.get('/terms', (req, res) => res.render('terms', { title: 'Terms & Conditions' }));
@@ -253,7 +286,8 @@ router.post('/settings', csrfGuard, requireAuth, a(async (req, res) => {
     if (!secondary || secondary === primary) secondary = null;
     const fontSize = Math.min(28, Math.max(14, parseInt(req.body.reader_font_size, 10) || 18));
     const fontFamily = ['serif', 'sans'].includes(req.body.reader_font_family) ? req.body.reader_font_family : 'serif';
-    await Users.updateUser(uid, { preferred_translation: primary, secondary_translation: secondary, theme, reader_font_size: fontSize, reader_font_family: fontFamily });
+    const reminder = req.body.reminder_email ? 1 : 0;
+    await Users.updateUser(uid, { preferred_translation: primary, secondary_translation: secondary, theme, reader_font_size: fontSize, reader_font_family: fontFamily, reminder_email: reminder });
     messages.prefsSuccess = 'Preferences saved.';
   }
   req.user = await Users.findById(uid);

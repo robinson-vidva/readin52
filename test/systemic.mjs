@@ -123,6 +123,15 @@ async function run() {
   check('translations 100+ in reader', optCount >= 200, `options=${optCount} (2 selects)`); // 2 selects × ~100+
   check('translations grouped by language', langGroups >= 40, `optgroups=${langGroups}`);
 
+  // 10b. New features: commentary, share, reminders
+  check('reader has commentary picker', readerHtml.includes('spCommentarySel') && readerHtml.includes('matthew-henry'));
+  check('reader has share button', readerHtml.includes('spShareBtn'));
+  const settingsHtml = await (await u.fetch('/settings')).text();
+  check('settings has daily-reminder toggle', settingsHtml.includes('reminder_email'));
+  const cron = await (await u.fetch('/cron/reminders')).json().catch(() => ({}));
+  check('cron /cron/reminders reachable', cron.ok === true, JSON.stringify(cron));
+  check('unsubscribe with bad token → 400', (await anon.fetch('/unsubscribe/reminders?u=1&t=bad')).status === 400);
+
   // 11. Admin flow (seeded admin, must-change first)
   const admin = jar();
   csrf = await csrfFrom(admin, '/login');

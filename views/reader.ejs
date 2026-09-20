@@ -57,6 +57,7 @@
         <div class="sp-btns">
           <button class="chip-btn" id="spNoteBtn">✍️ Note</button>
           <button class="chip-btn" id="spCopyBtn">⧉ Copy</button>
+          <button class="chip-btn" id="spShareBtn">⤴ Share</button>
         </div>
       </div>
 
@@ -70,6 +71,22 @@
       <div class="sp-section">
         <h4 class="sp-title">Cross references <span class="sp-hint">related passages</span></h4>
         <div id="spRefs" class="sp-refs"><p class="muted small">Tap a verse to see related passages.</p></div>
+      </div>
+
+      <div class="sp-section sp-commentary">
+        <h4 class="sp-title">Commentary
+          <select id="spCommentarySel" class="select-sm">
+            <option value="">— Off —</option>
+            <option value="matthew-henry">Matthew Henry</option>
+            <option value="adam-clarke">Adam Clarke</option>
+            <option value="john-calvin">John Calvin</option>
+            <option value="john-gill">John Gill</option>
+            <option value="jamieson-fausset-brown">Jamieson-Fausset-Brown</option>
+            <option value="keil-delitzsch">Keil &amp; Delitzsch (OT)</option>
+            <option value="tyndale">Tyndale Study Notes</option>
+          </select>
+        </h4>
+        <div id="spCommentary" class="sp-commentary-body"><p class="muted small">Choose a commentary to see notes on this verse.</p></div>
       </div>
 
       <div class="sp-notes" id="spNotes"></div>

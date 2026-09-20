@@ -163,6 +163,7 @@
     document.body.classList.add('study-open');
     $('#spNoteForm').hidden = true;
     loadRefs(book, chapter, verse);
+    loadCommentary(book, chapter, verse);
     loadVerseNotes(book, chapter, verse);
     markHighlightState(vEl);
   }
@@ -263,6 +264,68 @@
       await window.api('/api/notes/' + b.dataset.id, 'DELETE', {});
       loadVerseNotes(book, chapter, verse); refreshNoteCount();
     }));
+  }
+
+  // ---- Commentary ----
+  let commentaryId = localStorage.getItem('r52-cm') || '';
+  const cmSel = $('#spCommentarySel');
+  if (cmSel) {
+    cmSel.value = commentaryId;
+    cmSel.addEventListener('change', () => {
+      commentaryId = cmSel.value; localStorage.setItem('r52-cm', commentaryId);
+      if (activeVerse) loadCommentary(activeVerse.book, activeVerse.chapter, activeVerse.verse);
+    });
+  }
+  async function loadCommentary(book, chapter, verse) {
+    const box = $('#spCommentary');
+    if (!commentaryId) { box.innerHTML = '<p class="muted small">Choose a commentary to see notes on this verse.</p>'; return; }
+    box.innerHTML = '<p class="muted small">Loading commentary…</p>';
+    const data = await BibleAPI.getCommentary(commentaryId, book, chapter);
+    if (data.error || !data.blocks) { box.innerHTML = '<p class="muted small">Commentary unavailable for this passage.</p>'; return; }
+    // exact verse, else the passage block that covers this verse (largest starting verse ≤ target)
+    const covering = data.blocks.filter((b) => b.number <= verse).pop() || data.blocks[0];
+    if (!covering) { box.innerHTML = '<p class="muted small">No commentary for this chapter.</p>'; return; }
+    const scope = covering.number === verse ? '' : `<span class="cm-scope">on verse ${covering.number}${covering.number < verse ? '+' : ''}</span>`;
+    box.innerHTML = `${scope}<div class="cm-text">${esc(covering.text)}</div>`;
+  }
+
+  // ---- Share as image ----
+  $('#spShareBtn').addEventListener('click', async () => {
+    if (!activeVerse) return;
+    const blob = await makeVerseCard(activeVerse.text, `${BibleAPI.getBookName(activeVerse.book)} ${activeVerse.chapter}:${activeVerse.verse}`);
+    if (!blob) return;
+    const file = new File([blob], 'readin52-verse.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'ReadIn52' }); return; } catch {}
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `${activeVerse.book}-${activeVerse.chapter}-${activeVerse.verse}.png`; a.click();
+    URL.revokeObjectURL(url);
+    window.toast('Verse image saved');
+  });
+  function makeVerseCard(text, ref) {
+    return new Promise((resolve) => {
+      const W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+      const grad = g.createLinearGradient(0, 0, W, H); grad.addColorStop(0, '#b0603a'); grad.addColorStop(1, '#5b3a29');
+      g.fillStyle = grad; g.fillRect(0, 0, W, H);
+      g.fillStyle = 'rgba(255,255,255,0.06)'; roundRect(g, 64, 64, W - 128, H - 128, 44); g.fill();
+      g.textAlign = 'center';
+      const size = text.length > 260 ? 34 : text.length > 140 ? 42 : 50;
+      g.fillStyle = '#fdf6ee';
+      wrapText(g, '“' + text + '”', W / 2, H / 2 - 40, W - 280, size * 1.4, `600 ${size}px Georgia, serif`);
+      g.font = '700 40px Inter, Arial, sans-serif'; g.fillStyle = '#ffe6cf'; g.fillText(ref.toUpperCase(), W / 2, H - 230);
+      g.font = '600 32px Inter, Arial, sans-serif'; g.fillStyle = 'rgba(255,255,255,0.9)'; g.fillText('ReadIn52', W / 2, H - 150);
+      g.font = '400 26px Inter, Arial, sans-serif'; g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillText('readin52.askdevotions.com', W / 2, H - 105);
+      c.toBlob(resolve, 'image/png');
+    });
+  }
+  function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function wrapText(g, text, x, y, maxW, lh, font) {
+    g.font = font; const words = text.split(' '); let line = ''; const lines = [];
+    for (const w of words) { const t = line + w + ' '; if (g.measureText(t).width > maxW && line) { lines.push(line.trim()); line = w + ' '; } else line = t; }
+    lines.push(line.trim());
+    const startY = y - (lines.length - 1) * lh / 2;
+    lines.forEach((l, i) => g.fillText(l, x, startY + i * lh));
   }
 
   // ---- Toolbar controls ----
