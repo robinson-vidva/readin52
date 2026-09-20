@@ -5,6 +5,7 @@ import * as Progress from '../services/progress.js';
 import * as Badges from '../services/badges.js';
 import * as Notes from '../services/notes.js';
 import * as Plan from '../services/readingPlan.js';
+import * as CrossRefs from '../services/crossRefs.js';
 import { BOOK_NAMES } from '../data/books.js';
 
 const router = express.Router();
@@ -69,6 +70,23 @@ router.post('/progress', a(async (req, res) => {
   }
   res.json(result);
 }));
+
+// ---- Cross-references (study) ----
+router.get('/cross-references', (req, res) => {
+  const book = String(req.query.book || '').toUpperCase();
+  const chapter = parseInt(req.query.chapter, 10);
+  const verse = parseInt(req.query.verse, 10);
+  if (!book || !chapter || !verse) return res.json({ success: false, error: 'book, chapter, verse required' });
+  res.json({ success: true, refs: CrossRefs.getCrossRefs(book, chapter, verse) });
+});
+
+// Which verses in a chapter have cross-references (to mark them in the reader)
+router.get('/cross-references/chapter', (req, res) => {
+  const book = String(req.query.book || '').toUpperCase();
+  const chapter = parseInt(req.query.chapter, 10);
+  if (!book || !chapter) return res.json({ success: false, error: 'book, chapter required' });
+  res.json({ success: true, verses: CrossRefs.versesWithRefs(book, chapter) });
+});
 
 // ---- Stats ----
 router.get('/stats', a(async (req, res) => {

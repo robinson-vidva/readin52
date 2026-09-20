@@ -7,7 +7,7 @@
 
   <div class="reader-toolbar">
     <div class="rt-left">
-      <button class="icon-btn" id="rBookBtn" title="Choose book"><%= bookName %> <%= chapter %> ▾</button>
+      <button class="icon-btn rt-title" id="rBookBtn"><span id="rTitleText"><%= bookName %> <%= chapter %></span> ▾</button>
     </div>
     <div class="rt-center">
       <select id="rTranslation" class="select-sm" aria-label="Translation">
@@ -20,7 +20,7 @@
     </div>
     <div class="rt-right">
       <button class="icon-btn" id="rBookmark" title="Bookmark this chapter" aria-pressed="false">☆</button>
-      <button class="icon-btn" id="rNotesBtn" title="Notes for this chapter">✍️ <span id="rNoteCount"></span></button>
+      <button class="icon-btn" id="rNotesBtn" title="Your notes here">✍️ <span id="rNoteCount"></span></button>
       <div class="type-controls">
         <button class="icon-btn" id="rFontDown" title="Smaller text">A−</button>
         <button class="icon-btn" id="rFontFamily" title="Toggle serif / sans">Aa</button>
@@ -30,16 +30,49 @@
     </div>
   </div>
 
-  <div class="reader-scroll">
-    <article class="reader-page" id="readerContent">
-      <div class="reader-loading">Loading…</div>
-    </article>
+  <div class="reader-layout" id="readerLayout">
+    <div class="reader-scroll" id="readerScroll">
+      <article class="reader-page" id="readerContent"><div class="reader-loading">Loading…</div></article>
+      <div class="load-sentinel" id="loadSentinel"></div>
+      <div class="reader-end" id="readerEnd" hidden>You've reached the end of the Bible. <a href="/reader/GEN/1">Start again at Genesis →</a></div>
+    </div>
 
-    <nav class="chapter-nav">
-      <button class="btn btn-ghost" id="rPrev">← Previous</button>
-      <span id="rProgressMark"></span>
-      <button class="btn btn-ghost" id="rNext">Next →</button>
-    </nav>
+    <!-- Study panel: cross references + verse actions -->
+    <aside class="study-panel" id="studyPanel" hidden>
+      <div class="sp-head">
+        <div><span class="sp-eyebrow">Study</span><strong id="spRef">—</strong></div>
+        <button class="icon-btn" id="spClose" aria-label="Close">✕</button>
+      </div>
+
+      <div class="sp-verse" id="spVerse"></div>
+
+      <div class="sp-actions">
+        <div class="sp-hl" id="spHighlight">
+          <% ['yellow','green','blue','red','purple'].forEach(function(c){ %>
+            <button class="hl-swatch c-<%= c %>" data-color="<%= c %>" title="Highlight <%= c %>"></button>
+          <% }); %>
+          <button class="hl-swatch hl-clear" data-color="" title="Clear highlight">✕</button>
+        </div>
+        <div class="sp-btns">
+          <button class="chip-btn" id="spNoteBtn">✍️ Note</button>
+          <button class="chip-btn" id="spCopyBtn">⧉ Copy</button>
+        </div>
+      </div>
+
+      <form class="sp-noteform" id="spNoteForm" hidden>
+        <input type="hidden" id="spNoteId" />
+        <input type="text" id="spNoteTitle" placeholder="Note title" />
+        <textarea id="spNoteContent" rows="3" placeholder="Write a reflection on this verse…"></textarea>
+        <div class="sp-noteactions"><button type="submit" class="btn btn-primary btn-sm">Save note</button><button type="button" class="btn btn-ghost btn-sm" id="spNoteCancel">Cancel</button></div>
+      </form>
+
+      <div class="sp-section">
+        <h4 class="sp-title">Cross references <span class="sp-hint">related passages</span></h4>
+        <div id="spRefs" class="sp-refs"><p class="muted small">Tap a verse to see related passages.</p></div>
+      </div>
+
+      <div class="sp-notes" id="spNotes"></div>
+    </aside>
   </div>
 
   <!-- Book picker -->
@@ -50,29 +83,6 @@
     </div>
   </div>
 
-  <!-- Notes drawer -->
-  <aside class="notes-drawer" id="notesDrawer" hidden>
-    <div class="nd-head"><h3>Notes · <span id="ndRef"></span></h3><button class="icon-btn" id="ndClose">✕</button></div>
-    <div class="nd-list" id="ndList"></div>
-    <form class="nd-form" id="ndForm">
-      <input type="text" id="ndTitle" placeholder="Note title" required />
-      <textarea id="ndContent" placeholder="Write your reflection…" rows="4" required></textarea>
-      <div class="nd-colors" id="ndColors">
-        <% ['default','yellow','green','blue','red','purple'].forEach(function(c){ %>
-          <button type="button" class="color-dot c-<%= c %> <%= c==='default'?'sel':'' %>" data-color="<%= c %>" aria-label="<%= c %>"></button>
-        <% }); %>
-      </div>
-      <input type="hidden" id="ndNoteId" />
-      <div class="nd-actions"><button type="submit" class="btn btn-primary btn-sm">Save note</button><button type="button" class="btn btn-ghost btn-sm" id="ndCancel" hidden>Cancel</button></div>
-    </form>
-  </aside>
-
-  <!-- Highlight popover -->
-  <div class="hl-popover" id="hlPopover" hidden>
-    <% ['yellow','green','blue','red','purple'].forEach(function(c){ %>
-      <button class="hl-swatch c-<%= c %>" data-color="<%= c %>" aria-label="Highlight <%= c %>"></button>
-    <% }); %>
-    <button class="hl-swatch hl-clear" data-color="" title="Clear">✕</button>
-  </div>
+  <button class="study-fab" id="studyFab" hidden aria-label="Open study panel">📖</button>
 </main>
 <%- include('partials/footer') %>

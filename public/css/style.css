@@ -395,6 +395,69 @@ body.focus-mode .reader-toolbar { top: 0; }
 .hl-swatch.c-blue { background: var(--hl-blue); } .hl-swatch.c-red { background: var(--hl-red); } .hl-swatch.c-purple { background: var(--hl-purple); }
 .hl-clear { background: var(--surface-2); display: grid; place-items: center; font-size: .8rem; }
 
+/* ---------- Study reader ---------- */
+.reader-layout { flex: 1; display: block; }
+.reader-scroll { min-height: 60vh; transition: padding-right .2s; }
+.reader-page { max-width: 720px; margin: 0 auto; padding: 1.5rem 20px 2rem; }
+.reader-page.sans .verses { --reader-font: var(--font-ui); }
+.chapter-block { margin-bottom: 1.5rem; }
+.chapter-block .chapter-title { font-family: var(--font-serif); font-size: 1.9rem; text-align: center; margin: 1.2rem 0 1.3rem; color: var(--accent-ink); }
+.verses { font-family: var(--reader-font, var(--font-serif)); font-size: var(--reader-size, 19px); line-height: 1.9; }
+.verse { cursor: pointer; border-radius: 5px; padding: 0 .12em; transition: background .12s; scroll-margin-top: 120px; }
+.verse:hover { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.verse.active { background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+.verse .vn { font-size: .66em; font-weight: 700; color: var(--accent); vertical-align: super; margin-right: .28em; user-select: none; }
+.verse.has-ref .vn { border-bottom: 1.5px dotted color-mix(in srgb, var(--accent) 60%, transparent); }
+.verse.hl-yellow { background: var(--hl-yellow); } .verse.hl-green { background: var(--hl-green); }
+.verse.hl-blue { background: var(--hl-blue); } .verse.hl-red { background: var(--hl-red); } .verse.hl-purple { background: var(--hl-purple); }
+.load-sentinel { height: 1px; }
+.reader-end { text-align: center; color: var(--muted); padding: 2rem 20px 4rem; }
+
+/* Study panel */
+.study-panel { position: fixed; z-index: 55; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; }
+.sp-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 1rem 1.1rem .7rem; border-bottom: 1px solid var(--border); }
+.sp-eyebrow { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 700; }
+.sp-head strong { font-family: var(--font-serif); font-size: 1.2rem; }
+.sp-verse { padding: .9rem 1.1rem; font-family: var(--font-serif); font-size: 1.05rem; line-height: 1.6; color: var(--text); background: var(--surface-2); }
+.sp-actions { padding: .8rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: .7rem; }
+.sp-hl { display: flex; gap: .45rem; align-items: center; }
+.sp-hl .hl-swatch { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); cursor: pointer; }
+.sp-hl .hl-swatch.sel { box-shadow: 0 0 0 2px var(--accent); }
+.hl-swatch.c-yellow { background: var(--hl-yellow); } .hl-swatch.c-green { background: var(--hl-green); }
+.hl-swatch.c-blue { background: var(--hl-blue); } .hl-swatch.c-red { background: var(--hl-red); } .hl-swatch.c-purple { background: var(--hl-purple); }
+.hl-swatch.hl-clear { background: var(--surface-2); display: grid; place-items: center; font-size: .75rem; color: var(--muted); }
+.sp-btns { display: flex; gap: .5rem; }
+.chip-btn { flex: 1; border: 1px solid var(--border); background: var(--surface-2); border-radius: 9px; padding: .5rem; cursor: pointer; font: inherit; font-size: .88rem; font-weight: 600; color: var(--text); }
+.chip-btn:hover { border-color: var(--accent); }
+.sp-noteform { padding: .8rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: .5rem; }
+.sp-noteactions { display: flex; gap: .5rem; }
+.sp-section { padding: 1rem 1.1rem; flex: 1; overflow-y: auto; }
+.sp-title { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: .7rem; display: flex; align-items: baseline; gap: .5rem; }
+.sp-hint { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: .72rem; }
+.sp-refs { display: flex; flex-direction: column; gap: .7rem; }
+.xref { border-left: 3px solid color-mix(in srgb, var(--accent) 40%, var(--border)); padding: .2rem 0 .2rem .7rem; }
+.xref-ref { font-weight: 700; font-size: .9rem; color: var(--accent-ink); }
+.xref-text { font-family: var(--font-serif); font-size: .92rem; line-height: 1.5; margin-top: .2rem; }
+.sp-notes { padding: 0 1.1rem 1.1rem; }
+.sp-note { border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 8px; padding: .6rem; margin-bottom: .5rem; }
+.sp-note.c-yellow { border-left-color: #e6b800; } .sp-note.c-green { border-left-color: #3aa856; }
+.sp-note.c-blue { border-left-color: #3b82c4; } .sp-note.c-red { border-left-color: #cc4b4b; } .sp-note.c-purple { border-left-color: #8b5cb8; }
+.sp-note strong { font-size: .92rem; } .sp-note p { font-size: .85rem; white-space: pre-wrap; margin: .2rem 0; }
+.study-fab { position: fixed; bottom: 20px; right: 20px; z-index: 45; width: 52px; height: 52px; border-radius: 50%; border: none; background: var(--grad); color: #fff; font-size: 1.3rem; cursor: pointer; box-shadow: var(--shadow-lg); }
+
+.rt-title { font-weight: 700; font-size: 1rem; }
+
+/* Desktop: right drawer */
+@media (min-width: 1100px) {
+  .study-panel { top: 0; right: 0; bottom: 0; width: 400px; }
+  body.study-open .reader-scroll { padding-right: 400px; }
+}
+/* Mobile/tablet: bottom sheet */
+@media (max-width: 1099px) {
+  .study-panel { left: 0; right: 0; bottom: 0; max-height: 76vh; border-radius: 18px 18px 0 0; animation: slideUp .22s ease; }
+  @keyframes slideUp { from { transform: translateY(100%); } }
+}
+
 /* ---------- Tables / admin ---------- */
 .table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .table th { text-align: left; padding: .6rem .7rem; border-bottom: 2px solid var(--border); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }

@@ -1,6 +1,7 @@
 import { get, all, run, insert, NOW } from '../db.js';
 
-const NULLABLE = ['week_number', 'category', 'book', 'chapter'];
+const NULLABLE = ['week_number', 'category', 'book', 'chapter', 'verse'];
+const INTS = ['week_number', 'chapter', 'verse'];
 
 function clean(data) {
   const out = {
@@ -11,23 +12,23 @@ function clean(data) {
   for (const f of NULLABLE) {
     const v = data[f];
     out[f] = (v === '' || v === undefined || v === null) ? null
-      : (f === 'week_number' || f === 'chapter') ? parseInt(v, 10) : v;
+      : INTS.includes(f) ? parseInt(v, 10) : v;
   }
   return out;
 }
 
 export async function createNote(userId, data) {
   const n = clean(data);
-  return await insert(`INSERT INTO notes (user_id, title, content, color, week_number, category, book, chapter)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-    userId, n.title, n.content, n.color, n.week_number, n.category, n.book, n.chapter);
+  return await insert(`INSERT INTO notes (user_id, title, content, color, week_number, category, book, chapter, verse)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+    userId, n.title, n.content, n.color, n.week_number, n.category, n.book, n.chapter, n.verse);
 }
 
 export async function updateNote(id, userId, data) {
   const n = clean(data);
-  const info = await run(`UPDATE notes SET title=?, content=?, color=?, week_number=?, category=?, book=?, chapter=?,
+  const info = await run(`UPDATE notes SET title=?, content=?, color=?, week_number=?, category=?, book=?, chapter=?, verse=?,
     updated_at=${NOW} WHERE id=? AND user_id=?`,
-    n.title, n.content, n.color, n.week_number, n.category, n.book, n.chapter, id, userId);
+    n.title, n.content, n.color, n.week_number, n.category, n.book, n.chapter, n.verse, id, userId);
   return info.changes > 0;
 }
 

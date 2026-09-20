@@ -108,11 +108,12 @@ async function createSchema() {
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       title TEXT NOT NULL, content TEXT NOT NULL,
-      week_number INTEGER, category TEXT, book TEXT, chapter INTEGER,
+      week_number INTEGER, category TEXT, book TEXT, chapter INTEGER, verse INTEGER,
       color TEXT DEFAULT 'default',
       created_at TEXT DEFAULT ${NOW},
       updated_at TEXT DEFAULT ${NOW}
     );
+    ALTER TABLE notes ADD COLUMN IF NOT EXISTS verse INTEGER;
     CREATE INDEX IF NOT EXISTS idx_notes_user ON notes(user_id);
     CREATE TABLE IF NOT EXISTS highlights (
       id SERIAL PRIMARY KEY,

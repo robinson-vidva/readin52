@@ -1,144 +1,291 @@
-/* ReadIn52 reader — chapter loading, dual translation, highlights, notes, bookmarks */
+/* ReadIn52 study reader — continuous reading, cross-references, verse actions */
 (function () {
   const $ = (s, r = document) => r.querySelector(s);
   const el = $('#reader');
   if (!el) return;
   const U = window.READIN52.user || {};
   const BOOKS = window.READIN52_BOOKS;
+  const ORDER = Object.keys(BOOKS);
 
   const state = {
     book: el.dataset.book,
     chapter: parseInt(el.dataset.chapter, 10),
-    total: parseInt(el.dataset.total, 10),
     translation: localStorage.getItem('r52-tr') || U.translation || 'eng_kjv',
     secondary: U.secondary || '',
     dual: localStorage.getItem('r52-dual') === '1',
-    fontSize: parseInt(localStorage.getItem('r52-fs') || U.fontSize || 18, 10),
+    fontSize: parseInt(localStorage.getItem('r52-fs') || U.fontSize || 19, 10),
     fontFamily: localStorage.getItem('r52-ff') || U.fontFamily || 'serif',
   };
 
   const content = $('#readerContent');
   const trSel = $('#rTranslation');
   const secSel = $('#rSecondary');
-  const bookBtn = $('#rBookBtn');
+  let loading = false;
+  let loaded = [];        // ordered [{book, chapter}]
+  let atEnd = false;
 
   trSel.value = state.translation;
   if (state.secondary) secSel.value = state.secondary;
-  if (state.dual && state.secondary) { secSel.hidden = false; }
-
+  if (state.dual && state.secondary) secSel.hidden = false;
   applyType();
 
-  function applyType() {
-    content.style.setProperty('--reader-size', state.fontSize + 'px');
-    document.querySelectorAll('.verses').forEach((v) => v.classList.toggle('sans', state.fontFamily === 'sans'));
-  }
-
-  function setUrl() {
-    history.replaceState({}, '', `/reader/${state.book}/${state.chapter}`);
-    bookBtn.textContent = `${BibleAPI.getBookName(state.book)} ${state.chapter} ▾`;
-    document.title = `${BibleAPI.getBookName(state.book)} ${state.chapter} · ReadIn52`;
-  }
-
-  async function load() {
-    content.innerHTML = '<div class="reader-loading">Loading…</div>';
-    state.total = BibleAPI.getTotalChapters(state.book);
-    setUrl();
-    const [primary, highlights, secondary] = await Promise.all([
-      BibleAPI.getChapter(state.translation, state.book, state.chapter),
-      window.api(`/api/highlights?book=${state.book}&chapter=${state.chapter}`),
-      (state.dual && state.secondary) ? BibleAPI.getChapter(state.secondary, state.book, state.chapter) : Promise.resolve(null),
-    ]);
-    if (primary.error) { content.innerHTML = `<div class="reader-loading">Could not load this chapter. ${primary.message || ''}</div>`; return; }
-
-    const hl = (highlights && highlights.highlights) || {};
-    const title = `<h2 class="chapter-title">${primary.bookName} ${state.chapter}</h2>`;
-
-    if (secondary && !secondary.error) {
-      content.className = 'reader-page dual';
-      content.innerHTML = title + `<div class="dual-cols">
-        <div class="col"><h4>${trName(state.translation)}</h4><div class="verses" data-col="1">${renderVerses(primary, hl)}</div></div>
-        <div class="col"><h4>${trName(state.secondary)}</h4><div class="verses" data-col="2">${renderVerses(secondary, {})}</div></div>
-      </div>`;
-    } else {
-      content.className = 'reader-page';
-      content.innerHTML = title + `<div class="verses">${renderVerses(primary, hl)}</div>`;
-    }
-    applyType();
-    bindVerses();
-    updateNav();
-    refreshNoteCount();
-    refreshBookmark();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
   function esc(s) { return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
-  function renderVerses(data, hl) {
+  function applyType() { content.style.setProperty('--reader-size', state.fontSize + 'px'); content.classList.toggle('sans', state.fontFamily === 'sans'); }
+  function nextOf(b, c) { const t = BibleAPI.getTotalChapters(b); if (c < t) return { book: b, chapter: c + 1 }; const i = ORDER.indexOf(b); return i < ORDER.length - 1 ? { book: ORDER[i + 1], chapter: 1 } : null; }
+  function prevOf(b, c) { if (c > 1) return { book: b, chapter: c - 1 }; const i = ORDER.indexOf(b); return i > 0 ? { book: ORDER[i - 1], chapter: BibleAPI.getTotalChapters(ORDER[i - 1]) } : null; }
+
+  // ---- Chapter rendering ----
+  function versesHtml(data, hl) {
     return data.verses.map((v) => {
       const cls = hl[v.verse] ? ` hl-${hl[v.verse]}` : '';
-      return `<span class="verse${cls}" data-verse="${v.verse}"><span class="vn">${v.verse}</span>${esc(v.text)} </span>`;
+      return `<span class="verse${cls}" data-book="${data.book}" data-chapter="${data.chapter}" data-verse="${v.verse}"><span class="vn">${v.verse}</span>${esc(v.text)} </span>`;
     }).join('');
   }
+
+  async function buildBlock(book, chapter) {
+    const [primary, hlRes, refsRes, secondary] = await Promise.all([
+      BibleAPI.getChapter(state.translation, book, chapter),
+      window.api(`/api/highlights?book=${book}&chapter=${chapter}`),
+      window.api(`/api/cross-references/chapter?book=${book}&chapter=${chapter}`),
+      (state.dual && state.secondary) ? BibleAPI.getChapter(state.secondary, book, chapter) : Promise.resolve(null),
+    ]);
+    const block = document.createElement('section');
+    block.className = 'chapter-block';
+    block.dataset.book = book; block.dataset.chapter = chapter;
+    if (primary.error) { block.innerHTML = `<div class="reader-loading">Could not load ${BibleAPI.getBookName(book)} ${chapter}.</div>`; return block; }
+
+    const hl = (hlRes && hlRes.highlights) || {};
+    const refSet = new Set((refsRes && refsRes.verses) || []);
+    const title = `<h2 class="chapter-title">${primary.bookName} ${chapter}</h2>`;
+
+    if (secondary && !secondary.error) {
+      block.innerHTML = title + `<div class="dual-cols">
+        <div class="col"><h4>${trName(state.translation)}</h4><div class="verses" data-col="1">${versesHtml(primary, hl)}</div></div>
+        <div class="col"><h4>${trName(state.secondary)}</h4><div class="verses">${versesHtml(secondary, {})}</div></div></div>`;
+    } else {
+      block.innerHTML = title + `<div class="verses">${versesHtml(primary, hl)}</div>`;
+    }
+    // mark verses that have cross-references (primary column only)
+    const primaryVerses = secondary ? block.querySelectorAll('.col:first-child .verse') : block.querySelectorAll('.verse');
+    primaryVerses.forEach((v) => { if (refSet.has(parseInt(v.dataset.verse, 10))) v.classList.add('has-ref'); });
+    return block;
+  }
+
   function trName(id) { const o = trSel.querySelector(`option[value="${id}"]`); return o ? o.textContent : id; }
 
-  // ---- Verse highlight popover ----
-  const pop = $('#hlPopover');
-  let popVerse = null;
-  function bindVerses() {
-    content.querySelectorAll('.verses[data-col="1"] .verse, .reader-page > .verses .verse').forEach((v) => {
-      v.addEventListener('click', (e) => {
-        popVerse = v;
-        pop.hidden = false;
-        const r = v.getBoundingClientRect();
-        pop.style.left = Math.min(r.left, window.innerWidth - 220) + 'px';
-        pop.style.top = (window.scrollY + r.bottom + 6) + 'px';
-        e.stopPropagation();
+  async function loadInitial() {
+    content.innerHTML = '';
+    loaded = [];
+    atEnd = false;
+    const block = await buildBlock(state.book, state.chapter);
+    content.appendChild(block);
+    loaded.push({ book: state.book, chapter: state.chapter });
+    applyType();
+    updateChrome();
+    window.scrollTo({ top: 0 });
+  }
+
+  async function loadNext() {
+    if (loading || atEnd) return;
+    const last = loaded[loaded.length - 1];
+    const nx = nextOf(last.book, last.chapter);
+    if (!nx) { atEnd = true; $('#readerEnd').hidden = false; return; }
+    loading = true;
+    const block = await buildBlock(nx.book, nx.chapter);
+    content.appendChild(block);
+    loaded.push(nx);
+    applyType();
+    loading = false;
+  }
+
+  // ---- Continuous scroll ----
+  const observer = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) loadNext();
+  }, { rootMargin: '600px' });
+  observer.observe($('#loadSentinel'));
+
+  // ---- Scroll spy: keep title + URL on the chapter in view ----
+  let spyRaf = null;
+  window.addEventListener('scroll', () => {
+    if (spyRaf) return;
+    spyRaf = requestAnimationFrame(() => {
+      spyRaf = null;
+      const blocks = content.querySelectorAll('.chapter-block');
+      let cur = null;
+      blocks.forEach((b) => { if (b.getBoundingClientRect().top < 120) cur = b; });
+      if (cur && cur.dataset.book) {
+        const b = cur.dataset.book, c = cur.dataset.chapter;
+        if (b !== state.book || +c !== state.chapter) {
+          state.book = b; state.chapter = +c;
+          $('#rTitleText').textContent = `${BibleAPI.getBookName(b)} ${c}`;
+          document.title = `${BibleAPI.getBookName(b)} ${c} · ReadIn52`;
+          history.replaceState({}, '', `/reader/${b}/${c}`);
+          refreshBookmark(); refreshNoteCount();
+        }
+      }
+    });
+  }, { passive: true });
+
+  function updateChrome() {
+    $('#rTitleText').textContent = `${BibleAPI.getBookName(state.book)} ${state.chapter}`;
+    document.title = `${BibleAPI.getBookName(state.book)} ${state.chapter} · ReadIn52`;
+    refreshBookmark(); refreshNoteCount();
+  }
+
+  function jumpTo(book, chapter) {
+    state.book = book; state.chapter = chapter;
+    history.replaceState({}, '', `/reader/${book}/${chapter}`);
+    closeStudy();
+    loadInitial();
+  }
+
+  // ---- Study panel ----
+  const panel = $('#studyPanel');
+  const fab = $('#studyFab');
+  let activeVerse = null; // { book, chapter, verse, text, el }
+
+  content.addEventListener('click', (e) => {
+    const v = e.target.closest('.verse');
+    if (!v || v.closest('.col:nth-child(2)')) return; // ignore secondary column
+    openStudy(v);
+  });
+
+  function openStudy(vEl) {
+    const book = vEl.dataset.book, chapter = +vEl.dataset.chapter, verse = +vEl.dataset.verse;
+    const text = vEl.textContent.replace(/^\s*\d+\s*/, '').trim();
+    activeVerse = { book, chapter, verse, text, el: vEl };
+    document.querySelectorAll('.verse.active').forEach((x) => x.classList.remove('active'));
+    vEl.classList.add('active');
+
+    $('#spRef').textContent = `${BibleAPI.getBookName(book)} ${chapter}:${verse}`;
+    $('#spVerse').textContent = text;
+    panel.hidden = false; fab.hidden = true;
+    document.body.classList.add('study-open');
+    $('#spNoteForm').hidden = true;
+    loadRefs(book, chapter, verse);
+    loadVerseNotes(book, chapter, verse);
+    markHighlightState(vEl);
+  }
+  function closeStudy() {
+    panel.hidden = true;
+    document.body.classList.remove('study-open');
+    document.querySelectorAll('.verse.active').forEach((x) => x.classList.remove('active'));
+    if (activeVerse) fab.hidden = false;
+  }
+  $('#spClose').addEventListener('click', closeStudy);
+  fab.addEventListener('click', () => { if (activeVerse) { panel.hidden = false; fab.hidden = true; document.body.classList.add('study-open'); } });
+
+  // Cross references with inline text
+  async function loadRefs(book, chapter, verse) {
+    const box = $('#spRefs');
+    box.innerHTML = '<p class="muted small">Finding related passages…</p>';
+    const res = await window.api(`/api/cross-references?book=${book}&chapter=${chapter}&verse=${verse}`);
+    if (!res.success || !res.refs.length) { box.innerHTML = '<p class="muted small">No cross-references for this verse.</p>'; return; }
+    box.innerHTML = '';
+    for (const r of res.refs) {
+      const item = document.createElement('div');
+      item.className = 'xref';
+      item.innerHTML = `<a class="xref-ref" href="/reader/${r.book}/${r.chapter}" data-b="${r.book}" data-c="${r.chapter}">${r.ref}</a><div class="xref-text muted">…</div>`;
+      item.querySelector('.xref-ref').addEventListener('click', (e) => { e.preventDefault(); jumpTo(r.book, r.chapter); });
+      box.appendChild(item);
+      // fetch the referenced text (cached)
+      BibleAPI.getChapter(state.translation, r.book, r.chapter).then((data) => {
+        if (data.error) return;
+        const parts = [];
+        for (let v = r.verse; v <= (r.verseEnd || r.verse); v++) {
+          const found = data.verses.find((x) => x.verse === v);
+          if (found) parts.push(found.text);
+        }
+        item.querySelector('.xref-text').textContent = parts.join(' ') || '';
       });
-    });
+    }
   }
-  pop.querySelectorAll('.hl-swatch').forEach((sw) => {
-    sw.addEventListener('click', async () => {
-      if (!popVerse) return;
-      const color = sw.dataset.color;
-      const verse = popVerse.dataset.verse;
-      const res = await window.api('/api/highlights', 'POST', { book: state.book, chapter: state.chapter, verse, color });
-      popVerse.className = 'verse' + (res.color ? ` hl-${res.color}` : '');
-      pop.hidden = true;
-    });
-  });
-  document.addEventListener('click', (e) => { if (!pop.contains(e.target) && pop && !e.target.classList.contains('verse') && !e.target.classList.contains('vn')) pop.hidden = true; });
 
-  // ---- Navigation ----
-  function updateNav() {
-    $('#rPrev').disabled = state.chapter <= 1;
-    $('#rNext').disabled = state.chapter >= state.total;
-    $('#rProgressMark').textContent = `${state.chapter} / ${state.total}`;
+  // ---- Highlights ----
+  function markHighlightState(vEl) {
+    const cur = (vEl.className.match(/hl-(\w+)/) || [])[1] || '';
+    $('#spHighlight').querySelectorAll('.hl-swatch').forEach((s) => s.classList.toggle('sel', s.dataset.color === cur));
   }
-  $('#rPrev').addEventListener('click', () => { if (state.chapter > 1) { state.chapter--; load(); } });
-  $('#rNext').addEventListener('click', () => { if (state.chapter < state.total) { state.chapter++; load(); } });
-  document.addEventListener('keydown', (e) => {
-    if (e.target.matches('input,textarea')) return;
-    if (e.key === 'ArrowLeft' && state.chapter > 1) { state.chapter--; load(); }
-    if (e.key === 'ArrowRight' && state.chapter < state.total) { state.chapter++; load(); }
+  $('#spHighlight').querySelectorAll('.hl-swatch').forEach((sw) => sw.addEventListener('click', async () => {
+    if (!activeVerse) return;
+    const res = await window.api('/api/highlights', 'POST', { book: activeVerse.book, chapter: activeVerse.chapter, verse: activeVerse.verse, color: sw.dataset.color });
+    document.querySelectorAll(`.verse[data-book="${activeVerse.book}"][data-chapter="${activeVerse.chapter}"][data-verse="${activeVerse.verse}"]`)
+      .forEach((x) => {
+        const hasRef = x.classList.contains('has-ref');
+        const isActive = x.classList.contains('active');
+        x.className = 'verse' + (hasRef ? ' has-ref' : '') + (isActive ? ' active' : '') + (res.color ? ` hl-${res.color}` : '');
+      });
+    markHighlightState(activeVerse.el);
+  }));
+
+  // ---- Copy ----
+  $('#spCopyBtn').addEventListener('click', async () => {
+    if (!activeVerse) return;
+    const txt = `"${activeVerse.text}" — ${BibleAPI.getBookName(activeVerse.book)} ${activeVerse.chapter}:${activeVerse.verse}`;
+    try { await navigator.clipboard.writeText(txt); window.toast('Verse copied'); } catch { window.toast('Copy failed'); }
   });
 
-  // ---- Translations ----
-  trSel.addEventListener('change', () => { state.translation = trSel.value; localStorage.setItem('r52-tr', state.translation); load(); });
-  secSel.addEventListener('change', () => { state.secondary = secSel.value; localStorage.setItem('r52-sec', state.secondary); load(); });
+  // ---- Verse notes ----
+  const noteForm = $('#spNoteForm');
+  $('#spNoteBtn').addEventListener('click', () => {
+    noteForm.hidden = !noteForm.hidden;
+    if (!noteForm.hidden) {
+      $('#spNoteId').value = '';
+      $('#spNoteTitle').value = `${BibleAPI.getBookName(activeVerse.book)} ${activeVerse.chapter}:${activeVerse.verse}`;
+      $('#spNoteContent').value = '';
+      setTimeout(() => $('#spNoteContent').focus(), 20);
+    }
+  });
+  $('#spNoteCancel').addEventListener('click', () => { noteForm.hidden = true; });
+  noteForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await window.api('/api/notes', 'POST', {
+      note_id: $('#spNoteId').value || '',
+      title: $('#spNoteTitle').value, content: $('#spNoteContent').value,
+      book: activeVerse.book, chapter: activeVerse.chapter, verse: activeVerse.verse,
+    });
+    noteForm.hidden = true;
+    window.toast('Note saved');
+    loadVerseNotes(activeVerse.book, activeVerse.chapter, activeVerse.verse);
+    refreshNoteCount();
+  });
+  async function loadVerseNotes(book, chapter, verse) {
+    const box = $('#spNotes');
+    const res = await window.api(`/api/notes/chapter?book=${book}&chapter=${chapter}`);
+    const notes = (res.notes || []).filter((n) => !n.verse || n.verse === verse);
+    if (!notes.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<h4 class="sp-title">Your notes</h4>' + notes.map((n) => `
+      <div class="sp-note c-${n.color}" data-id="${n.id}">
+        <strong>${esc(n.title)}</strong><p>${esc(n.content)}</p>
+        <button class="icon-btn sp-note-del" data-id="${n.id}">🗑 delete</button>
+      </div>`).join('');
+    box.querySelectorAll('.sp-note-del').forEach((b) => b.addEventListener('click', async () => {
+      await window.api('/api/notes/' + b.dataset.id, 'DELETE', {});
+      loadVerseNotes(book, chapter, verse); refreshNoteCount();
+    }));
+  }
+
+  // ---- Toolbar controls ----
+  trSel.addEventListener('change', () => { state.translation = trSel.value; localStorage.setItem('r52-tr', state.translation); loadInitial(); });
+  secSel.addEventListener('change', () => { state.secondary = secSel.value; localStorage.setItem('r52-sec', state.secondary); loadInitial(); });
   $('#rDualBtn').addEventListener('click', () => {
     state.dual = !state.dual;
-    if (state.dual && !state.secondary) { state.secondary = secSel.value; }
+    if (state.dual && !state.secondary) state.secondary = secSel.value;
     secSel.hidden = !state.dual;
     localStorage.setItem('r52-dual', state.dual ? '1' : '0');
-    load();
+    loadInitial();
   });
-
-  // ---- Type controls ----
   $('#rFontUp').addEventListener('click', () => { state.fontSize = Math.min(30, state.fontSize + 2); localStorage.setItem('r52-fs', state.fontSize); applyType(); });
   $('#rFontDown').addEventListener('click', () => { state.fontSize = Math.max(14, state.fontSize - 2); localStorage.setItem('r52-fs', state.fontSize); applyType(); });
   $('#rFontFamily').addEventListener('click', () => { state.fontFamily = state.fontFamily === 'serif' ? 'sans' : 'serif'; localStorage.setItem('r52-ff', state.fontFamily); applyType(); });
-
-  // ---- Focus mode ----
   $('#rFocus').addEventListener('click', () => document.body.classList.toggle('focus-mode'));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input,textarea')) return;
+    if (e.key === 'Escape') closeStudy();
+    if (e.key === 'ArrowRight') { const nx = nextOf(state.book, state.chapter); if (nx) jumpTo(nx.book, nx.chapter); }
+    if (e.key === 'ArrowLeft') { const pv = prevOf(state.book, state.chapter); if (pv) jumpTo(pv.book, pv.chapter); }
+  });
 
   // ---- Bookmark ----
   const bmBtn = $('#rBookmark');
@@ -146,13 +293,17 @@
     const res = await window.api('/api/bookmarks');
     const on = (res.bookmarks || []).some((b) => b.book === state.book && b.chapter === state.chapter);
     bmBtn.textContent = on ? '★' : '☆';
-    bmBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
   bmBtn.addEventListener('click', async () => {
     const res = await window.api('/api/bookmarks', 'POST', { book: state.book, chapter: state.chapter });
     bmBtn.textContent = res.bookmarked ? '★' : '☆';
     window.toast(res.bookmarked ? 'Bookmarked' : 'Bookmark removed');
   });
+  async function refreshNoteCount() {
+    const res = await window.api(`/api/notes/chapter?book=${state.book}&chapter=${state.chapter}`);
+    $('#rNoteCount').textContent = (res.notes || []).length || '';
+  }
+  $('#rNotesBtn').addEventListener('click', () => { location.href = '/notes'; });
 
   // ---- Book picker ----
   const picker = $('#bookPicker');
@@ -164,78 +315,16 @@
       const wrap = document.createElement('div');
       wrap.className = 'picker-book';
       let chaps = '';
-      for (let i = 1; i <= chapters; i++) chaps += `<a href="#" data-book="${code}" data-ch="${i}">${i}</a>`;
+      for (let i = 1; i <= chapters; i++) chaps += `<a href="#" data-b="${code}" data-c="${i}">${i}</a>`;
       wrap.innerHTML = `<div class="pb-name">${name}</div><div class="picker-chaps">${chaps}</div>`;
       bookList.appendChild(wrap);
     }
-    bookList.querySelectorAll('a').forEach((a) => a.addEventListener('click', (e) => {
-      e.preventDefault();
-      state.book = a.dataset.book; state.chapter = parseInt(a.dataset.ch, 10);
-      picker.hidden = true; load();
-    }));
+    bookList.querySelectorAll('a').forEach((aEl) => aEl.addEventListener('click', (e) => { e.preventDefault(); picker.hidden = true; jumpTo(aEl.dataset.b, +aEl.dataset.c); }));
   }
-  bookBtn.addEventListener('click', () => { picker.hidden = false; buildPicker(); $('#bookSearch').value = ''; setTimeout(() => $('#bookSearch').focus(), 20); });
+  $('#rBookBtn').addEventListener('click', () => { picker.hidden = false; buildPicker(); $('#bookSearch').value = ''; setTimeout(() => $('#bookSearch').focus(), 20); });
   $('#bookPickerClose').addEventListener('click', () => picker.hidden = true);
   picker.addEventListener('click', (e) => { if (e.target === picker) picker.hidden = true; });
   $('#bookSearch').addEventListener('input', (e) => buildPicker(e.target.value));
 
-  // ---- Notes drawer ----
-  const drawer = $('#notesDrawer');
-  const ndList = $('#ndList');
-  const ndForm = $('#ndForm');
-  let ndColor = 'default';
-  async function refreshNoteCount() {
-    const res = await window.api(`/api/notes/chapter?book=${state.book}&chapter=${state.chapter}`);
-    const n = (res.notes || []).length;
-    $('#rNoteCount').textContent = n ? n : '';
-  }
-  async function openNotes() {
-    $('#ndRef').textContent = `${BibleAPI.getBookName(state.book)} ${state.chapter}`;
-    drawer.hidden = false;
-    const res = await window.api(`/api/notes/chapter?book=${state.book}&chapter=${state.chapter}`);
-    renderNotes(res.notes || []);
-  }
-  function renderNotes(notes) {
-    ndList.innerHTML = notes.length ? '' : '<p class="muted">No notes for this chapter yet.</p>';
-    notes.forEach((n) => {
-      const d = document.createElement('div');
-      d.className = 'nd-note c-' + n.color;
-      d.style.borderLeftColor = 'var(--hl-' + (n.color === 'default' ? 'yellow' : n.color) + ')';
-      d.innerHTML = `<h4>${escAttr(n.title)}</h4><p>${escAttr(n.content)}</p>
-        <div class="nd-note-tools"><button class="icon-btn nd-edit">✎</button><button class="icon-btn nd-del">🗑</button></div>`;
-      d.querySelector('.nd-edit').addEventListener('click', () => fillForm(n));
-      d.querySelector('.nd-del').addEventListener('click', async () => {
-        if (!confirm('Delete this note?')) return;
-        await window.api('/api/notes/' + n.id, 'DELETE', {});
-        openNotes(); refreshNoteCount();
-      });
-      ndList.appendChild(d);
-    });
-  }
-  function escAttr(s) { return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
-  function fillForm(n) {
-    $('#ndNoteId').value = n.id; $('#ndTitle').value = n.title; $('#ndContent').value = n.content;
-    selColor(n.color); $('#ndCancel').hidden = false;
-  }
-  function selColor(c) {
-    ndColor = c;
-    $('#ndColors').querySelectorAll('.color-dot').forEach((b) => b.classList.toggle('sel', b.dataset.color === c));
-  }
-  $('#ndColors').querySelectorAll('.color-dot').forEach((b) => b.addEventListener('click', () => selColor(b.dataset.color)));
-  $('#rNotesBtn').addEventListener('click', openNotes);
-  $('#ndClose').addEventListener('click', () => drawer.hidden = true);
-  $('#ndCancel').addEventListener('click', () => resetForm());
-  function resetForm() { ndForm.reset(); $('#ndNoteId').value = ''; selColor('default'); $('#ndCancel').hidden = true; }
-  ndForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const body = {
-      note_id: $('#ndNoteId').value || '', title: $('#ndTitle').value, content: $('#ndContent').value,
-      color: ndColor, book: state.book, chapter: state.chapter,
-    };
-    await window.api('/api/notes', 'POST', body);
-    resetForm(); openNotes(); refreshNoteCount();
-    window.toast('Note saved');
-  });
-
-  load();
+  loadInitial();
 })();
