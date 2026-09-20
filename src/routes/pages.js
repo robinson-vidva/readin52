@@ -6,6 +6,7 @@ import * as Notes from '../services/notes.js';
 import * as Badges from '../services/badges.js';
 import * as Plan from '../services/readingPlan.js';
 import * as Email from '../services/email.js';
+import * as Turnstile from '../services/turnstile.js';
 import { BOOK_NAMES, BOOK_CHAPTERS, OLD_TESTAMENT, NEW_TESTAMENT } from '../data/books.js';
 
 const router = express.Router();
@@ -30,6 +31,9 @@ router.get('/login', (req, res) => {
 
 router.post('/login', csrfGuard, a(async (req, res) => {
   const { email, password } = req.body;
+  if (!(await Turnstile.verify(req.body['cf-turnstile-response'], req.ip))) {
+    return res.render('login', { title: 'Sign In', error: 'Human verification failed. Please try again.', email: email || '' });
+  }
   const result = await Auth.login(email, password, req.ip);
   if (!result.success) return res.render('login', { title: 'Sign In', error: result.error, email });
   req.session.userId = result.user.id;
@@ -48,6 +52,7 @@ router.post('/register', csrfGuard, a(async (req, res) => {
   if (!res.locals.app.registrationEnabled) return res.redirect('/login');
   const { name, email, password, password_confirm, accept_terms } = req.body;
   const render = (error) => res.render('register', { title: 'Create Account', error, name, email });
+  if (!(await Turnstile.verify(req.body['cf-turnstile-response'], req.ip))) return render('Human verification failed. Please try again.');
   if (!accept_terms) return render('You must accept the Terms & Conditions.');
   if (password !== password_confirm) return render('Passwords do not match.');
   const result = await Auth.register(name, email, password);
@@ -68,6 +73,9 @@ router.get('/forgot-password', (req, res) => {
 
 router.post('/forgot-password', csrfGuard, a(async (req, res) => {
   const email = (req.body.email || '').trim();
+  if (!(await Turnstile.verify(req.body['cf-turnstile-response'], req.ip))) {
+    return res.render('forgot-password', { title: 'Reset Password', error: 'Human verification failed. Please try again.', success: null });
+  }
   // Always show the same message to prevent email enumeration.
   const success = 'If an account exists with this email, you will receive a reset link shortly.';
   let devLink = null;

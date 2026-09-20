@@ -7,6 +7,7 @@ import { initDb } from './db.js';
 import { makeSessionStore } from './sessionStore.js';
 import { attachUser } from './auth.js';
 import { appConfig } from './services/readingPlan.js';
+import * as Turnstile from './services/turnstile.js';
 import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
 import adminRouter from './routes/admin.js';
@@ -53,6 +54,7 @@ app.use((req, res, next) => {
   res.locals.query = req.query;
   res.locals.pageScripts = [];
   res.locals.assetVer = ASSET_VER;
+  res.locals.turnstile = { enabled: Turnstile.isEnabled(), siteKey: Turnstile.siteKey() };
   next();
 });
 

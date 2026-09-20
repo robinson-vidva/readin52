@@ -1,6 +1,7 @@
 <%- include('partials/head') %>
 <body class="reader-body">
 <%- include('partials/header') %>
+<% const byLang = {}; translations.forEach(function(t){ (byLang[t.language] = byLang[t.language] || []).push(t); }); const langNames = Object.keys(byLang); %>
 <main class="reader" id="reader"
       data-book="<%= book %>" data-chapter="<%= chapter %>"
       data-bookname="<%= bookName %>" data-total="<%= totalChapters %>">
@@ -11,11 +12,11 @@
     </div>
     <div class="rt-center">
       <select id="rTranslation" class="select-sm" aria-label="Translation">
-        <% translations.forEach(function(t){ %><option value="<%= t.id %>"><%= t.name %></option><% }); %>
+        <% langNames.forEach(function(lang){ %><optgroup label="<%= lang %>"><% byLang[lang].forEach(function(t){ %><option value="<%= t.id %>"><%= t.name %></option><% }); %></optgroup><% }); %>
       </select>
       <button class="icon-btn" id="rDualBtn" title="Compare a second translation">＋ Compare</button>
       <select id="rSecondary" class="select-sm" aria-label="Second translation" hidden>
-        <% translations.forEach(function(t){ %><option value="<%= t.id %>"><%= t.name %></option><% }); %>
+        <% langNames.forEach(function(lang){ %><optgroup label="<%= lang %>"><% byLang[lang].forEach(function(t){ %><option value="<%= t.id %>"><%= t.name %></option><% }); %></optgroup><% }); %>
       </select>
     </div>
     <div class="rt-right">

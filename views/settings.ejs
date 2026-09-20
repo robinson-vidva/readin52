@@ -2,6 +2,7 @@
 <body>
 <%- include('partials/header') %>
 <% const u = currentUser; %>
+<% const byLang = {}; translations.forEach(function(t){ (byLang[t.language] = byLang[t.language] || []).push(t); }); const langNames = Object.keys(byLang); %>
 <main class="container app-main narrow">
   <div class="page-head"><h1>Settings</h1></div>
 
@@ -13,13 +14,13 @@
       <input type="hidden" name="action" value="save_preferences" />
       <label>Primary translation
         <select name="preferred_translation">
-          <% translations.forEach(function(t){ %><option value="<%= t.id %>" <%= u.preferred_translation===t.id?'selected':'' %>><%= t.name %> (<%= t.language %>)</option><% }); %>
+          <% langNames.forEach(function(lang){ %><optgroup label="<%= lang %>"><% byLang[lang].forEach(function(t){ %><option value="<%= t.id %>" <%= u.preferred_translation===t.id?'selected':'' %>><%= t.name %></option><% }); %></optgroup><% }); %>
         </select>
       </label>
       <label>Compare translation (optional)
         <select name="secondary_translation">
           <option value="">— None —</option>
-          <% translations.forEach(function(t){ %><option value="<%= t.id %>" <%= u.secondary_translation===t.id?'selected':'' %>><%= t.name %> (<%= t.language %>)</option><% }); %>
+          <% langNames.forEach(function(lang){ %><optgroup label="<%= lang %>"><% byLang[lang].forEach(function(t){ %><option value="<%= t.id %>" <%= u.secondary_translation===t.id?'selected':'' %>><%= t.name %></option><% }); %></optgroup><% }); %>
         </select>
       </label>
       <label>Theme

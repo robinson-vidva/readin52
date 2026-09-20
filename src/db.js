@@ -200,6 +200,20 @@ async function seedReadingPlan() {
   await batch(stmts);
 }
 
+async function seedTranslations() {
+  let list = [];
+  try { list = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'translations.json'), 'utf-8')); }
+  catch { return; }
+  // Upsert so existing installs pick up the expanded set and refreshed names.
+  const stmts = list.map((t) => ({
+    sql: `INSERT INTO bible_translations (id, name, language, direction) VALUES (?, ?, ?, ?)
+          ON CONFLICT (id) DO UPDATE SET name = excluded.name, language = excluded.language, direction = excluded.direction`,
+    args: [t.id, t.name, t.language, t.direction || 'ltr'],
+  }));
+  // batch in chunks to keep statements reasonable
+  for (let i = 0; i < stmts.length; i += 50) await batch(stmts.slice(i, i + 50));
+}
+
 async function seedBadges() {
   await batch(BADGES.map((b) => ({
     sql: `INSERT INTO badges (id, name, description, icon, category, criteria, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
@@ -224,6 +238,7 @@ async function _init() {
   await createSchema();
   await seedSettings();
   await seedReadingPlan();
+  await seedTranslations();
   await seedBadges();
   const admin = await seedAdmin();
   await loadSettings();

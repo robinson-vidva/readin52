@@ -13,6 +13,7 @@
       <label>Password<input type="password" name="password" minlength="6" required /></label>
       <label>Confirm password<input type="password" name="password_confirm" minlength="6" required /></label>
       <label class="checkbox"><input type="checkbox" name="accept_terms" value="1" required /> <span>I accept the <a href="/terms" target="_blank">Terms</a> &amp; <a href="/privacy" target="_blank">Privacy Policy</a>.</span></label>
+      <%- include('partials/turnstile') %>
       <button type="submit" class="btn btn-primary btn-block">Create account</button>
     </form>
     <div class="auth-links"><a href="/login">Already have an account? Sign in</a></div>
