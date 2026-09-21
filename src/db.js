@@ -23,8 +23,18 @@ let backend = null;
 async function makeBackend() {
   if (PG_URL) {
     const pg = (await import('pg')).default;
+    // Drop any sslmode/ssl query param from the URL: node-postgres' parser now
+    // warns that 'require' is a deprecated alias for 'verify-full'. We configure
+    // SSL explicitly via the `ssl` option below, so the URL param is redundant.
+    let connectionString = PG_URL;
+    try {
+      const u = new URL(PG_URL);
+      u.searchParams.delete('sslmode');
+      u.searchParams.delete('ssl');
+      connectionString = u.toString();
+    } catch { /* not a parseable URL (e.g. PGlite path) — leave as-is */ }
     const pool = new pg.Pool({
-      connectionString: PG_URL,
+      connectionString,
       ssl: /localhost|127\.0\.0\.1/.test(PG_URL) ? false : { rejectUnauthorized: false },
       max: 3,
     });
