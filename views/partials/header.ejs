@@ -11,6 +11,7 @@
       <nav class="main-nav" aria-label="Primary">
         <a href="/dashboard" class="<%= path === '/dashboard' ? 'active' : '' %>">Plan</a>
         <a href="/books" class="<%= (path === '/books' || path.startsWith('/reader')) ? 'active' : '' %>">Read</a>
+        <a href="/search" class="<%= path === '/search' ? 'active' : '' %>">Search</a>
         <a href="/notes" class="<%= path === '/notes' ? 'active' : '' %>">Notes</a>
         <a href="/stats" class="<%= path === '/stats' ? 'active' : '' %>">Stats</a>
         <a href="/achievements" class="<%= path === '/achievements' ? 'active' : '' %>">Badges</a>

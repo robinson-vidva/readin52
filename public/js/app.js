@@ -94,16 +94,28 @@
       items.forEach((it, i) => {
         const li = document.createElement('li');
         li.className = i === active ? 'active' : '';
-        li.innerHTML = `<span>${it.name} ${it.chapter}</span><span class="pr-ref">${it.code}</span>`;
+        li.innerHTML = it.search
+          ? `<span>Search all Scripture for “${it.q}”</span><span class="pr-ref">Enter</span>`
+          : `<span>${it.name} ${it.chapter}</span><span class="pr-ref">${it.code}</span>`;
         li.addEventListener('click', () => go(it));
         results.appendChild(li);
       });
     }
-    function go(it) { if (it) location.href = `/reader/${it.code}/${it.chapter}`; }
+    function go(it) {
+      if (!it) return;
+      if (it.search) { location.href = '/search?q=' + encodeURIComponent(it.q); return; }
+      location.href = `/reader/${it.code}/${it.chapter}`;
+    }
+    function refresh(q) {
+      items = parseQuery(q);
+      const t = (q || '').trim();
+      if (t.length >= 2) items.push({ search: true, q: t });
+      active = 0; render();
+    }
     function open() { backdrop.hidden = false; input.value = ''; items = parseQuery(''); active = 0; render(); setTimeout(() => input.focus(), 20); }
     function close() { backdrop.hidden = true; }
 
-    input.addEventListener('input', () => { items = parseQuery(input.value); active = 0; render(); });
+    input.addEventListener('input', () => refresh(input.value));
     input.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') { active = Math.min(active + 1, items.length - 1); render(); e.preventDefault(); }
       else if (e.key === 'ArrowUp') { active = Math.max(active - 1, 0); render(); e.preventDefault(); }

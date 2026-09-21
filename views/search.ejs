@@ -1,0 +1,48 @@
+<%- include('partials/head') %>
+<body>
+<%- include('partials/header') %>
+<%
+  function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function hl(text, words){
+    let out = esc(text);
+    (words || []).forEach(function(w){
+      if (!w || w.length < 2) return;
+      const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+      out = out.replace(re, '<mark>$1</mark>');
+    });
+    return out;
+  }
+%>
+<main class="container app-main narrow">
+  <div class="page-head"><h1>Search the Bible</h1></div>
+
+  <form class="search-bar" method="get" action="/search" role="search">
+    <svg class="ico" aria-hidden="true"><use href="#i-compass"/></svg>
+    <input type="text" name="q" value="<%= q %>" placeholder="Search a word or phrase — e.g. “be still” or “living water”" autocomplete="off" autofocus aria-label="Search the Bible" />
+    <button class="btn btn-primary" type="submit">Search</button>
+  </form>
+
+  <% if (!q) { %>
+    <section class="card">
+      <p class="muted" style="margin:0 0 .6rem">Find any word or phrase across all 66 books. Results are from the King James Version.</p>
+      <div class="search-examples">
+        <% ['be still','living water','fear not','the good shepherd','faith hope love','a time to'].forEach(function(ex){ %>
+          <a class="chip-link" href="/search?q=<%= encodeURIComponent(ex) %>"><%= ex %></a>
+        <% }); %>
+      </div>
+    </section>
+  <% } else if (!found.results.length) { %>
+    <section class="card"><p class="muted" style="margin:0">No verses found for “<strong><%= q %></strong>”. Try fewer or different words.</p></section>
+  <% } else { %>
+    <p class="muted small search-count"><%= found.total %> verse<%= found.total === 1 ? '' : 's' %><%= found.total > found.results.length ? ' (showing first ' + found.results.length + ')' : '' %> · King James Version</p>
+    <ol class="search-results">
+      <% found.results.forEach(function(r){ %>
+        <li class="search-result">
+          <a class="sr-ref" href="/reader/<%= r.book %>/<%= r.chapter %>?v=<%= r.verse %>"><%= r.bookName %> <%= r.chapter %>:<%= r.verse %></a>
+          <p class="sr-text"><%- hl(r.text, found.words) %></p>
+        </li>
+      <% }); %>
+    </ol>
+  <% } %>
+</main>
+<%- include('partials/footer') %>

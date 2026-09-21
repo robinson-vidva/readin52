@@ -539,6 +539,32 @@ body.verse-mode .verse.active { background: color-mix(in srgb, var(--accent) 13%
 .prose ul { padding-left: 1.3rem; margin: .5rem 0; }
 .prose li { margin: .3rem 0; }
 
+/* ---------- Search ---------- */
+.search-bar { display: flex; align-items: center; gap: .6rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: .5rem .5rem .5rem .85rem; margin-bottom: 1.4rem; }
+.search-bar .ico { width: 20px; height: 20px; color: var(--muted); }
+.search-bar input { border: none; background: transparent; padding: .45rem .2rem; font-size: 1.05rem; }
+.search-bar input:focus { outline: none; box-shadow: none; }
+.search-count { margin: 0 0 1rem; }
+.search-results { list-style: none; display: flex; flex-direction: column; gap: .1rem; }
+.search-result { padding: .8rem .9rem; border-radius: 10px; border-bottom: 1px solid var(--border); }
+.search-result:hover { background: var(--surface-2); }
+.sr-ref { display: inline-block; font-weight: 700; color: var(--accent-ink); font-size: .88rem; margin-bottom: .15rem; }
+.sr-text { font-family: var(--font-serif); font-size: 1.02rem; line-height: 1.55; color: var(--text); }
+mark { background: var(--gold-soft); color: inherit; border-radius: 3px; padding: 0 .12em; }
+.search-examples { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip-link { display: inline-block; padding: .35rem .7rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); color: var(--text); font-size: .88rem; }
+.chip-link:hover { border-color: var(--accent); text-decoration: none; }
+
+/* Read-aloud (audio) */
+#rListenBtn .ico-stop { display: none; }
+body.audio-playing #rListenBtn .ico-listen { display: none; }
+body.audio-playing #rListenBtn .ico-stop { display: inline-block; color: var(--accent); }
+.verse.speaking { background: var(--gold-soft); box-shadow: inset 3px 0 0 var(--gold); border-radius: 6px; }
+
+/* Deep-linked verse flash (from search results) */
+@keyframes verseFlash { 0%,55% { background: var(--gold-soft); box-shadow: inset 3px 0 0 var(--gold); } 100% { background: transparent; box-shadow: none; } }
+.verse.flash { animation: verseFlash 2.4s ease; border-radius: 6px; }
+
 /* ---------- Footer ---------- */
 .site-footer { border-top: 1px solid var(--border); background: var(--surface); margin-top: auto; }
 .footer-inner { max-width: 1080px; margin: 0 auto; padding: 1.5rem 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }

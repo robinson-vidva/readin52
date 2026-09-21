@@ -7,6 +7,7 @@ import * as Badges from '../services/badges.js';
 import * as Plan from '../services/readingPlan.js';
 import * as Email from '../services/email.js';
 import * as Turnstile from '../services/turnstile.js';
+import * as Search from '../services/search.js';
 import { BOOK_NAMES, BOOK_CHAPTERS, OLD_TESTAMENT, NEW_TESTAMENT } from '../data/books.js';
 
 const router = express.Router();
@@ -229,6 +230,12 @@ router.get('/notes', requireAuth, a(async (req, res) => {
     bookNames: BOOK_NAMES, categories: Plan.getCategoryMap(), pageScripts: ['notes.js'],
   });
 }));
+
+router.get('/search', requireAuth, (req, res) => {
+  const q = String(req.query.q || '').slice(0, 120);
+  const found = q ? Search.search(q, { limit: 80 }) : { query: '', total: 0, results: [], translation: 'KJV', words: [] };
+  res.render('search', { title: q ? `Search: ${q}` : 'Search', q, found });
+});
 
 router.get('/reader/:book/:chapter', requireAuth, (req, res) => {
   const book = req.params.book.toUpperCase();

@@ -21,6 +21,7 @@
   const content = $('#readerContent');
   const trSel = $('#rTranslation');
   const secSel = $('#rSecondary');
+  let pendingVerse = parseInt(new URLSearchParams(location.search).get('v'), 10) || 0;
   let loading = false;
   let loaded = [];        // ordered [{book, chapter}]
   let atEnd = false;
@@ -91,6 +92,7 @@
   function trName(id) { const o = trSel.querySelector(`option[value="${id}"]`); return o ? o.textContent : id; }
 
   async function loadInitial() {
+    if (typeof stopAudio === 'function') stopAudio();
     content.innerHTML = '';
     loaded = [];
     atEnd = false;
@@ -99,6 +101,18 @@
     loaded.push({ book: state.book, chapter: state.chapter });
     applyType();
     updateChrome();
+    if (pendingVerse) {
+      const target = block.querySelector(`.verse[data-verse="${pendingVerse}"]`);
+      pendingVerse = 0;
+      if (target) {
+        setTimeout(() => {
+          target.scrollIntoView({ block: 'center' });
+          target.classList.add('flash');
+          setTimeout(() => target.classList.remove('flash'), 2600);
+        }, 180);
+        return;
+      }
+    }
     window.scrollTo({ top: 0 });
   }
 
@@ -365,6 +379,79 @@
     window.toast(state.layout === 'verse' ? 'Verse-by-verse reading' : 'Paragraph reading');
   });
   $('#rFocus').addEventListener('click', () => document.body.classList.toggle('focus-mode'));
+
+  // ---- Read aloud (Web Speech API) ----
+  const synth = window.speechSynthesis;
+  let audioOn = false, audioVerses = [], aIdx = 0, fastEnds = 0;
+  function pickVoice() {
+    const vs = synth ? synth.getVoices() : [];
+    return vs.find((v) => /^en/i.test(v.lang) && /natural|samantha|aria|zira|google us/i.test(v.name))
+        || vs.find((v) => /^en[-_]?(us|gb)/i.test(v.lang))
+        || vs.find((v) => /^en/i.test(v.lang)) || null;
+  }
+  function verseText(elm) { return elm.textContent.replace(/^\s*\d+\s*/, '').trim(); }
+  function buildAudioQueue() {
+    const blocks = Array.from(content.querySelectorAll('.chapter-block'));
+    let start = blocks.findIndex((b) => b.dataset.book === state.book && +b.dataset.chapter === state.chapter);
+    if (start < 0) start = 0;
+    let v = [];
+    for (let i = start; i < blocks.length; i++) {
+      const b = blocks[i];
+      const sel = b.querySelector('.dual-cols') ? '.col:first-child .verse' : '.verse';
+      v = v.concat(Array.from(b.querySelectorAll(sel)));
+    }
+    audioVerses = v;
+  }
+  function setAudioBtn() {
+    document.body.classList.toggle('audio-playing', audioOn);
+    const b = $('#rListenBtn'); if (b) b.title = audioOn ? 'Stop reading' : 'Listen — read aloud';
+  }
+  function stopAudio() {
+    audioOn = false;
+    if (synth) synth.cancel();
+    document.querySelectorAll('.verse.speaking').forEach((x) => x.classList.remove('speaking'));
+    setAudioBtn();
+  }
+  async function speakLoop() {
+    if (!audioOn) return;
+    if (aIdx >= audioVerses.length) {
+      if (!atEnd) { await loadNext(); buildAudioQueue(); }
+      if (aIdx >= audioVerses.length) { window.toast('Finished reading'); stopAudio(); return; }
+    }
+    const elm = audioVerses[aIdx];
+    document.querySelectorAll('.verse.speaking').forEach((x) => x.classList.remove('speaking'));
+    elm.classList.add('speaking');
+    elm.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const txt = verseText(elm);
+    const u = new SpeechSynthesisUtterance(txt);
+    const voice = pickVoice(); if (voice) u.voice = voice;
+    u.rate = 0.95; u.pitch = 1;
+    const started = Date.now();
+    // Guard: if speech silently no-ops (no voices / unsupported), utterances
+    // finish or error instantly — detect several fast finishes and bail
+    // instead of racing through every chapter with no sound.
+    const advance = (quick) => {
+      if (!audioOn) return;
+      fastEnds = quick ? fastEnds + 1 : 0;
+      if (fastEnds >= 3) { window.toast('Read-aloud isn’t available on this browser'); stopAudio(); return; }
+      aIdx++;
+      if (!atEnd && aIdx > audioVerses.length - 3) loadNext().then(buildAudioQueue);
+      speakLoop();
+    };
+    u.onend = () => advance(Date.now() - started < 180 && txt.length > 40);
+    u.onerror = () => advance(true);
+    synth.speak(u);
+  }
+  function startAudio() {
+    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') { window.toast('Read-aloud isn’t supported on this browser'); return; }
+    buildAudioQueue();
+    if (!audioVerses.length) return;
+    aIdx = 0; fastEnds = 0; audioOn = true; setAudioBtn();
+    synth.cancel();
+    speakLoop();
+  }
+  if (synth) { try { synth.getVoices(); synth.onvoiceschanged = () => {}; } catch {} }
+  $('#rListenBtn').addEventListener('click', () => { audioOn ? stopAudio() : startAudio(); });
 
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input,textarea')) return;
