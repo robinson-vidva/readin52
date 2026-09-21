@@ -8,6 +8,9 @@ import { makeSessionStore } from './sessionStore.js';
 import { attachUser } from './auth.js';
 import { appConfig } from './services/readingPlan.js';
 import * as Turnstile from './services/turnstile.js';
+import * as Monitoring from './monitoring.js';
+
+Monitoring.init();
 import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
 import adminRouter from './routes/admin.js';
@@ -55,6 +58,8 @@ app.use((req, res, next) => {
   res.locals.pageScripts = [];
   res.locals.assetVer = ASSET_VER;
   res.locals.turnstile = { enabled: Turnstile.isEnabled(), siteKey: Turnstile.siteKey() };
+  res.locals.baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+  res.locals.fullUrl = res.locals.baseUrl + req.originalUrl.split('?')[0];
   next();
 });
 
@@ -70,6 +75,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error('ReadIn52 error:', err);
+  Monitoring.capture(err);
   res.status(500).render('error', { title: 'Something went wrong', message: 'We encountered an error processing your request.' });
 });
 

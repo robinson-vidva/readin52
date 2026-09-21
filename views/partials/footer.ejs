@@ -33,6 +33,9 @@
     user: <%- currentUser ? JSON.stringify({ id: currentUser.id, name: currentUser.name, translation: currentUser.preferred_translation, secondary: currentUser.secondary_translation, fontSize: currentUser.reader_font_size, fontFamily: currentUser.reader_font_family }) : 'null' %>
   };
 </script>
+<!-- Vercel Web Analytics + Speed Insights (privacy-friendly, no cookies) -->
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
 <script src="/static/js/app.js?v=<%= assetVer %>"></script>
 <% if (typeof pageScripts !== 'undefined') { pageScripts.forEach(function(s){ %><script src="/static/js/<%= s %>?v=<%= assetVer %>"></script><% }); } %>
 </body>

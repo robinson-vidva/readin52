@@ -6,6 +6,22 @@
   <meta name="theme-color" content="#5b3a29" />
   <title><%= typeof title !== 'undefined' ? title + ' · ' + app.appName : app.appName %></title>
   <meta name="description" content="<%= app.appTagline %>" />
+  <link rel="canonical" href="<%= typeof fullUrl !== 'undefined' ? fullUrl : '' %>" />
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:site_name" content="<%= app.appName %>" />
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title + ' · ' + app.appName : app.appName %>" />
+  <meta property="og:description" content="<%= app.appTagline %>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="<%= typeof fullUrl !== 'undefined' ? fullUrl : '' %>" />
+  <meta property="og:image" content="<%= (typeof baseUrl !== 'undefined' ? baseUrl : '') %>/static/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= app.appName %> — <%= app.appTagline %>" />
+  <meta name="twitter:description" content="<%= app.appTagline %>" />
+  <meta name="twitter:image" content="<%= (typeof baseUrl !== 'undefined' ? baseUrl : '') %>/static/og.jpg" />
+
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg" />
   <link rel="apple-touch-icon" href="/static/icons/icon-180.png" />
