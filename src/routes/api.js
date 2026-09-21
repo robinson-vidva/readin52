@@ -6,6 +6,7 @@ import * as Badges from '../services/badges.js';
 import * as Notes from '../services/notes.js';
 import * as Plan from '../services/readingPlan.js';
 import * as CrossRefs from '../services/crossRefs.js';
+import * as AI from '../services/ai.js';
 import { BOOK_NAMES } from '../data/books.js';
 
 const router = express.Router();
@@ -170,6 +171,27 @@ router.post('/bookmarks', a(async (req, res) => {
   if (existing) { await run('DELETE FROM bookmarks WHERE id=?', existing.id); return res.json({ success: true, bookmarked: false }); }
   await run('INSERT INTO bookmarks (user_id, book, chapter, label) VALUES (?, ?, ?, ?)', req.user.id, book, ch, `${BOOK_NAMES[book] || book} ${ch}`);
   res.json({ success: true, bookmarked: true });
+}));
+
+// ---- AI study companion (optional; dormant unless configured) ----
+const aiHits = new Map(); // userId -> [timestamps] (simple in-memory throttle)
+function aiAllowed(userId) {
+  const now = Date.now();
+  const arr = (aiHits.get(userId) || []).filter((t) => now - t < 60000);
+  if (arr.length >= 12) { aiHits.set(userId, arr); return false; } // 12/min per user
+  arr.push(now); aiHits.set(userId, arr);
+  return true;
+}
+router.post('/ai/explain', a(async (req, res) => {
+  if (!AI.isEnabled()) return res.json({ success: false, error: 'The study companion is not enabled.' });
+  if (!aiAllowed(req.user.id)) return res.json({ success: false, error: 'Slow down a moment and try again.' });
+  const ref = String(req.body.ref || '').slice(0, 60);
+  const text = String(req.body.text || '').slice(0, 1500);
+  const question = String(req.body.question || '').slice(0, 300);
+  if (!text) return res.json({ success: false, error: 'No passage text provided.' });
+  const out = await AI.explain({ ref, text, question });
+  if (out.error) return res.json({ success: false, error: out.error });
+  res.json({ success: true, answer: out.answer });
 }));
 
 function today() { return new Date().toISOString().slice(0, 10); }

@@ -76,6 +76,21 @@
         <div class="sp-noteactions"><button type="submit" class="btn btn-primary btn-sm">Save note</button><button type="button" class="btn btn-ghost btn-sm" id="spNoteCancel">Cancel</button></div>
       </form>
 
+      <% if (typeof ai !== 'undefined' && ai.enabled) { %>
+      <div class="sp-section sp-ai">
+        <h4 class="sp-title">Study companion <span class="sp-hint">AI</span></h4>
+        <div class="sp-btns">
+          <button class="chip-btn" id="spExplainBtn"><svg class="ico"><use href="#i-compass"/></svg> Explain this verse</button>
+        </div>
+        <form class="sp-ai-ask" id="spAiForm">
+          <input type="text" id="spAiInput" placeholder="Ask about this verse…" autocomplete="off" />
+          <button class="chip-btn" type="submit">Ask</button>
+        </form>
+        <div class="sp-ai-body" id="spAiBody" hidden></div>
+        <p class="sp-ai-note">AI-generated — weigh it against Scripture.</p>
+      </div>
+      <% } %>
+
       <div class="sp-section">
         <h4 class="sp-title">Cross references <span class="sp-hint">related passages</span></h4>
         <div id="spRefs" class="sp-refs"><p class="muted small">Tap a verse to see related passages.</p></div>

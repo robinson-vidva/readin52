@@ -193,6 +193,7 @@
     panel.hidden = false; fab.hidden = true;
     document.body.classList.add('study-open');
     $('#spNoteForm').hidden = true;
+    if (typeof resetAi === 'function') resetAi();
     loadRefs(book, chapter, verse);
     loadCommentary(book, chapter, verse);
     loadVerseNotes(book, chapter, verse);
@@ -452,6 +453,23 @@
   }
   if (synth) { try { synth.getVoices(); synth.onvoiceschanged = () => {}; } catch {} }
   $('#rListenBtn').addEventListener('click', () => { audioOn ? stopAudio() : startAudio(); });
+
+  // ---- AI study companion (optional) ----
+  const aiBody = $('#spAiBody');
+  function resetAi() { if (aiBody) { aiBody.hidden = true; aiBody.textContent = ''; } const inp = $('#spAiInput'); if (inp) inp.value = ''; }
+  async function askAi(question) {
+    if (!activeVerse || !aiBody) return;
+    aiBody.hidden = false;
+    aiBody.textContent = 'Thinking…';
+    const res = await window.api('/api/ai/explain', 'POST', {
+      ref: `${BibleAPI.getBookName(activeVerse.book)} ${activeVerse.chapter}:${activeVerse.verse}`,
+      text: activeVerse.text,
+      question: question || '',
+    });
+    aiBody.textContent = res && res.success ? res.answer : ((res && res.error) || 'The study companion is unavailable.');
+  }
+  $('#spExplainBtn')?.addEventListener('click', () => askAi(''));
+  $('#spAiForm')?.addEventListener('submit', (e) => { e.preventDefault(); const q = $('#spAiInput').value.trim(); if (q) askAi(q); });
 
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input,textarea')) return;

@@ -10,6 +10,7 @@ import { appConfig } from './services/readingPlan.js';
 import * as Turnstile from './services/turnstile.js';
 import * as Monitoring from './monitoring.js';
 import * as ErrorLog from './services/errorLog.js';
+import * as AI from './services/ai.js';
 
 Monitoring.init();
 import pagesRouter from './routes/pages.js';
@@ -59,6 +60,7 @@ app.use((req, res, next) => {
   res.locals.pageScripts = [];
   res.locals.assetVer = ASSET_VER;
   res.locals.turnstile = { enabled: Turnstile.isEnabled(), siteKey: Turnstile.siteKey() };
+  res.locals.ai = { enabled: AI.isEnabled() };
   res.locals.baseUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
   res.locals.fullUrl = res.locals.baseUrl + req.originalUrl.split('?')[0];
   next();
