@@ -3,7 +3,7 @@
 <header class="site-header">
   <div class="header-inner">
     <a href="<%= isAuthed ? '/dashboard' : '/' %>" class="brand">
-      <img src="/static/icons/icon.svg" alt="" class="brand-mark" width="30" height="30" />
+      <img src="/static/icons/icon.svg?v=<%= assetVer %>" alt="" class="brand-mark" width="30" height="30" />
       <span class="brand-name"><%= app.appName %></span>
     </a>
 

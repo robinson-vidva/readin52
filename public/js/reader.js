@@ -36,9 +36,19 @@
 
   // ---- Chapter rendering ----
   function versesHtml(data, hl) {
-    return data.verses.map((v) => {
+    return data.verses.map((v, i) => {
       const cls = hl[v.verse] ? ` hl-${hl[v.verse]}` : '';
-      return `<span class="verse${cls}" data-book="${data.book}" data-chapter="${data.chapter}" data-verse="${v.verse}"><span class="vn">${v.verse}</span>${esc(v.text)} </span>`;
+      let body;
+      if (i === 0) {
+        // Illuminated drop cap on the opening word of each chapter.
+        const raw = v.text.replace(/^¶\s*/, '');
+        const m = raw.match(/^([^A-Za-z]*)([A-Za-z])([\s\S]*)$/);
+        body = m ? `${esc(m[1])}<span class="dropcap">${esc(m[2])}</span>${esc(m[3])}` : esc(raw);
+      } else {
+        body = esc(v.text);
+      }
+      const first = i === 0 ? ' first' : '';
+      return `<span class="verse${first}${cls}" data-book="${data.book}" data-chapter="${data.chapter}" data-verse="${v.verse}"><span class="vn">${v.verse}</span>${body} </span>`;
     }).join('');
   }
 
