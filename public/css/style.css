@@ -431,6 +431,33 @@ body.focus-mode .reader-toolbar { top: 0; }
 .verse.active { background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
 .verse .vn { font-size: .66em; font-weight: 700; color: var(--gold); vertical-align: super; margin-right: .28em; user-select: none; }
 .verse.has-ref .vn { border-bottom: 1.5px dotted color-mix(in srgb, var(--gold) 70%, transparent); }
+
+/* Verse-by-verse layout: each verse on its own line, numbers in a gold gutter */
+#rLayoutBtn .ico-para { display: none; }
+body.verse-mode #rLayoutBtn .ico-verse { display: none; }
+body.verse-mode #rLayoutBtn .ico-para { display: inline-block; }
+body.verse-mode .verses { display: block; }
+body.verse-mode .verse {
+  display: block; position: relative;
+  padding: .32rem .5rem .32rem 2.9rem;
+  margin: .12rem 0; border-radius: 8px;
+  scroll-margin-top: 120px;
+}
+body.verse-mode .verse .vn {
+  position: absolute; left: 0; top: .32rem;
+  width: 2.2rem; text-align: right;
+  font-size: .82em; vertical-align: baseline; margin: 0;
+  border-bottom: none;
+}
+body.verse-mode .verse.first .vn { display: block; }
+body.verse-mode .verse.has-ref { }
+body.verse-mode .verse.has-ref::before {
+  content: ''; position: absolute; left: 2.5rem; top: .7rem;
+  width: 4px; height: 4px; border-radius: 50%; background: var(--gold);
+}
+body.verse-mode .dropcap { float: none; font-size: 1em; line-height: inherit; margin: 0; font-weight: 700; }
+body.verse-mode .verse:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+body.verse-mode .verse.active { background: color-mix(in srgb, var(--accent) 13%, transparent); box-shadow: inset 3px 0 0 var(--gold); }
 .verse.hl-yellow { background: var(--hl-yellow); } .verse.hl-green { background: var(--hl-green); }
 .verse.hl-blue { background: var(--hl-blue); } .verse.hl-red { background: var(--hl-red); } .verse.hl-purple { background: var(--hl-purple); }
 .load-sentinel { height: 1px; }

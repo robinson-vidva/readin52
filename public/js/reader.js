@@ -15,6 +15,7 @@
     dual: localStorage.getItem('r52-dual') === '1',
     fontSize: parseInt(localStorage.getItem('r52-fs') || U.fontSize || 19, 10),
     fontFamily: localStorage.getItem('r52-ff') || U.fontFamily || 'serif',
+    layout: localStorage.getItem('r52-layout') || 'paragraph',
   };
 
   const content = $('#readerContent');
@@ -28,9 +29,15 @@
   if (state.secondary) secSel.value = state.secondary;
   if (state.dual && state.secondary) secSel.hidden = false;
   applyType();
+  applyLayout();
 
   function esc(s) { return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
   function applyType() { content.style.setProperty('--reader-size', state.fontSize + 'px'); content.classList.toggle('sans', state.fontFamily === 'sans'); }
+  function applyLayout() {
+    document.body.classList.toggle('verse-mode', state.layout === 'verse');
+    const btn = $('#rLayoutBtn');
+    if (btn) btn.title = state.layout === 'verse' ? 'Paragraph layout' : 'Verse-by-verse layout';
+  }
   function nextOf(b, c) { const t = BibleAPI.getTotalChapters(b); if (c < t) return { book: b, chapter: c + 1 }; const i = ORDER.indexOf(b); return i < ORDER.length - 1 ? { book: ORDER[i + 1], chapter: 1 } : null; }
   function prevOf(b, c) { if (c > 1) return { book: b, chapter: c - 1 }; const i = ORDER.indexOf(b); return i > 0 ? { book: ORDER[i - 1], chapter: BibleAPI.getTotalChapters(ORDER[i - 1]) } : null; }
 
@@ -351,6 +358,12 @@
   $('#rFontUp').addEventListener('click', () => { state.fontSize = Math.min(30, state.fontSize + 2); localStorage.setItem('r52-fs', state.fontSize); applyType(); });
   $('#rFontDown').addEventListener('click', () => { state.fontSize = Math.max(14, state.fontSize - 2); localStorage.setItem('r52-fs', state.fontSize); applyType(); });
   $('#rFontFamily').addEventListener('click', () => { state.fontFamily = state.fontFamily === 'serif' ? 'sans' : 'serif'; localStorage.setItem('r52-ff', state.fontFamily); applyType(); });
+  $('#rLayoutBtn').addEventListener('click', () => {
+    state.layout = state.layout === 'verse' ? 'paragraph' : 'verse';
+    localStorage.setItem('r52-layout', state.layout);
+    applyLayout();
+    window.toast(state.layout === 'verse' ? 'Verse-by-verse reading' : 'Paragraph reading');
+  });
   $('#rFocus').addEventListener('click', () => document.body.classList.toggle('focus-mode'));
 
   document.addEventListener('keydown', (e) => {
