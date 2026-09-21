@@ -1,0 +1,43 @@
+<%- include('../partials/head') %>
+<body>
+<%- include('../partials/header') %>
+<main class="container app-main">
+  <div class="page-head"><h1>Error log</h1></div>
+  <%- include('../partials/admin-nav') %>
+
+  <section class="card">
+    <div class="row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div>
+        <p class="muted" style="margin:0">
+          Server errors are captured here automatically (most recent 500 kept).
+          <% if (sentry) { %>Sentry is also active.<% } else { %>Sentry is not configured — set <code>SENTRY_DSN</code> to also stream errors to Sentry.<% } %>
+        </p>
+      </div>
+      <% if (total > 0) { %>
+      <form method="post" action="/admin/errors/clear" onsubmit="return confirm('Clear all captured errors?')">
+        <input type="hidden" name="csrf_token" value="<%= csrfToken %>" />
+        <button class="btn btn-ghost" type="submit">Clear log</button>
+      </form>
+      <% } %>
+    </div>
+  </section>
+
+  <% if (!errors.length) { %>
+    <section class="card"><p class="muted" style="margin:0">No errors captured. 🎉</p></section>
+  <% } else { %>
+    <section class="card">
+      <% errors.forEach(function(e){ %>
+        <details style="border-bottom:1px solid var(--border);padding:10px 0">
+          <summary style="cursor:pointer;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+            <span class="muted small" style="min-width:150px"><%= e.created_at %></span>
+            <code class="small"><%= e.method || '' %> <%= e.path || '' %></code>
+            <strong style="flex:1"><%= e.message %></strong>
+          </summary>
+          <% if (e.user_id) { %><p class="muted small" style="margin:8px 0 0">User #<%= e.user_id %></p><% } %>
+          <% if (e.stack) { %><pre class="small" style="white-space:pre-wrap;overflow:auto;background:var(--bg-subtle,#f6f6f8);padding:10px;border-radius:8px;margin:8px 0 0"><%= e.stack %></pre><% } %>
+        </details>
+      <% }); %>
+    </section>
+  <% } %>
+</main>
+<%- include('../partials/footer') %>

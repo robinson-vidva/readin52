@@ -4,6 +4,7 @@ import { run, setSetting } from '../db.js';
 import * as Users from '../services/users.js';
 import * as Progress from '../services/progress.js';
 import * as Plan from '../services/readingPlan.js';
+import * as ErrorLog from '../services/errorLog.js';
 
 const router = express.Router();
 const a = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -103,6 +104,21 @@ router.post('/settings', csrfGuard, a(async (req, res) => {
     res.locals.app = Plan.appConfig();
   }
   res.render('admin/settings', { title: 'App Settings', adminPage: 'settings', messages });
+}));
+
+router.get('/errors', a(async (req, res) => {
+  res.render('admin/errors', {
+    title: 'Error Log', adminPage: 'errors',
+    errors: await ErrorLog.getRecent(100),
+    total: await ErrorLog.count(),
+    sentry: !!process.env.SENTRY_DSN,
+  });
+}));
+
+router.post('/errors/clear', csrfGuard, a(async (req, res) => {
+  await ErrorLog.clearAll();
+  req.flash('success', 'Error log cleared.');
+  res.redirect('/admin/errors');
 }));
 
 router.get('/user-progress', a(async (req, res) => {

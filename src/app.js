@@ -9,6 +9,7 @@ import { attachUser } from './auth.js';
 import { appConfig } from './services/readingPlan.js';
 import * as Turnstile from './services/turnstile.js';
 import * as Monitoring from './monitoring.js';
+import * as ErrorLog from './services/errorLog.js';
 
 Monitoring.init();
 import pagesRouter from './routes/pages.js';
@@ -76,6 +77,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error('ReadIn52 error:', err);
   Monitoring.capture(err);
+  ErrorLog.log(err, req);
   res.status(500).render('error', { title: 'Something went wrong', message: 'We encountered an error processing your request.' });
 });
 

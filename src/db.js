@@ -169,6 +169,12 @@ async function createSchema() {
     );
     CREATE INDEX IF NOT EXISTS idx_login ON login_attempts(email, attempted_at);
     CREATE TABLE IF NOT EXISTS sessions (sid TEXT PRIMARY KEY, sess TEXT NOT NULL, expire BIGINT NOT NULL);
+    CREATE TABLE IF NOT EXISTS error_logs (
+      id SERIAL PRIMARY KEY,
+      created_at TEXT DEFAULT ${NOW},
+      method TEXT, path TEXT, message TEXT, stack TEXT, user_id INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_error_logs ON error_logs(created_at);
   `);
 }
 
