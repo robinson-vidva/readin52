@@ -21,7 +21,7 @@
     </div>
     <div class="rt-right">
       <button class="icon-btn" id="rBookmark" title="Bookmark this chapter" aria-pressed="false">☆</button>
-      <button class="icon-btn" id="rNotesBtn" title="Your notes here">✍️ <span id="rNoteCount"></span></button>
+      <button class="icon-btn" id="rNotesBtn" title="Your notes here"><svg class="ico"><use href="#i-pen"/></svg> <span id="rNoteCount"></span></button>
       <div class="type-controls">
         <button class="icon-btn" id="rFontDown" title="Smaller text">A−</button>
         <button class="icon-btn" id="rFontFamily" title="Toggle serif / sans">Aa</button>
@@ -55,7 +55,7 @@
           <button class="hl-swatch hl-clear" data-color="" title="Clear highlight">✕</button>
         </div>
         <div class="sp-btns">
-          <button class="chip-btn" id="spNoteBtn">✍️ Note</button>
+          <button class="chip-btn" id="spNoteBtn"><svg class="ico"><use href="#i-pen"/></svg> Note</button>
           <button class="chip-btn" id="spCopyBtn">⧉ Copy</button>
           <button class="chip-btn" id="spShareBtn">⤴ Share</button>
         </div>
@@ -101,6 +101,6 @@
     </div>
   </div>
 
-  <button class="study-fab" id="studyFab" hidden aria-label="Open study panel">📖</button>
+  <button class="study-fab" id="studyFab" hidden aria-label="Open study panel"><svg class="ico" style="width:24px;height:24px"><use href="#i-book"/></svg></button>
 </main>
 <%- include('partials/footer') %>

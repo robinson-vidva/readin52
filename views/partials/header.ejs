@@ -1,4 +1,5 @@
 <% const isAuthed = !!currentUser; %>
+<%- include('icons') %>
 <header class="site-header">
   <div class="header-inner">
     <a href="<%= isAuthed ? '/dashboard' : '/' %>" class="brand">

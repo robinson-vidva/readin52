@@ -3,7 +3,7 @@
 <%- include('partials/header') %>
 <main class="container app-main">
   <div class="empty" style="margin-top:4rem">
-    <div class="empty-ico">🕯️</div>
+    <div class="empty-ico"><span class="icon-chip lg"><svg class="ico"><use href="#i-compass"/></svg></span></div>
     <h1><%= title %></h1>
     <p class="muted"><%= message %></p>
     <a href="<%= currentUser ? '/dashboard' : '/' %>" class="btn btn-primary">Return home</a>

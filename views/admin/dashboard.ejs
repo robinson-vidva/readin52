@@ -5,10 +5,10 @@
   <div class="page-head"><h1>Admin</h1></div>
   <%- include('../partials/admin-nav') %>
   <section class="stat-row">
-    <div class="stat card"><span class="stat-ico">👥</span><div><strong><%= userCount %></strong><small>Users</small></div></div>
-    <div class="stat card"><span class="stat-ico">📖</span><div><strong><%= globalStats.active_readers %></strong><small>Active readers</small></div></div>
-    <div class="stat card"><span class="stat-ico">✅</span><div><strong><%= globalStats.total_completed %></strong><small>Readings completed</small></div></div>
-    <div class="stat card"><span class="stat-ico">🏁</span><div><strong><%= globalStats.completed_plan %></strong><small>Finished the plan</small></div></div>
+    <div class="stat card"><span class="icon-chip sm"><svg class="ico"><use href="#i-users"/></svg></span><div><strong><%= userCount %></strong><small>Users</small></div></div>
+    <div class="stat card"><span class="icon-chip sm"><svg class="ico"><use href="#i-book"/></svg></span><div><strong><%= globalStats.active_readers %></strong><small>Active readers</small></div></div>
+    <div class="stat card"><span class="icon-chip sm"><svg class="ico"><use href="#i-check"/></svg></span><div><strong><%= globalStats.total_completed %></strong><small>Readings completed</small></div></div>
+    <div class="stat card"><span class="icon-chip sm"><svg class="ico"><use href="#i-flag"/></svg></span><div><strong><%= globalStats.completed_plan %></strong><small>Finished the plan</small></div></div>
   </section>
   <section class="card">
     <div class="card-head"><h2>Newest users</h2><a href="/admin/users" class="btn btn-ghost btn-sm">Manage all</a></div>
